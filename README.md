@@ -1,5 +1,7 @@
 # QQ-bot
 
+[![build-docker](https://github.com/Lick-Dog-Club/qq-bot/actions/workflows/build.yaml/badge.svg)](https://github.com/Lick-Dog-Club/qq-bot/actions/workflows/build.yaml)
+
 > qq 机器人
 
 ## 功能
