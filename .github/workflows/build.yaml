@@ -47,7 +47,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       -
-        name: Download math result for job 1
+        name: Download app-linux-amd64
         uses: actions/download-artifact@v3
         with:
           name: app-amd64
