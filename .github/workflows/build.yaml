@@ -8,20 +8,24 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    - uses: actions/setup-go@v3
-      with:
-        go-version: '^1.19'
-    - run: |
-        make build-linux-amd64
-    -
-      name: artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: app-amd64
-        path: |
-          app-linux-amd64
+    steps:
+      -
+        uses: actions/setup-go@v3
+        with:
+          go-version: '^1.19'
+      -
+        run: |
+          make build-linux-amd64
+      -
+        name: artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-amd64
+          path: |
+            app-linux-amd64
 
   docker:
+    needs: build
     runs-on: ubuntu-latest
     steps:
       -
