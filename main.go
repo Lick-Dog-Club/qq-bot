@@ -8,8 +8,10 @@ import (
 	"qq/ai"
 	lottery "qq/bili-lottery"
 	"qq/bot"
+	"qq/picture"
 	"qq/weather"
 	"strings"
+	"time"
 
 	"github.com/lithammer/dedent"
 )
@@ -23,9 +25,16 @@ func main() {
 		}
 		log.Printf("receive %#v\n", message)
 		atMsg := fmt.Sprintf("[CQ:at,qq=%v]", message.SelfID)
-		if strings.Contains(message.Message, atMsg) && message.GroupID > 0 {
+		if (strings.Contains(message.Message, atMsg) && message.MessageType == "group") || message.MessageType == "private" {
 			msg := strings.ReplaceAll(message.Message, atMsg, "")
 			switch {
+			case isKeyword(msg, "涩图"):
+				msgID := bot.Send(message, picture.Url())
+				go func() {
+					bot.Send(message, "图片即将在 30s 之后撤回，要保存的赶紧了~")
+					time.Sleep(30 * time.Second)
+					bot.DeleteMsg(msgID)
+				}()
 			case isKeyword(msg, "天气"):
 				city := content(msg, "天气")
 				if city == "" {
@@ -38,6 +47,7 @@ func main() {
 			case isKeyword(msg, "help"):
 				bot.Send(message, dedent.Dedent(`
 					@bot 抽奖 <bilibili-cookie>: 自动转发up主的抽奖活动
+					@bot 涩图: 返回动漫图片~
 					@bot help: 帮助界面
 					@bot 天气 <城市: 默认杭州>: 查询城市天气
 					@bot default: ai 自动回答

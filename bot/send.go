@@ -1,6 +1,7 @@
 package bot
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -73,9 +74,30 @@ type Anonymous struct {
 	Flag string `json:"flag"` //匿名用户 flag, 在调用禁言 API 时需要传入
 }
 
-func Send(message Message, msg string) {
-	req, _ := http.NewRequest("POST", CQHost+"/send_group_msg", strings.NewReader(fmt.Sprintf(`{"group_id": %d, "message": %q}`, message.GroupID, strings.Trim(msg, "\n"))))
+type SendResponse struct {
+	Data struct {
+		MessageID int `json:"message_id"`
+	} `json:"data"`
+}
+
+func DeleteMsg(msgID int) {
+	req, _ := http.NewRequest("POST", CQHost+"/delete_msg", strings.NewReader(fmt.Sprintf(`{"message_id": %d}`, msgID)))
 	req.Header.Add("content-type", "application/json")
 	do, _ := c.Do(req)
 	defer do.Body.Close()
+}
+
+func Send(message Message, msg string) int {
+	var req *http.Request
+	if message.GroupID > 0 {
+		req, _ = http.NewRequest("POST", CQHost+"/send_group_msg", strings.NewReader(fmt.Sprintf(`{"group_id": %d, "message": %q}`, message.GroupID, strings.Trim(msg, "\n"))))
+	} else {
+		req, _ = http.NewRequest("POST", CQHost+"/send_msg", strings.NewReader(fmt.Sprintf(`{"user_id": %d, "message": %q}`, message.UserID, strings.Trim(msg, "\n"))))
+	}
+	req.Header.Add("content-type", "application/json")
+	do, _ := c.Do(req)
+	defer do.Body.Close()
+	var res SendResponse
+	json.NewDecoder(do.Body).Decode(&res)
+	return res.Data.MessageID
 }
