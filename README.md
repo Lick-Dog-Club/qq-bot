@@ -13,6 +13,7 @@
 
 ```text
 @bot 抽奖 <bilibili-cookie>: 自动转发up主的抽奖活动
+@bot 涩图: 返回动漫图片, 30s 后撤回~
 @bot help: 帮助界面
 @bot default: ai 自动回答
 ```
