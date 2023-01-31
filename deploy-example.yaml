@@ -177,6 +177,8 @@ spec:
           env:
             - name: AI_TOKEN
               value: "<your-token>"
+            - name: WEATHER_KEY
+              value: "<高德天气 api-key>"
           ports:
             - containerPort: 5701
               name: http

@@ -74,7 +74,7 @@ type Anonymous struct {
 }
 
 func Send(message Message, msg string) {
-	req, _ := http.NewRequest("POST", CQHost+"/send_group_msg", strings.NewReader(fmt.Sprintf(`{"group_id": %d, "message": %q}`, message.GroupID, msg)))
+	req, _ := http.NewRequest("POST", CQHost+"/send_group_msg", strings.NewReader(fmt.Sprintf(`{"group_id": %d, "message": %q}`, message.GroupID, strings.Trim(msg, "\n"))))
 	req.Header.Add("content-type", "application/json")
 	do, _ := c.Do(req)
 	defer do.Body.Close()
