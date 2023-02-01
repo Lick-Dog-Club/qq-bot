@@ -264,7 +264,7 @@ func (gpt *ChatGPTClient) buildPrompt(messages userMessageList, parentMessageId 
 	}
 
 	currentDateString := time.Now().Format("2006-01-02")
-	promptPrefix := fmt.Sprintf(`You are ChatGPT, a large language model trained by OpenAI. You answer as concisely as possible for each response (e.g. don’t be verbose). It is very important that you answer as concisely as possible, so please remember this. If you are generating a list, do not have too many items. Keep the number of items short.
+	promptPrefix := fmt.Sprintf(`你是 ChatGPT，OpenAI 训练的大型语言模型。 您对每个回复都尽可能简洁地回答（例如，不要冗长）。 尽可能简洁地回答是非常重要的，所以请记住这一点。 如果要生成列表，则不要有太多项目。 保持项目数量简短。
 Current date: %s\n\n`, currentDateString)
 	promptSuffix := "\n"
 	currentTokenCount := getTokenCount(promptPrefix + promptSuffix)
@@ -312,13 +312,8 @@ type CompletionRequest struct {
 }
 
 func (gpt *ChatGPTClient) getCompletion(prompt string) (string, error) {
-	var input = CompletionRequest{
-		Model:           "text-chat-davinci-002-20230126",
-		Temperature:     0.7,
-		PresencePenalty: 0.6,
-		Stop:            []string{"<|im_end|>"},
-		Prompt:          prompt,
-	}
+	var input = gpt.opt
+	input.Prompt = prompt
 	marshal, _ := json.Marshal(&input)
 	request, _ := http.NewRequest("POST", "https://api.openai.com/v1/completions", bytes.NewReader(marshal))
 	request.Header.Add("Content-Type", "application/json")
