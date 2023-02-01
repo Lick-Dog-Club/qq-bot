@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/google/uuid"
 	"math"
 	"net/http"
 	"os"
@@ -12,6 +11,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 var (
@@ -21,7 +22,7 @@ var (
 
 func Request(userID int, ask string) string {
 	user := manager.GetByUser(userID)
-	if user.LastAskTime().Before(time.Now().Add(10 * time.Minute)) {
+	if user.LastAskTime().Add(10 * time.Minute).Before(time.Now()) {
 		manager.DeleteUser(userID)
 		user = manager.GetByUser(userID)
 	}

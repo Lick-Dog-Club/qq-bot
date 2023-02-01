@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"embed"
 	"encoding/json"
-	"github.com/samber/lo"
 	"math"
 	"strings"
 	"sync"
+
+	"github.com/samber/lo"
 
 	"github.com/dlclark/regexp2"
 )
