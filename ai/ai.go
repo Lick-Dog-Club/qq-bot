@@ -17,7 +17,7 @@ import (
 
 var (
 	token   = os.Getenv("AI_TOKEN")
-	manager = NewGptManager(token)
+	manager = newGptManager(token)
 )
 
 func Request(userID int, ask string) string {
@@ -29,143 +29,66 @@ func Request(userID int, ask string) string {
 	return user.Send(ask)
 }
 
-type GptManager struct {
+type gptManager struct {
 	sync.RWMutex
-	users  map[int]*ChatGPTClient
+	users  map[int]*chatGPTClient
 	apiKey string
 }
 
-func NewGptManager(apiKey string) *GptManager {
-	return &GptManager{apiKey: apiKey, users: map[int]*ChatGPTClient{}}
+func newGptManager(apiKey string) *gptManager {
+	return &gptManager{apiKey: apiKey, users: map[int]*chatGPTClient{}}
 }
 
-func (m *GptManager) DeleteUser(userID int) {
+func (m *gptManager) DeleteUser(userID int) {
 	m.Lock()
 	defer m.Unlock()
 	delete(m.users, userID)
 }
 
-func (m *GptManager) GetByUser(userID int) *ChatGPTClient {
+func (m *gptManager) GetByUser(userID int) *chatGPTClient {
 	m.Lock()
 	defer m.Unlock()
 	client, ok := m.users[userID]
 	if !ok {
-		client = NewChatGPTClient(m.apiKey)
+		client = newChatGPTClient(m.apiKey)
 		m.users[userID] = client
 	}
 	return client
 }
 
-type Status struct {
-	sync.RWMutex
-	isAsking    bool
-	opts        *SendOpts
-	msg         string
-	lastAskTime time.Time
-}
-
-func (s *Status) GetOpts() *SendOpts {
-	s.RLock()
-	defer s.RUnlock()
-	if s.opts == nil {
-		s.opts = &SendOpts{
-			ConversationId:  uuid.NewString(),
-			ParentMessageId: uuid.NewString(),
-		}
-	}
-	return s.opts
-}
-
-func (s *Status) SetOpts(opts *SendOpts) {
-	s.Lock()
-	defer s.Unlock()
-	s.opts = &SendOpts{
-		ConversationId:  opts.ConversationId,
-		ParentMessageId: opts.ParentMessageId,
-	}
-}
-
-func (s *Status) IsAsking() bool {
-	s.RLock()
-	defer s.RUnlock()
-	return s.isAsking
-}
-
-func (s *Status) LastAskTime() time.Time {
-	s.RLock()
-	defer s.RUnlock()
-	return s.lastAskTime
-}
-
-func (s *Status) Msg() string {
-	s.RLock()
-	defer s.RUnlock()
-	return s.msg
-}
-
-func (s *Status) SetMsg(msg string) {
-	s.Lock()
-	defer s.Unlock()
-	s.msg = msg
-}
-func (s *Status) Asked() {
-	s.Lock()
-	defer s.Unlock()
-	s.isAsking = false
-}
-
-func (s *Status) Asking() {
-	s.Lock()
-	defer s.Unlock()
-	s.isAsking = true
-	s.lastAskTime = time.Now()
-}
-
-type ChatGPTClient struct {
+type chatGPTClient struct {
 	lastAskTime time.Time
 	apiKey      string
-	opt         CompletionRequest
-	cache       *KV
-	status      *Status
+	opt         completionRequest
+	cache       *keyValue
+	status      *status
 }
 
-func NewChatGPTClient(apiKey string) *ChatGPTClient {
-	return &ChatGPTClient{
+func newChatGPTClient(apiKey string) *chatGPTClient {
+	return &chatGPTClient{
 		apiKey: apiKey,
-		opt: CompletionRequest{
+		opt: completionRequest{
 			Model:           "text-chat-davinci-002-20230126",
 			Temperature:     0.7,
 			Stop:            []string{"<|im_end|>"},
 			PresencePenalty: 0.6,
 		},
-		cache:  NewKV(map[string]any{"namespace": "chatgpt"}),
-		status: &Status{},
+		cache:  newKV(map[string]any{"namespace": "chatgpt"}),
+		status: &status{},
 	}
 }
 
-func (gpt *ChatGPTClient) LastAskTime() time.Time {
+func (gpt *chatGPTClient) LastAskTime() time.Time {
 	return gpt.status.LastAskTime()
 }
 
-type SendOpts struct {
-	ConversationId  string
-	ParentMessageId string
-}
-
-type userMessage struct {
-	id              string
-	parentMessageId string
-	role            string
-	message         string
-}
-
-func (gpt *ChatGPTClient) Send(msg string) string {
+func (gpt *chatGPTClient) Send(msg string) string {
 	if gpt.status.IsAsking() {
 		return "正在回答上一个问题~: " + gpt.status.Msg()
 	}
 	gpt.status.Asking()
 	gpt.status.SetMsg(msg)
-	var opts *SendOpts = gpt.status.GetOpts()
+	var opts *sendOpts = gpt.status.GetOpts()
 	var conversation []userMessage
 	get := gpt.cache.Get(opts.ConversationId)
 	if get == nil {
@@ -194,7 +117,7 @@ func (gpt *ChatGPTClient) Send(msg string) string {
 	}
 	conversation = append(conversation, reply)
 	gpt.cache.Set(opts.ConversationId, conversation)
-	gpt.status.SetOpts(&SendOpts{
+	gpt.status.SetOpts(&sendOpts{
 		ConversationId:  opts.ConversationId,
 		ParentMessageId: reply.id,
 	})
@@ -203,55 +126,7 @@ func (gpt *ChatGPTClient) Send(msg string) string {
 	return reply.message
 }
 
-type userMessageList []userMessage
-
-func (l userMessageList) Find(id string) *userMessage {
-	for _, message := range l {
-		if message.id == id {
-			return &message
-		}
-	}
-	return nil
-}
-
-type GptResponse struct {
-	ID      string `json:"id"`
-	Object  string `json:"object"`
-	Created int    `json:"created"`
-	Model   string `json:"model"`
-	Choices []struct {
-		Text string `json:"text"`
-	} `json:"choices"`
-}
-
-type KV struct {
-	kv map[string]any
-	sync.RWMutex
-}
-
-func NewKV(kv map[string]any) *KV {
-	return &KV{kv: kv}
-}
-
-func (kv *KV) Get(k string) any {
-	kv.RLock()
-	defer kv.RUnlock()
-	return kv.kv[k]
-}
-
-func (kv *KV) Set(k string, v any) {
-	kv.Lock()
-	defer kv.Unlock()
-	kv.kv[k] = v
-}
-
-func getTokenCount(text string) int {
-	encoder, _ := encoder.NewEncoder()
-	encode, _ := encoder.Encode(strings.ReplaceAll(text, `<|im_end|>`, `<|endoftext|>`))
-	return len(encode)
-}
-
-func (gpt *ChatGPTClient) buildPrompt(messages userMessageList, parentMessageId string) string {
+func (gpt *chatGPTClient) buildPrompt(messages userMessageList, parentMessageId string) string {
 	var orderedMessages []userMessage
 	var currentMessageId = parentMessageId
 	for currentMessageId != "" {
@@ -292,26 +167,13 @@ Current date: %s\n\n`, currentDateString)
 	return prompt
 }
 
-type CompletionRequest struct {
-	Model            string         `json:"model"`
-	Prompt           string         `json:"prompt,omitempty"`
-	Suffix           string         `json:"suffix,omitempty"`
-	MaxTokens        int            `json:"max_tokens,omitempty"`
-	Temperature      float32        `json:"temperature,omitempty"`
-	TopP             float32        `json:"top_p,omitempty"`
-	N                int            `json:"n,omitempty"`
-	Stream           bool           `json:"stream,omitempty"`
-	LogProbs         int            `json:"logprobs,omitempty"`
-	Echo             bool           `json:"echo,omitempty"`
-	Stop             []string       `json:"stop,omitempty"`
-	PresencePenalty  float32        `json:"presence_penalty,omitempty"`
-	FrequencyPenalty float32        `json:"frequency_penalty,omitempty"`
-	BestOf           int            `json:"best_of,omitempty"`
-	LogitBias        map[string]int `json:"logit_bias,omitempty"`
-	User             string         `json:"user,omitempty"`
+func getTokenCount(text string) int {
+	encoder, _ := encoder.NewEncoder()
+	encode, _ := encoder.Encode(strings.ReplaceAll(text, `<|im_end|>`, `<|endoftext|>`))
+	return len(encode)
 }
 
-func (gpt *ChatGPTClient) getCompletion(prompt string) (string, error) {
+func (gpt *chatGPTClient) getCompletion(prompt string) (string, error) {
 	var input = gpt.opt
 	input.Prompt = prompt
 	marshal, _ := json.Marshal(&input)
@@ -323,7 +185,7 @@ func (gpt *ChatGPTClient) getCompletion(prompt string) (string, error) {
 		return "", err
 	}
 	defer do.Body.Close()
-	var data GptResponse
+	var data gptResponse
 	json.NewDecoder(do.Body).Decode(&data)
 	return data.Choices[0].Text, nil
 }

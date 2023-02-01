@@ -15,3 +15,7 @@ build-linux-amd64:
 .PHONY: build
 build:
 	go build -ldflags="${LDFLAGS}" -o app .
+
+.PHONY: fmt
+fmt:
+	goimports -w . && gofmt -w .
