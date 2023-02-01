@@ -180,7 +180,7 @@ func (gpt *chatGPTClient) getCompletion(prompt string) (string, error) {
 	request, _ := http.NewRequest("POST", "https://api.openai.com/v1/completions", bytes.NewReader(marshal))
 	request.Header.Add("Content-Type", "application/json")
 	request.Header.Add("Authorization", "Bearer "+gpt.apiKey)
-	do, err := (&http.Client{Timeout: 60 * time.Second}).Do(request)
+	do, err := (&http.Client{Timeout: 3 * time.Minute}).Do(request)
 	if err != nil {
 		return "", err
 	}
