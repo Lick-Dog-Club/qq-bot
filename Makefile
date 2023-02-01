@@ -1,4 +1,6 @@
-LDFLAGS=-w -s
+VERSION_PATH=$(shell go list -m -f "{{.Path}}")/sys-update
+LDFLAGS=-w -s \
+-X ${VERSION_PATH}.gitCommit=$(shell git rev-parse --short HEAD)
 
 .PHONY: build-push
 build-push:
@@ -9,3 +11,7 @@ build-push:
 .PHONY: build-linux-amd64
 build-linux-amd64:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="${LDFLAGS}" -o app-linux-amd64 .
+
+.PHONY: build
+build:
+	go build -ldflags="${LDFLAGS}" -o app .
