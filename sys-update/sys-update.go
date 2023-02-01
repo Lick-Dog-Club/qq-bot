@@ -65,10 +65,10 @@ func UpdateVersion(msg bot.Message) {
 		ns := os.Getenv("APP_NAMESPACE")
 		pod := os.Getenv("POD_NAME")
 		if ns != "" && pod != "" {
-			bot.Send(msg, fmt.Sprintf("更新到最新版本 [%s %s: %s](%v)...", data[0].Commit.Committer.Name, data[0].Commit.Committer.Date, data[0].Commit.Message, data[0].HTMLURL))
+			bot.Send(msg, fmt.Sprintf("更新到最新版本 [%s %s: %s](%v)...", data[0].Commit.Committer.Name, data[0].Commit.Committer.Date.Format("2006-01-02 15:04:05"), data[0].Commit.Message, data[0].HTMLURL))
 			clientset.CoreV1().Pods(ns).Delete(context.TODO(), pod, v1.DeleteOptions{})
 		}
 		return
 	}
-	bot.Send(msg, "无需更新")
+	bot.Send(msg, "当前已经是最新版本~")
 }
