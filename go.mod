@@ -2,13 +2,13 @@ module qq
 
 go 1.19
 
-require (
-	github.com/lithammer/dedent v1.1.0
-	github.com/sashabaranov/go-gpt3 v0.0.0-20221202105456-0f9f4aa343ad
-)
+require github.com/lithammer/dedent v1.1.0
 
 require (
 	github.com/cenkalti/backoff/v4 v4.2.0
+	github.com/dlclark/regexp2 v1.8.0
+	github.com/google/uuid v1.3.0
+	github.com/samber/lo v1.37.0
 	k8s.io/apimachinery v0.26.1
 	k8s.io/client-go v0.26.1
 )
@@ -31,6 +31,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
+	golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17 // indirect
 	golang.org/x/net v0.3.1-0.20221206200815-1e63c2f08a10 // indirect
 	golang.org/x/oauth2 v0.0.0-20220223155221-ee480838109b // indirect
 	golang.org/x/sys v0.3.0 // indirect

@@ -61,7 +61,7 @@ func main() {
 					@bot default: ai 自动回答
 				`))
 			default:
-				bot.Send(message, ai.Request(msg))
+				bot.Send(message, ai.Request(message.UserID, msg))
 			}
 		}
 	})
