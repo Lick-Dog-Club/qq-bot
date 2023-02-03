@@ -190,7 +190,7 @@ func (gpt *chatGPTClient) getCompletion(prompt string) (string, error) {
 	if err := json.NewDecoder(do.Body).Decode(&data); err != nil {
 		return "", err
 	}
-	log.Println(data)
+	log.Println(do.Status, data)
 	var res string = "没有结果"
 	if len(data.Choices) > 0 {
 		res = data.Choices[0].Text
