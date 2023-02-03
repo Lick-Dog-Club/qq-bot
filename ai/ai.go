@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"math"
 	"net/http"
 	"os"
@@ -186,6 +187,13 @@ func (gpt *chatGPTClient) getCompletion(prompt string) (string, error) {
 	}
 	defer do.Body.Close()
 	var data gptResponse
-	json.NewDecoder(do.Body).Decode(&data)
-	return data.Choices[0].Text, nil
+	if err := json.NewDecoder(do.Body).Decode(&data); err != nil {
+		return "", err
+	}
+	log.Println(data)
+	var res string = "没有结果"
+	if len(data.Choices) > 0 {
+		res = data.Choices[0].Text
+	}
+	return res, nil
 }
