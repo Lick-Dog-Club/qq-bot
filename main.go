@@ -11,6 +11,7 @@ import (
 	"qq/picture"
 	sys_update "qq/sys-update"
 	"qq/weather"
+	"qq/zhihu"
 	"strings"
 	"time"
 
@@ -47,6 +48,8 @@ func main() {
 					city = "杭州"
 				}
 				bot.Send(message, weather.Get(city))
+			case isKeyword(msg, "知乎"):
+				bot.Send(message, zhihu.Top50())
 			case isKeyword(msg, "抽奖"):
 				cookie := content(msg, "抽奖")
 				bot.Send(message, lottery.Run(message, cookie).String())
@@ -54,6 +57,7 @@ func main() {
 				bot.Send(message, dedent.Dedent(`
 					@bot 抽奖 <bilibili-cookie>: 自动转发up主的抽奖活动
 					@bot 天气 <城市: 默认杭州>: 查询城市天气
+					@bot 知乎: 返回知乎 top50
 					@bot 涩图: 返回动漫图片~
 					@bot default: ai 自动回答
 					@bot help: 帮助界面
