@@ -13,7 +13,7 @@ func Top() string {
 	json.NewDecoder(get.Body).Decode(&data)
 	var res string
 	for idx, datum := range data.Data {
-		res += fmt.Sprintf("%d %s%s", idx+1, datum.Title, datum.URL)
+		res += fmt.Sprintf("%d. %s %s\n", idx+1, datum.Title, datum.URL)
 	}
 	return res
 }
