@@ -16,7 +16,7 @@ func Top50() string {
 	json.NewDecoder(get.Body).Decode(&data)
 	var res string
 	for idx, datum := range data.Data {
-		res += fmt.Sprintf("%d. %s%s\n", idx+1, datum.Target.Title, datum.Target.Url)
+		res += fmt.Sprintf("%d. %s\n", idx+1, datum.Target.Title)
 	}
 	return res
 }
