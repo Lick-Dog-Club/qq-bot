@@ -3,6 +3,7 @@ package zhihu
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -10,7 +11,10 @@ func Top50() string {
 	request, _ := http.NewRequest("GET", "https://www.zhihu.com/api/v3/feed/topstory/hot-lists/total?limit=50", nil)
 	request.Header.Add("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36")
 	request.Header.Add("referer", "https://www.zhihu.com/hot")
-	get, _ := http.DefaultClient.Do(request)
+	get, err := http.DefaultClient.Do(request)
+	if err != nil {
+		return err.Error()
+	}
 	defer get.Body.Close()
 	var data Response
 	json.NewDecoder(get.Body).Decode(&data)
@@ -18,6 +22,7 @@ func Top50() string {
 	for idx, datum := range data.Data {
 		res += fmt.Sprintf("%d. %s\n", idx+1, datum.Target.Title)
 	}
+	log.Printf("知乎 top50: %d\n", get.StatusCode)
 	return res
 }
 

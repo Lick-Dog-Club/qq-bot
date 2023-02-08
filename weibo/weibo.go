@@ -3,6 +3,7 @@ package weibo
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -15,6 +16,7 @@ func Top() string {
 	for idx, datum := range data.Data {
 		res += fmt.Sprintf("%d. %s\n", idx+1, datum.Title)
 	}
+	log.Printf("微博: %d\n", get.StatusCode)
 	return res
 }
 

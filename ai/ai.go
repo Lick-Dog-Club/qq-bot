@@ -140,7 +140,7 @@ func (gpt *chatGPTClient) buildPrompt(messages userMessageList, parentMessageId 
 	}
 
 	currentDateString := time.Now().Format("2006-01-02")
-	promptPrefix := fmt.Sprintf(`你是 ChatGPT，OpenAI 训练的大型语言模型。 您对每个回复都尽可能简洁地回答（例如，不要冗长）。请用中文回答问题。
+	promptPrefix := fmt.Sprintf(`你是 ChatGPT，OpenAI 训练的大型语言模型。请用中文回答问题。
 Current date: %s\n\n`, currentDateString)
 	promptSuffix := "\n"
 	currentTokenCount := getTokenCount(promptPrefix + promptSuffix)
