@@ -50,7 +50,7 @@ func main() {
 				}
 				bot.Send(message, weather.Get(city))
 			case isKeyword(msg, "知乎"):
-				bot.Send(message, zhihu.Top50())
+				bot.Send(message, zhihu.Top())
 			case isKeyword(msg, "微博"):
 				bot.Send(message, weibo.Top())
 			case isKeyword(msg, "抽奖"):
