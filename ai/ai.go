@@ -69,7 +69,7 @@ func newChatGPTClient(apiKey string) *chatGPTClient {
 	return &chatGPTClient{
 		apiKey: apiKey,
 		opt: completionRequest{
-			Model:           "text-chat-davinci-002-20221122",
+			Model:           "text-davinci-003",
 			Temperature:     0.7,
 			Stop:            []string{"<|im_end|>"},
 			PresencePenalty: 0.6,
