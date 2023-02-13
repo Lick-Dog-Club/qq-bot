@@ -170,7 +170,8 @@ Current date: %s\n\n`, currentDateString)
 
 func getTokenCount(text string) int {
 	encoder, _ := encoder.NewEncoder()
-	encode, _ := encoder.Encode(strings.ReplaceAll(text, `<|im_end|>`, `<|endoftext|>`))
+	endStr := `<|endoftext|>`
+	encode, _ := encoder.Encode(strings.ReplaceAll(strings.ReplaceAll(text, `<|im_end|>`, endStr), `<|im_sep|>`, endStr))
 	return len(encode)
 }
 
