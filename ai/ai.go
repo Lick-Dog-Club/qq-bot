@@ -144,18 +144,21 @@ func (gpt *chatGPTClient) buildPrompt(messages userMessageList, parentMessageId 
 		currentMessageId = m.parentMessageId
 	}
 
-	//currentDateString := time.Now().Format("2006-01-02")
-	promptPrefix := ""
-	//promptPrefix := fmt.Sprintf(`%sInstructions: \nYou are ChatGPT, a large language model trained by OpenAI, 请用中文回答问题. Current date: %s%s\n\n`, separatorToken, currentDateString, separatorToken)
-	promptSuffix := "\n"
+	currentDateString := time.Now().Format("2006-01-02")
+	promptPrefix := fmt.Sprintf("\n%sInstructions: \nYou are ChatGPT, a large language model trained by OpenAI, 请用中文回答问题. \nCurrent date: %s%s\n\n", separatorToken, currentDateString, separatorToken)
+	promptSuffix := "ChatGPT:\n"
 	currentTokenCount := getTokenCount(promptPrefix + promptSuffix)
 	promptBody := ""
 	maxTokenCount := 3097
 
 	for currentTokenCount < maxTokenCount && len(orderedMessages) > 0 {
 		m := orderedMessages[len(orderedMessages)-1]
+		roleLabel := "User"
+		if m.role != "User" {
+			roleLabel = "ChatGPT"
+		}
 		orderedMessages = append([]userMessage{}, orderedMessages[:len(orderedMessages)-1]...)
-		messageString := fmt.Sprintf(`%s%s\n`, m.message, endToken)
+		messageString := fmt.Sprintf("%s:\n%s%s\n", roleLabel, m.message, endToken)
 		newPromptBody := messageString + promptBody
 		newTokenCount := getTokenCount(promptPrefix + newPromptBody + promptSuffix)
 		if promptBody != "" && newTokenCount > maxTokenCount {
