@@ -90,7 +90,7 @@ const (
 
 func (gpt *chatGPTClient) Send(msg string) string {
 	if gpt.status.IsAsking() {
-		return "正在回答上一个问题~: " + gpt.status.Msg()
+		return "正在回答上一个问题: " + gpt.status.Msg()
 	}
 	gpt.status.Asking()
 	gpt.status.SetMsg(msg)
