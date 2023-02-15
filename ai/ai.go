@@ -70,9 +70,9 @@ func newChatGPTClient(apiKey string) *chatGPTClient {
 		apiKey: apiKey,
 		opt: completionRequest{
 			Model:           "text-davinci-003",
-			Temperature:     0.7,
-			Stop:            []string{"<|im_end|>"},
-			PresencePenalty: 0.6,
+			Temperature:     0.8,
+			Stop:            []string{endToken},
+			PresencePenalty: 1,
 		},
 		cache:  newKV(map[string]any{"namespace": "chatgpt"}),
 		status: &status{},
@@ -82,6 +82,11 @@ func newChatGPTClient(apiKey string) *chatGPTClient {
 func (gpt *chatGPTClient) LastAskTime() time.Time {
 	return gpt.status.LastAskTime()
 }
+
+const (
+	endToken       = "<|endoftext|>"
+	separatorToken = "<|endoftext|>"
+)
 
 func (gpt *chatGPTClient) Send(msg string) string {
 	if gpt.status.IsAsking() {
@@ -140,8 +145,7 @@ func (gpt *chatGPTClient) buildPrompt(messages userMessageList, parentMessageId 
 	}
 
 	currentDateString := time.Now().Format("2006-01-02")
-	promptPrefix := fmt.Sprintf(`你是 ChatGPT，OpenAI 训练的大型语言模型。请用中文回答问题。
-Current date: %s\n\n`, currentDateString)
+	promptPrefix := fmt.Sprintf(`%sInstructions: \n你是 ChatGPT，OpenAI 训练的大型语言模型。请用中文回答问题。\nCurrent date: %s%s\n\n`, separatorToken, currentDateString, separatorToken)
 	promptSuffix := "\n"
 	currentTokenCount := getTokenCount(promptPrefix + promptSuffix)
 	promptBody := ""
@@ -150,7 +154,7 @@ Current date: %s\n\n`, currentDateString)
 	for currentTokenCount < maxTokenCount && len(orderedMessages) > 0 {
 		m := orderedMessages[len(orderedMessages)-1]
 		orderedMessages = append([]userMessage{}, orderedMessages[:len(orderedMessages)-1]...)
-		messageString := fmt.Sprintf(`%s<|im_end|>\n`, m.message)
+		messageString := fmt.Sprintf(`%s%s\n`, m.message, endToken)
 		newPromptBody := messageString + promptBody
 		newTokenCount := getTokenCount(promptPrefix + newPromptBody + promptSuffix)
 		if promptBody != "" && newTokenCount > maxTokenCount {
@@ -168,10 +172,14 @@ Current date: %s\n\n`, currentDateString)
 	return prompt
 }
 
+const (
+	imEnd = "<|im_end|>"
+	imSep = "<|im_sep|>"
+)
+
 func getTokenCount(text string) int {
 	encoder, _ := encoder.NewEncoder()
-	endStr := `<|endoftext|>`
-	encode, _ := encoder.Encode(strings.ReplaceAll(strings.ReplaceAll(text, `<|im_end|>`, endStr), `<|im_sep|>`, endStr))
+	encode, _ := encoder.Encode(strings.ReplaceAll(strings.ReplaceAll(text, imSep, endToken), imEnd, endToken))
 	return len(encode)
 }
 
