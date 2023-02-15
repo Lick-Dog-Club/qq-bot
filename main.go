@@ -69,7 +69,7 @@ func main() {
 					@bot 更新系统: 更新到最新版本
 				`))
 			default:
-				bot.Send(message, ai.Request(message.UserID, msg))
+				bot.Send(message, ai.Request(fmt.Sprintf("%d", message.UserID), msg))
 			}
 		}
 	})

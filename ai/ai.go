@@ -21,7 +21,7 @@ var (
 	manager = newGptManager(token)
 )
 
-func Request(userID int, ask string) string {
+func Request(userID string, ask string) string {
 	user := manager.GetByUser(userID)
 	if user.LastAskTime().Add(10 * time.Minute).Before(time.Now()) {
 		manager.DeleteUser(userID)
@@ -32,21 +32,21 @@ func Request(userID int, ask string) string {
 
 type gptManager struct {
 	sync.RWMutex
-	users  map[int]*chatGPTClient
+	users  map[string]*chatGPTClient
 	apiKey string
 }
 
 func newGptManager(apiKey string) *gptManager {
-	return &gptManager{apiKey: apiKey, users: map[int]*chatGPTClient{}}
+	return &gptManager{apiKey: apiKey, users: map[string]*chatGPTClient{}}
 }
 
-func (m *gptManager) DeleteUser(userID int) {
+func (m *gptManager) DeleteUser(userID string) {
 	m.Lock()
 	defer m.Unlock()
 	delete(m.users, userID)
 }
 
-func (m *gptManager) GetByUser(userID int) *chatGPTClient {
+func (m *gptManager) GetByUser(userID string) *chatGPTClient {
 	m.Lock()
 	defer m.Unlock()
 	client, ok := m.users[userID]
