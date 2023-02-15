@@ -144,8 +144,9 @@ func (gpt *chatGPTClient) buildPrompt(messages userMessageList, parentMessageId 
 		currentMessageId = m.parentMessageId
 	}
 
-	currentDateString := time.Now().Format("2006-01-02")
-	promptPrefix := fmt.Sprintf(`%sInstructions: \nYou are ChatGPT, a large language model trained by OpenAI, 请用中文回答问题. Current date: %s%s\n\n`, separatorToken, currentDateString, separatorToken)
+	//currentDateString := time.Now().Format("2006-01-02")
+	promptPrefix := ""
+	//promptPrefix := fmt.Sprintf(`%sInstructions: \nYou are ChatGPT, a large language model trained by OpenAI, 请用中文回答问题. Current date: %s%s\n\n`, separatorToken, currentDateString, separatorToken)
 	promptSuffix := "\n"
 	currentTokenCount := getTokenCount(promptPrefix + promptSuffix)
 	promptBody := ""
