@@ -6,6 +6,8 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"qq/bot"
+	"qq/features"
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
@@ -28,7 +30,20 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-func Url() string {
+func init() {
+	features.AddKeyword("涩图", "返回动漫图片~", func(bot bot.Bot, content string) error {
+		msgID := bot.Send(url())
+		if bot.IsGroupMessage() {
+			tID := bot.Send("图片即将在 30s 之后撤回，要保存的赶紧了~")
+			time.Sleep(30 * time.Second)
+			bot.DeleteMsg(msgID)
+			bot.DeleteMsg(tID)
+		}
+		return nil
+	})
+}
+
+func url() string {
 	var (
 		response *http.Response
 		err      error

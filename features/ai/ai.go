@@ -8,7 +8,9 @@ import (
 	"math"
 	"net/http"
 	"os"
-	"qq/ai/encoder"
+	"qq/bot"
+	"qq/features"
+	"qq/features/ai/encoder"
 	"strings"
 	"sync"
 	"time"
@@ -21,13 +23,20 @@ var (
 	manager = newGptManager(token)
 )
 
-func Request(userID string, ask string) string {
-	user := manager.GetByUser(userID)
-	if user.LastAskTime().Add(10 * time.Minute).Before(time.Now()) {
-		manager.DeleteUser(userID)
-		user = manager.GetByUser(userID)
+func init() {
+	features.SetDefault("ai 自动回答", func(bot bot.Bot, content string) error {
+		bot.Send(request(bot.UserID(), content))
+		return nil
+	})
+}
+
+func request(userID string, ask string) string {
+	user := manager.getByUser(userID)
+	if user.lastAskTime().Add(10 * time.Minute).Before(time.Now()) {
+		manager.deleteUser(userID)
+		user = manager.getByUser(userID)
 	}
-	return user.Send(ask)
+	return user.send(ask)
 }
 
 type gptManager struct {
@@ -40,13 +49,13 @@ func newGptManager(apiKey string) *gptManager {
 	return &gptManager{apiKey: apiKey, users: map[string]*chatGPTClient{}}
 }
 
-func (m *gptManager) DeleteUser(userID string) {
+func (m *gptManager) deleteUser(userID string) {
 	m.Lock()
 	defer m.Unlock()
 	delete(m.users, userID)
 }
 
-func (m *gptManager) GetByUser(userID string) *chatGPTClient {
+func (m *gptManager) getByUser(userID string) *chatGPTClient {
 	m.Lock()
 	defer m.Unlock()
 	client, ok := m.users[userID]
@@ -58,11 +67,10 @@ func (m *gptManager) GetByUser(userID string) *chatGPTClient {
 }
 
 type chatGPTClient struct {
-	lastAskTime time.Time
-	apiKey      string
-	opt         completionRequest
-	cache       *keyValue
-	status      *status
+	apiKey string
+	opt    completionRequest
+	cache  *keyValue
+	status *status
 }
 
 func newChatGPTClient(apiKey string) *chatGPTClient {
@@ -79,7 +87,7 @@ func newChatGPTClient(apiKey string) *chatGPTClient {
 	}
 }
 
-func (gpt *chatGPTClient) LastAskTime() time.Time {
+func (gpt *chatGPTClient) lastAskTime() time.Time {
 	return gpt.status.LastAskTime()
 }
 
@@ -88,7 +96,7 @@ const (
 	separatorToken = "<|endoftext|>"
 )
 
-func (gpt *chatGPTClient) Send(msg string) string {
+func (gpt *chatGPTClient) send(msg string) string {
 	if gpt.status.IsAsking() {
 		return "正在回答上一个问题: " + gpt.status.Msg()
 	}

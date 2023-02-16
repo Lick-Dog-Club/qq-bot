@@ -8,9 +8,11 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"qq/bot"
+	"qq/features"
 )
 
-const URL = "https://restapi.amap.com/v3/weather/weatherInfo?key=%s&city=%s&extensions=all&output=json"
+const weatherURL = "https://restapi.amap.com/v3/weather/weatherInfo?key=%s&city=%s&extensions=all&output=json"
 
 var temp, _ = template.New("").Parse(`
 城市: {{.City}}
@@ -28,10 +30,20 @@ type input struct {
 	Nighttemp    string
 }
 
-func Get(city string) string {
-	get, _ := http.Get(fmt.Sprintf(URL, os.Getenv("WEATHER_KEY"), city))
+func init() {
+	features.AddKeyword("天气", "+<城市> 获取天气信息, 默认杭州", func(bot bot.Bot, city string) error {
+		if city == "" {
+			city = "杭州"
+		}
+		bot.Send(get(city))
+		return nil
+	})
+}
+
+func get(city string) string {
+	get, _ := http.Get(fmt.Sprintf(weatherURL, os.Getenv("WEATHER_KEY"), city))
 	defer closeBody(get.Body)
-	var res Response
+	var res response
 	json.NewDecoder(get.Body).Decode(&res)
 	if len(res.Forecasts) < 1 {
 		return "未找到天气信息"
@@ -53,7 +65,7 @@ func closeBody(rc io.ReadCloser) {
 	rc.Close()
 }
 
-type Response struct {
+type response struct {
 	Status    string `json:"status"`
 	Count     string `json:"count"`
 	Info      string `json:"info"`

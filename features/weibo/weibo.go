@@ -5,12 +5,21 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"qq/bot"
+	"qq/features"
 )
 
-func Top() string {
+func init() {
+	features.AddKeyword("微博", "获取热搜 top50", func(bot bot.Bot, city string) error {
+		bot.Send(top())
+		return nil
+	})
+}
+
+func top() string {
 	get, _ := http.Get("https://api.vvhan.com/api/wbhot")
 	defer get.Body.Close()
-	var data Response
+	var data response
 	json.NewDecoder(get.Body).Decode(&data)
 	var res string
 	for idx, datum := range data.Data {
@@ -20,7 +29,7 @@ func Top() string {
 	return res
 }
 
-type Response struct {
+type response struct {
 	Success bool   `json:"success"`
 	Time    string `json:"time"`
 	Data    []struct {

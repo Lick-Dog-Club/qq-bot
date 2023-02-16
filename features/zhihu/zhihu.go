@@ -5,9 +5,18 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"qq/bot"
+	"qq/features"
 )
 
-func Top() string {
+func init() {
+	features.AddKeyword("知乎", "获取热搜 top30", func(bot bot.Bot, city string) error {
+		bot.Send(top())
+		return nil
+	})
+}
+
+func top() string {
 	request, _ := http.NewRequest("GET", "https://www.zhihu.com/api/v3/feed/topstory/hot-lists/total?limit=50", nil)
 	request.Header.Add("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36")
 	request.Header.Add("referer", "https://www.zhihu.com/hot")
@@ -16,7 +25,7 @@ func Top() string {
 		return err.Error()
 	}
 	defer get.Body.Close()
-	var data Response
+	var data response
 	json.NewDecoder(get.Body).Decode(&data)
 	var res string
 	// 消息太长发不出去, 取前 30 个
@@ -28,7 +37,7 @@ func Top() string {
 	return res
 }
 
-type Response struct {
+type response struct {
 	Data []struct {
 		Type   string `json:"type"`
 		Target struct {

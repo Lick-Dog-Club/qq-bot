@@ -1,6 +1,6 @@
 package lottery
 
-type UserInfo struct {
+type userInfo struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
 	TTL     int    `json:"ttl"`
@@ -16,7 +16,7 @@ type UserInfo struct {
 	} `json:"data"`
 }
 
-type FeedAll struct {
+type feedAll struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
 	TTL     int    `json:"ttl"`
@@ -79,7 +79,7 @@ type FeedAll struct {
 	} `json:"data"`
 }
 
-type NoticeResp struct {
+type noticeResp struct {
 	Code    int    `json:"code"`
 	Msg     string `json:"msg"`
 	Message string `json:"message"`
@@ -105,7 +105,7 @@ type NoticeResp struct {
 	} `json:"data"`
 }
 
-type MyForwardResp struct {
+type myForwardResp struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
 	TTL     int    `json:"ttl"`

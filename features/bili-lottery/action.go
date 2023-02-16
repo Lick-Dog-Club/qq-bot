@@ -17,12 +17,12 @@ import (
 var httpClient = &http.Client{}
 
 type User struct {
-	cookie   Pair
+	cookie   cookiePairs
 	forwards map[string]struct{}
-	me       UserInfo
+	me       userInfo
 }
 
-func (u *User) BuildRequest(url string) *http.Request {
+func (u *User) buildRequest(url string) *http.Request {
 	request, _ := http.NewRequest("GET", url, nil)
 	request.Header.Add("cookie", fmt.Sprintf("DedeUserID=%v; SESSDATA=%v; bili_jct=%v; DedeUserID__ckMd5=%v",
 		u.cookie["DedeUserID"],
@@ -35,14 +35,14 @@ func (u *User) BuildRequest(url string) *http.Request {
 	return request
 }
 
-// Me https://api.bilibili.com/x/member/web/account
-func (u *User) Me() UserInfo {
-	response, err := httpClient.Do(u.BuildRequest("https://api.bilibili.com/x/member/web/account"))
+// info https://api.bilibili.com/x/member/web/account
+func (u *User) info() userInfo {
+	response, err := httpClient.Do(u.buildRequest("https://api.bilibili.com/x/member/web/account"))
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer closeBody(response.Body)
-	var info UserInfo
+	var info userInfo
 	err = json.NewDecoder(response.Body).Decode(&info)
 	if err != nil {
 		log.Fatal(err)
@@ -56,13 +56,13 @@ func (u *User) Me() UserInfo {
 	return info
 }
 
-// MyForwards https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/space?offset=&host_mid=345516933&timezone_offset=-480
-func (u *User) MyForwards(mid int) map[string]struct{} {
+// myForwards https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/space?offset=&host_mid=345516933&timezone_offset=-480
+func (u *User) myForwards(mid int) map[string]struct{} {
 	var res = make(map[string]struct{})
 	curlFn := func(offset string, mid int) (string, bool) {
-		resp, _ := httpClient.Do(u.BuildRequest(fmt.Sprintf("https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/space?offset=%v&host_mid=%v&timezone_offset=-480", offset, mid)))
+		resp, _ := httpClient.Do(u.buildRequest(fmt.Sprintf("https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/space?offset=%v&host_mid=%v&timezone_offset=-480", offset, mid)))
 		defer closeBody(resp.Body)
-		var data MyForwardResp
+		var data myForwardResp
 		json.NewDecoder(resp.Body).Decode(&data)
 		for _, item := range data.Data.Items {
 			if item.Type == "DYNAMIC_TYPE_FORWARD" {
@@ -82,23 +82,23 @@ func (u *User) MyForwards(mid int) map[string]struct{} {
 	return res
 }
 
-func (u *User) LotteryDynamics() (res []NoticeBody) {
+func (u *User) lotteryDynamics() (res []noticeBody) {
 	curlFn := func(offset string, page int) (bool, string) {
 		url := fmt.Sprintf("https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/all?timezone_offset=-480&type=all&pageSize=50&page=%v", page)
 		if offset != "" {
 			url += "&offset=" + offset
 		}
-		request := u.BuildRequest(url)
+		request := u.buildRequest(url)
 		resp, _ := httpClient.Do(request)
 		defer closeBody(resp.Body)
-		var data FeedAll
+		var data feedAll
 		json.NewDecoder(resp.Body).Decode(&data)
 	Loop:
 		for _, item := range data.Data.Items {
 			if len(item.Modules.ModuleDynamic.Desc.RichTextNodes) > 0 {
 				for _, node := range item.Modules.ModuleDynamic.Desc.RichTextNodes {
 					if node.Type == "RICH_TEXT_NODE_TYPE_LOTTERY" {
-						res = append(res, u.LotteryNotice(item.Modules.ModuleAuthor.Name, item.IDStr))
+						res = append(res, u.lotteryNotice(item.Modules.ModuleAuthor.Name, item.IDStr))
 						continue Loop
 					}
 				}
@@ -119,17 +119,17 @@ func (u *User) LotteryDynamics() (res []NoticeBody) {
 	return res
 }
 
-// LotteryNotice https://api.vc.bilibili.com/lottery_svr/v1/lottery_svr/lottery_notice?dynamic_id=753851500355125303
-func (u *User) LotteryNotice(up, dynamicId string) NoticeBody {
-	resp, _ := httpClient.Do(u.BuildRequest("https://api.vc.bilibili.com/lottery_svr/v1/lottery_svr/lottery_notice?dynamic_id=" + dynamicId))
+// lotteryNotice https://api.vc.bilibili.com/lottery_svr/v1/lottery_svr/lottery_notice?dynamic_id=753851500355125303
+func (u *User) lotteryNotice(up, dynamicId string) noticeBody {
+	resp, _ := httpClient.Do(u.buildRequest("https://api.vc.bilibili.com/lottery_svr/v1/lottery_svr/lottery_notice?dynamic_id=" + dynamicId))
 	defer closeBody(resp.Body)
-	var data NoticeResp
+	var data noticeResp
 	json.NewDecoder(resp.Body).Decode(&data)
 	_, ok := u.forwards[dynamicId]
 	deadline := time.Unix(int64(data.Data.LotteryTime), 0)
 	atoi, _ := strconv.Atoi(dynamicId)
 
-	in := NoticeBody{
+	in := noticeBody{
 		DynamicId:      atoi,
 		Up:             up,
 		WebUrl:         fmt.Sprintf("https://t.bilibili.com/%v", dynamicId),
@@ -148,9 +148,9 @@ func (u *User) LotteryNotice(up, dynamicId string) NoticeBody {
 	return in
 }
 
-type NoticeBodyList []NoticeBody
+type noticeBodyList []noticeBody
 
-func (l NoticeBodyList) String() string {
+func (l noticeBodyList) String() string {
 	bf := &bytes.Buffer{}
 	for _, body := range l {
 		lotteryNoticeTemplate.Execute(bf, body)
@@ -162,7 +162,7 @@ func (l NoticeBodyList) String() string {
 	return s
 }
 
-type NoticeBody struct {
+type noticeBody struct {
 	Up             string
 	DynamicId      int
 	Forwarded      bool
@@ -191,11 +191,11 @@ up: {{ .Up }}
 是否转发: {{ if .Forwarded }}是{{ else }}否{{ end }}
 `)
 
-// DynaRepost 转发动态
+// dynaRepost 转发动态
 //
 // dyid 为转发的动态ID
-func (u *User) DynaRepost(dyid int64, content string) error {
-	req := u.BuildRequest("https://api.vc.bilibili.com/dynamic_repost/v1/dynamic_repost/repost")
+func (u *User) dynaRepost(dyid int64, content string) error {
+	req := u.buildRequest("https://api.vc.bilibili.com/dynamic_repost/v1/dynamic_repost/repost")
 	req.Method = "POST"
 	req.Header.Add("Content-type", "application/x-www-form-urlencoded")
 	v := url.Values{}
