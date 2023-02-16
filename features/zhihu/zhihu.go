@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	features.AddKeyword("知乎", "获取热搜 top30", func(bot bot.Bot, city string) error {
+	features.AddKeyword("知乎", "获取热搜 top30", func(bot bot.Bot, s string) error {
 		bot.Send(top())
 		return nil
 	})
