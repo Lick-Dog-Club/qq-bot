@@ -3,6 +3,7 @@ package bot
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -11,13 +12,14 @@ type Bot interface {
 	UserID() string
 	DeleteMsg(msgID int)
 	Send(msg string) int
+	SendMsg(msg *Message, s string) int
 	IsGroupMessage() bool
 }
 
 type dummyBot struct {
 }
 
-func NewDummyBot(message Message) Bot {
+func NewDummyBot(message *Message) Bot {
 	return &dummyBot{}
 }
 
@@ -33,22 +35,27 @@ func (d *dummyBot) Send(msg string) int {
 	fmt.Printf("Send:\n%s", msg)
 	return 0
 }
+func (d *dummyBot) SendMsg(msg *Message, s string) int {
+	fmt.Printf("Send:\n%#v, %s", msg, s)
+	return 0
+}
 
 func (d *dummyBot) IsGroupMessage() bool {
 	return false
 }
 
 type bot struct {
-	msg Message
+	msg *Message
 }
 
-func NewBot(msg Message) Bot {
+func NewBot(msg *Message) Bot {
 	return &bot{msg: msg}
 }
 
 func (m *bot) UserID() string {
 	return fmt.Sprintf("%d", m.msg.UserID)
 }
+
 func (m *bot) IsGroupMessage() bool {
 	return m.msg.MessageType == "group"
 }
@@ -59,6 +66,10 @@ func (m *bot) DeleteMsg(msgID int) {
 
 func (m *bot) Send(msg string) int {
 	return send(m.msg, msg)
+}
+
+func (m *bot) SendMsg(msg *Message, s string) int {
+	return send(msg, s)
 }
 
 const cqHost = "http://127.0.0.1:5700"
@@ -141,7 +152,11 @@ func deleteMsg(msgID int) {
 	defer do.Body.Close()
 }
 
-func send(message Message, msg string) int {
+func send(message *Message, msg string) int {
+	if message.GroupID == 0 && message.UserID == 0 {
+		log.Println("GroupID == 0, UserID == 0")
+		return 0
+	}
 	var req *http.Request
 	if message.GroupID > 0 {
 		req, _ = http.NewRequest("POST", cqHost+"/send_group_msg", strings.NewReader(fmt.Sprintf(`{"group_id": %d, "message": %q}`, message.GroupID, strings.Trim(msg, "\n"))))

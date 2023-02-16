@@ -7,8 +7,8 @@ import (
 	"html/template"
 	"io"
 	"net/http"
-	"os"
 	"qq/bot"
+	"qq/config"
 	"qq/features"
 )
 
@@ -40,11 +40,16 @@ func init() {
 	})
 }
 
+var weatherKey = config.WeatherKey
+
 func get(city string) string {
-	get, _ := http.Get(fmt.Sprintf(weatherURL, os.Getenv("WEATHER_KEY"), city))
-	defer closeBody(get.Body)
+	if weatherKey == "" {
+		return "请先设置环境变量: WEATHER_KEY "
+	}
+	resp, _ := http.Get(fmt.Sprintf(weatherURL, weatherKey, city))
+	defer closeBody(resp.Body)
 	var res response
-	json.NewDecoder(get.Body).Decode(&res)
+	json.NewDecoder(resp.Body).Decode(&res)
 	if len(res.Forecasts) < 1 {
 		return "未找到天气信息"
 	}

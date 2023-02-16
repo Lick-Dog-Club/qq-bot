@@ -7,8 +7,8 @@ import (
 	"log"
 	"math"
 	"net/http"
-	"os"
 	"qq/bot"
+	"qq/config"
 	"qq/features"
 	"qq/features/ai/encoder"
 	"strings"
@@ -19,12 +19,16 @@ import (
 )
 
 var (
-	token   = os.Getenv("AI_TOKEN")
+	token   = config.AIToken
 	manager = newGptManager(token)
 )
 
 func init() {
 	features.SetDefault("ai 自动回答", func(bot bot.Bot, content string) error {
+		if token == "" {
+			bot.Send("请先设置环境变量: AI_TOKEN")
+			return nil
+		}
 		bot.Send(request(bot.UserID(), content))
 		return nil
 	})

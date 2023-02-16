@@ -8,14 +8,14 @@ import (
 )
 
 var (
-	newBotFunc func(msg bot.Message) bot.Bot = bot.NewBot
+	newBotFunc func(msg *bot.Message) bot.Bot = bot.NewBot
 
 	defaultCommand cmd
 	commands       = make(map[string]CommandImp)
 	mu             sync.RWMutex
 )
 
-func SetNewBotFunc(fn func(msg bot.Message) bot.Bot) {
+func SetNewBotFunc(fn func(msg *bot.Message) bot.Bot) {
 	newBotFunc = fn
 }
 
@@ -66,13 +66,7 @@ func SetDefault(desc string, fn commandFunc) {
 	}
 }
 
-func Default() CommandImp {
-	mu.RLock()
-	defer mu.RUnlock()
-	return defaultCommand
-}
-
-func Run(msg bot.Message, keyword string, content string) error {
+func Run(msg *bot.Message, keyword string, content string) error {
 	var command CommandImp
 	func() {
 		mu.RLock()
@@ -93,6 +87,9 @@ func (s sortCommands) Len() int {
 }
 
 func (s sortCommands) Less(i, j int) bool {
+	if s[i].IsSysCmd() == s[j].IsSysCmd() {
+		return s[i].Keyword() < s[j].Keyword()
+	}
 	return !s[i].IsSysCmd() && s[j].IsSysCmd()
 }
 

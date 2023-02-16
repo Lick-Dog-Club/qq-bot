@@ -1,13 +1,18 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"qq/bot"
+	"qq/cronjob"
 	"qq/features"
 	"strings"
+
+	_ "qq/cronjob/maotai"
+	_ "qq/cronjob/setu"
 
 	_ "qq/features/ai"
 	_ "qq/features/bili-lottery"
@@ -21,11 +26,8 @@ import (
 )
 
 func main() {
-	features.SetNewBotFunc(bot.NewDummyBot)
-	features.Run(bot.Message{}, "help", "")
-	return
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		var message bot.Message
+		var message *bot.Message
 		json.NewDecoder(r.Body).Decode(&message)
 		if message.PostType == "meta_event" {
 			return
@@ -40,8 +42,11 @@ func main() {
 			}
 		}
 	})
+	cm := cronjob.Manager()
+	cm.Run(context.TODO())
+	defer cm.Shutdown(context.TODO())
 
-	log.Println("start...")
+	log.Println("[HTTP]: start...")
 	log.Println(http.ListenAndServe(":5701", nil))
 }
 
@@ -52,7 +57,7 @@ func getKeywordAndContent(msg string) (string, string) {
 		return strings.ToLower(split[0]), trimSpace(split[1])
 	}
 
-	return msg, ""
+	return strings.ToLower(msg), ""
 }
 
 func trimSpace(s string) string {

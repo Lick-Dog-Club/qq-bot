@@ -32,7 +32,7 @@ func init() {
 
 func init() {
 	features.AddKeyword("涩图", "返回动漫图片~", func(bot bot.Bot, content string) error {
-		msgID := bot.Send(url())
+		msgID := bot.Send(Url())
 		if bot.IsGroupMessage() {
 			tID := bot.Send("图片即将在 30s 之后撤回，要保存的赶紧了~")
 			time.Sleep(30 * time.Second)
@@ -43,7 +43,7 @@ func init() {
 	})
 }
 
-func url() string {
+func Url() string {
 	var (
 		response *http.Response
 		err      error
