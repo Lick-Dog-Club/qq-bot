@@ -6,6 +6,7 @@ import (
 	"qq/bot"
 	"qq/config"
 	"qq/features"
+	"strings"
 )
 
 func init() {
@@ -21,7 +22,7 @@ func RaoKouLing() string {
 	var data response
 	json.NewDecoder(get.Body).Decode(&data)
 	if data.Code == 200 {
-		return data.Result.Content
+		return strings.ReplaceAll(data.Result.Content, `<br/>`, "")
 	}
 	return ""
 }
