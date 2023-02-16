@@ -216,6 +216,8 @@ spec:
               value: "<高德天气 api-key>"
             - name: GROUP_ID
               value: "<定时任务群组 ID>"
+            - name: TIAN_API_KEY
+              value: <tianapi key>
           ports:
             - containerPort: 5701
               name: http

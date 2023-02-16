@@ -11,12 +11,14 @@ import (
 	"qq/features"
 	"strings"
 
+	_ "qq/cronjob/lifetip"
 	_ "qq/cronjob/maotai"
 	_ "qq/cronjob/setu"
 
 	_ "qq/features/ai"
 	_ "qq/features/bili-lottery"
 	_ "qq/features/help"
+	_ "qq/features/lifetip"
 	_ "qq/features/picture"
 	_ "qq/features/sys-update"
 	_ "qq/features/version"
