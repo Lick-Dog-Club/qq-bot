@@ -20,6 +20,7 @@ import (
 	_ "qq/features/help"
 	_ "qq/features/lifetip"
 	_ "qq/features/picture"
+	_ "qq/features/raokouling"
 	_ "qq/features/sys-update"
 	_ "qq/features/version"
 	_ "qq/features/weather"
