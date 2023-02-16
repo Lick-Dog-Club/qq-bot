@@ -75,6 +75,10 @@ func Run(msg *bot.Message, keyword string, content string) error {
 		command, ok = commands[keyword]
 		if !ok {
 			command = defaultCommand
+			if content != "" {
+				content = fmt.Sprintf("%s %s", keyword, content)
+			}
+			content = keyword
 		}
 	}()
 	return command.Run(newBotFunc(msg), content)

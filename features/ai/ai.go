@@ -29,6 +29,7 @@ func init() {
 			bot.Send("请先设置环境变量: AI_TOKEN")
 			return nil
 		}
+		log.Printf("%s: %s", bot.UserID(), content)
 		bot.Send(request(bot.UserID(), content))
 		return nil
 	})
