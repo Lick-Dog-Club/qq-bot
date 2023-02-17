@@ -10,6 +10,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"qq/bot"
@@ -87,9 +88,10 @@ func init() {
 		request.Header.Add("Referer", "https://www.pixiv.net/")
 		httpClient := http.DefaultClient
 		if config.PixivProxy != "" {
+			parse, _ := url.Parse(config.PixivProxy)
 			httpClient = &http.Client{
 				Transport: &http.Transport{
-					Proxy: config.PixivProxy,
+					Proxy: http.ProxyURL(parse),
 				},
 			}
 		}
