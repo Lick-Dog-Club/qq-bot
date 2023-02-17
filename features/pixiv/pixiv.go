@@ -2,6 +2,8 @@ package pixiv
 
 import (
 	"context"
+	"crypto/md5"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -97,7 +99,7 @@ func init() {
 		}
 		defer get.Body.Close()
 		url := rank.Items[rand.Intn(len(rank.Items))].Image.Regular
-		base := filepath.Base(url)
+		base := Md5(filepath.Base(url))
 		os.MkdirAll("/data/images", 0755)
 		fpath := filepath.Join("/data", "images", base)
 		all, _ := io.ReadAll(get.Body)
@@ -105,4 +107,11 @@ func init() {
 		bot.Send(fmt.Sprintf("[CQ:image,file=%s]", base))
 		return nil
 	})
+}
+
+func Md5(data string) string {
+	hash := md5.New()
+	hash.Write([]byte(data))
+
+	return hex.EncodeToString(hash.Sum(nil))
 }
