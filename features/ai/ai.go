@@ -30,12 +30,12 @@ func init() {
 			return nil
 		}
 		log.Printf("%s: %s", bot.UserID(), content)
-		bot.Send(request(bot.UserID(), content))
+		bot.Send(Request(bot.UserID(), content))
 		return nil
 	})
 }
 
-func request(userID string, ask string) string {
+func Request(userID string, ask string) string {
 	user := manager.getByUser(userID)
 	if user.lastAskTime().Add(10 * time.Minute).Before(time.Now()) {
 		manager.deleteUser(userID)
@@ -158,7 +158,7 @@ func (gpt *chatGPTClient) buildPrompt(messages userMessageList, parentMessageId 
 	}
 
 	currentDateString := time.Now().Format("2006-01-02")
-	promptPrefix := fmt.Sprintf("\n%sInstructions: \nYou are ChatGPT, a large language model trained by OpenAI, 请用中文回答问题. \nCurrent date: %s%s\n\n", separatorToken, currentDateString, separatorToken)
+	promptPrefix := fmt.Sprintf("\n%sInstructions: \nYou are ChatGPT, a large language model trained by OpenAI. \nCurrent date: %s%s\n\n", separatorToken, currentDateString, separatorToken)
 	promptSuffix := "ChatGPT:\n"
 	currentTokenCount := getTokenCount(promptPrefix + promptSuffix)
 	promptBody := ""
@@ -201,6 +201,7 @@ func getTokenCount(text string) int {
 }
 
 func (gpt *chatGPTClient) getCompletion(prompt string) (string, error) {
+	fmt.Println(prompt)
 	var input = gpt.opt
 	input.Prompt = prompt
 	marshal, _ := json.Marshal(&input)
