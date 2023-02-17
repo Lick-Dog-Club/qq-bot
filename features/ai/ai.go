@@ -24,7 +24,7 @@ var (
 
 func init() {
 	features.SetDefault("ai 自动回答", func(bot bot.Bot, content string) error {
-		if token == "" {
+		if config.AIToken() == "" {
 			bot.Send("请先设置环境变量: AI_TOKEN")
 			return nil
 		}
