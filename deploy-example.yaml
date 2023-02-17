@@ -174,8 +174,6 @@ spec:
         app: qq-bot
     spec:
       volumes:
-        - name: images
-          emptyDir: {}
         - name: data
           persistentVolumeClaim:
             claimName: qq-bot-pvc
@@ -191,8 +189,6 @@ spec:
           image: silicer/go-cqhttp
           imagePullPolicy: IfNotPresent
           volumeMounts:
-            - mountPath: /images
-              name: images
             - mountPath: /data
               name: data
             - mountPath: /data/config.yml
@@ -206,8 +202,8 @@ spec:
           image: duccnzj/qq-bot
           imagePullPolicy: Always
           volumeMounts:
-            - mountPath: /images
-              name: images
+            - mountPath: /data
+              name: data
           env:
           - name: POD_NAME
             valueFrom:
