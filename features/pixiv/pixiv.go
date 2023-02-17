@@ -3,8 +3,14 @@ package pixiv
 import (
 	"context"
 	"errors"
+	"fmt"
+	"io"
 	"math/rand"
+	"net/http"
+	"os"
+	"path/filepath"
 	"qq/bot"
+	"qq/config"
 	"qq/features"
 	"sync"
 	"time"
@@ -14,7 +20,7 @@ import (
 )
 
 var (
-	session = ""
+	session = config.PixivSession
 	mu      sync.RWMutex
 )
 
@@ -53,27 +59,39 @@ func init() {
 		//daily_r18
 		//daily
 		//daily_ai
+		var mode = "daily"
 		switch content {
 		case "ai":
-			content = "daily_ai"
+			mode = "daily_ai"
 		case "r18":
-			content = "daily_r18"
+			mode = "daily_r18"
 		case "r18_ai":
-			content = "daily_r18_ai"
-		default:
-			content = "daily"
+			mode = "daily_r18_ai"
 		}
 		ctx, err := newClientCtx()
 		if err != nil {
 			bot.Send(err.Error())
 			return nil
 		}
-		rank := &artwork.Rank{Mode: content, Page: rand.Intn(20)}
+		rank := &artwork.Rank{Mode: mode, Page: rand.Intn(5)}
 		if err = rank.Fetch(ctx); err != nil {
 			bot.Send(err.Error())
 			return nil
 		}
-		bot.Send(rank.Items[rand.Intn(len(rank.Items))].Image.Regular)
+		request, _ := http.NewRequest("GET", rank.Items[rand.Intn(len(rank.Items))].Image.Regular, nil)
+		get, err := http.DefaultClient.Do(request)
+		if err != nil {
+			bot.Send(err.Error())
+			return nil
+		}
+		defer get.Body.Close()
+		url := rank.Items[rand.Intn(len(rank.Items))].Image.Regular
+		base := filepath.Base(url)
+		os.MkdirAll("/images/pixiv", 0755)
+		fpath := filepath.Join("/images", "pixiv", base)
+		all, _ := io.ReadAll(get.Body)
+		os.WriteFile(fpath, all, 0644)
+		bot.Send(fmt.Sprintf("[CQ:image,file=%s]", fpath))
 		return nil
 	})
 }
