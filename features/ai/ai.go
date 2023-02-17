@@ -19,8 +19,7 @@ import (
 )
 
 var (
-	token   = config.AIToken()
-	manager = newGptManager(token)
+	manager = newGptManager()
 )
 
 func init() {
@@ -46,12 +45,11 @@ func Request(userID string, ask string) string {
 
 type gptManager struct {
 	sync.RWMutex
-	users  map[string]*chatGPTClient
-	apiKey string
+	users map[string]*chatGPTClient
 }
 
-func newGptManager(apiKey string) *gptManager {
-	return &gptManager{apiKey: apiKey, users: map[string]*chatGPTClient{}}
+func newGptManager() *gptManager {
+	return &gptManager{users: map[string]*chatGPTClient{}}
 }
 
 func (m *gptManager) deleteUser(userID string) {
@@ -65,22 +63,20 @@ func (m *gptManager) getByUser(userID string) *chatGPTClient {
 	defer m.Unlock()
 	client, ok := m.users[userID]
 	if !ok {
-		client = newChatGPTClient(m.apiKey)
+		client = newChatGPTClient()
 		m.users[userID] = client
 	}
 	return client
 }
 
 type chatGPTClient struct {
-	apiKey string
 	opt    completionRequest
 	cache  *keyValue
 	status *status
 }
 
-func newChatGPTClient(apiKey string) *chatGPTClient {
+func newChatGPTClient() *chatGPTClient {
 	return &chatGPTClient{
-		apiKey: apiKey,
 		opt: completionRequest{
 			Model:           "text-davinci-003",
 			Temperature:     0.8,
@@ -214,7 +210,7 @@ func (gpt *chatGPTClient) getCompletion(prompt string) (string, error) {
 	marshal, _ := json.Marshal(&input)
 	request, _ := http.NewRequest("POST", "https://api.openai.com/v1/completions", bytes.NewReader(marshal))
 	request.Header.Add("Content-Type", "application/json")
-	request.Header.Add("Authorization", "Bearer "+gpt.apiKey)
+	request.Header.Add("Authorization", "Bearer "+config.AIToken())
 	do, err := (&http.Client{Timeout: 3 * time.Minute}).Do(request)
 	if err != nil {
 		return "", err

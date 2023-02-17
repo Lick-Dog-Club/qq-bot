@@ -40,13 +40,11 @@ func init() {
 	})
 }
 
-var weatherKey = config.WeatherKey()
-
 func get(city string) string {
-	if weatherKey == "" {
+	if config.WeatherKey() == "" {
 		return "请先设置环境变量: WEATHER_KEY "
 	}
-	resp, _ := http.Get(fmt.Sprintf(weatherURL, weatherKey, city))
+	resp, _ := http.Get(fmt.Sprintf(weatherURL, config.WeatherKey(), city))
 	defer closeBody(resp.Body)
 	var res response
 	json.NewDecoder(resp.Body).Decode(&res)
