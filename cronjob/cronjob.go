@@ -61,10 +61,10 @@ func (m *manager) NewCommand(name string, fn func(bot bot.Bot) error) CommandImp
 func (m *manager) Run(ctx context.Context) error {
 	log.Println("[Server]: start cron.")
 	for _, cmd := range m.List() {
-		name := cmd.Name()
-		if err := m.runner.AddCommand(name, cmd.Expression(), func() {
-			log.Println("[RUNNING]: " + name)
-			cmd.Func()()
+		c := cmd
+		if err := m.runner.AddCommand(c.name, c.Expression(), func() {
+			log.Println("[RUNNING]: " + c.name)
+			c.Func()()
 		}); err != nil {
 			return err
 		}
