@@ -2,8 +2,6 @@ package pixiv
 
 import (
 	"context"
-	"crypto/md5"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -17,6 +15,8 @@ import (
 	"qq/features"
 	"sync"
 	"time"
+
+	"github.com/cenkalti/backoff/v4"
 
 	"github.com/NateScarlet/pixiv/pkg/artwork"
 	"github.com/NateScarlet/pixiv/pkg/client"
@@ -92,25 +92,23 @@ func init() {
 		}
 		request, _ := http.NewRequest("GET", rank.Items[rand.Intn(len(rank.Items))].Image.Regular, nil)
 		request.Header.Add("Referer", "https://www.pixiv.net/")
-		get, err := httpClient.Do(request)
+		var get *http.Response
+		err = backoff.Retry(func() error {
+			var err error
+			get, err = httpClient.Do(request)
+			return err
+		}, backoff.WithMaxRetries(backoff.NewConstantBackOff(1*time.Second), 10))
 		if err != nil {
 			bot.Send(err.Error())
 			return nil
 		}
 		defer get.Body.Close()
 		url := rank.Items[rand.Intn(len(rank.Items))].Image.Regular
-		base := Md5(filepath.Base(url)) + filepath.Ext(filepath.Base(url))
+		base := filepath.Base(url)
 		fpath := filepath.Join("/data", "images", base)
 		all, _ := io.ReadAll(get.Body)
 		os.WriteFile(fpath, all, 0644)
 		bot.Send(fmt.Sprintf("[CQ:image,file=file://%s]", filepath.Join("/data", fpath)))
 		return nil
 	})
-}
-
-func Md5(data string) string {
-	hash := md5.New()
-	hash.Write([]byte(data))
-
-	return hex.EncodeToString(hash.Sum(nil))
 }
