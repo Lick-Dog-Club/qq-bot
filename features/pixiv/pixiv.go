@@ -84,6 +84,7 @@ func init() {
 			return nil
 		}
 		request, _ := http.NewRequest("GET", rank.Items[rand.Intn(len(rank.Items))].Image.Regular, nil)
+		request.Header.Add("Referer", "https://www.pixiv.net/")
 		httpClient := http.DefaultClient
 		if config.PixivProxy != "" {
 			httpClient = &http.Client{
