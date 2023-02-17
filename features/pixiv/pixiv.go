@@ -100,12 +100,10 @@ func init() {
 		defer get.Body.Close()
 		url := rank.Items[rand.Intn(len(rank.Items))].Image.Regular
 		base := Md5(filepath.Base(url)) + filepath.Ext(filepath.Base(url))
-		os.MkdirAll("/data/images", 0755)
 		fpath := filepath.Join("/data", "images", base)
 		all, _ := io.ReadAll(get.Body)
 		os.WriteFile(fpath, all, 0644)
-		bot.Send(fmt.Sprintf("[CQ:image,type=image,file=%s]", base))
-		bot.Send(fmt.Sprintf("[CQ:image,type=image,file=%s]", filepath.Join("images", base)))
+		bot.Send(fmt.Sprintf("[CQ:image,file=file://%s]", filepath.Join("/data", fpath)))
 		return nil
 	})
 }
