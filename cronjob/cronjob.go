@@ -62,8 +62,8 @@ func (m *manager) Run(ctx context.Context) error {
 	log.Println("[Server]: start cron.")
 	for _, cmd := range m.List() {
 		c := cmd
-		if err := m.runner.AddCommand(c.name, c.Expression(), func() {
-			log.Println("[RUNNING]: " + c.name)
+		if err := m.runner.AddCommand(c.Name(), c.Expression(), func() {
+			log.Println("[RUNNING]: " + c.Name())
 			c.Func()()
 		}); err != nil {
 			return err
