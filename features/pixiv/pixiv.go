@@ -82,7 +82,8 @@ func init() {
 			bot.Send(err.Error())
 			return nil
 		}
-		request, _ := http.NewRequest("GET", rank.Items[rand.Intn(len(rank.Items))].Image.Regular, nil)
+                u := rank.Items[rand.Intn(len(rank.Items))].Image.Original
+		request, _ := http.NewRequest("GET",u, nil)
 		request.Header.Add("Referer", "https://www.pixiv.net/")
 		var get *http.Response
 		err = backoff.Retry(func() error {
@@ -95,8 +96,7 @@ func init() {
 			return nil
 		}
 		defer get.Body.Close()
-		url := rank.Items[rand.Intn(len(rank.Items))].Image.Regular
-		base := filepath.Base(url)
+		base := filepath.Base(u)
 		fpath := filepath.Join("/data", "images", base)
 		all, _ := io.ReadAll(get.Body)
 		os.WriteFile(fpath, all, 0644)
