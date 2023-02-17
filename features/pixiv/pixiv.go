@@ -25,6 +25,12 @@ import (
 var (
 	session = config.PixivSession
 	mu      sync.RWMutex
+
+	httpClient = &http.Client{
+		Transport: &http.Transport{
+			Proxy: http.ProxyFromEnvironment,
+		},
+	}
 )
 
 func newClientCtx() (context.Context, error) {
@@ -38,7 +44,9 @@ func newClientCtx() (context.Context, error) {
 		return nil, errors.New("请先设置session: pixiv-session +<session>")
 	}
 	// 使用 PHPSESSID Cookie 登录 (推荐)。
-	c := &client.Client{}
+	c := &client.Client{
+		Client: httpClient,
+	}
 	c.SetDefaultHeader("User-Agent", client.DefaultUserAgent)
 	c.SetPHPSESSID(s)
 
@@ -84,11 +92,6 @@ func init() {
 		}
 		request, _ := http.NewRequest("GET", rank.Items[rand.Intn(len(rank.Items))].Image.Regular, nil)
 		request.Header.Add("Referer", "https://www.pixiv.net/")
-		httpClient := &http.Client{
-			Transport: &http.Transport{
-				Proxy: http.ProxyFromEnvironment,
-			},
-		}
 		get, err := httpClient.Do(request)
 		if err != nil {
 			bot.Send(err.Error())
@@ -97,8 +100,8 @@ func init() {
 		defer get.Body.Close()
 		url := rank.Items[rand.Intn(len(rank.Items))].Image.Regular
 		base := filepath.Base(url)
-		os.MkdirAll("/images/pixiv", 0755)
-		fpath := filepath.Join("/images", "pixiv", base)
+		os.MkdirAll("/data/images", 0755)
+		fpath := filepath.Join("/data", "images", base)
 		all, _ := io.ReadAll(get.Body)
 		os.WriteFile(fpath, all, 0644)
 		bot.Send(fmt.Sprintf("[CQ:image,file=%s]", fpath))
