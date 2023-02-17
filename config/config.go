@@ -70,7 +70,7 @@ var mappingKV = KV{
 }
 
 func Set(m map[string]string) {
-	var newKv KV
+	var newKv = KV{}
 	for k, v := range c.Load().(KV) {
 		newv := v
 		if s, ok := m[k]; ok && !(k == "pod_name" || k == "namespace") {
