@@ -1,3 +1,5 @@
+//go:build unix
+
 package pixiv
 
 import (
@@ -79,7 +81,15 @@ func init() {
 			return nil
 		}
 		request, _ := http.NewRequest("GET", rank.Items[rand.Intn(len(rank.Items))].Image.Regular, nil)
-		get, err := http.DefaultClient.Do(request)
+		httpClient := http.DefaultClient
+		if config.PixivProxy != "" {
+			httpClient = &http.Client{
+				Transport: &http.Transport{
+					Proxy: config.PixivProxy,
+				},
+			}
+		}
+		get, err := httpClient.Do(request)
 		if err != nil {
 			bot.Send(err.Error())
 			return nil
@@ -92,6 +102,7 @@ func init() {
 		all, _ := io.ReadAll(get.Body)
 		os.WriteFile(fpath, all, 0644)
 		bot.Send(fmt.Sprintf("[CQ:image,file=%s]", fpath))
+		os.Remove(fpath)
 		return nil
 	})
 }
