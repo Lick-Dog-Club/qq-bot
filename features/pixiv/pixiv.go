@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"math/rand"
 	"net/http"
 	"os"
@@ -23,8 +22,7 @@ import (
 )
 
 var (
-	session = config.PixivSession()
-	mu      sync.RWMutex
+	mu sync.RWMutex
 
 	httpClient = &http.Client{
 		Transport: &http.Transport{
@@ -34,12 +32,7 @@ var (
 )
 
 func newClientCtx() (context.Context, error) {
-	var s string
-	func() {
-		mu.RLock()
-		defer mu.RUnlock()
-		s = session
-	}()
+	var s string = config.PixivSession()
 	if s == "" {
 		return nil, errors.New("请先设置session: pixiv-session +<session>")
 	}
@@ -57,15 +50,7 @@ func newClientCtx() (context.Context, error) {
 }
 
 func init() {
-	log.Println(config.PixivSession())
 	rand.Seed(time.Now().UnixNano())
-	features.AddKeyword("pixiv-session", "设置 pixiv session", func(bot bot.Bot, content string) error {
-		mu.Lock()
-		defer mu.Unlock()
-		session = content
-		bot.Send("已设置 pixiv session")
-		return nil
-	})
 	features.AddKeyword("pixiv", "+<ai/r18/r18_ai> pixiv top", func(bot bot.Bot, content string) error {
 		//daily_r18_ai
 		//daily_r18
@@ -85,8 +70,12 @@ func init() {
 			bot.Send(err.Error())
 			return nil
 		}
-		rank := &artwork.Rank{Mode: mode, Page: rand.Intn(5)}
-		if err = rank.Fetch(ctx); err != nil {
+		rank := &artwork.Rank{Mode: mode}
+		err = backoff.Retry(func() error {
+			rank.Page = rand.Intn(5)
+			return rank.Fetch(ctx)
+		}, backoff.WithMaxRetries(backoff.NewConstantBackOff(1*time.Second), 10))
+		if err != nil {
 			bot.Send(err.Error())
 			return nil
 		}
