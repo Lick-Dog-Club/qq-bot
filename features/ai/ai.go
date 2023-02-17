@@ -172,8 +172,16 @@ func (gpt *chatGPTClient) buildPrompt(messages userMessageList, parentMessageId 
 		}
 		orderedMessages = append([]userMessage{}, orderedMessages[:len(orderedMessages)-1]...)
 		messageString := fmt.Sprintf("%s:\n%s%s\n", roleLabel, m.message, endToken)
-		newPromptBody := messageString + promptBody
+		newPromptBody := ""
 		newTokenCount := getTokenCount(promptPrefix + newPromptBody + promptSuffix)
+
+		if promptBody != "" {
+			newPromptBody = fmt.Sprintf("%s%s", messageString, promptBody)
+		} else {
+			newPromptBody = fmt.Sprintf("%s%s%s", promptPrefix, messageString, promptBody)
+		}
+
+		newTokenCount = getTokenCount(fmt.Sprintf("%s%s%s", promptPrefix, promptBody, promptSuffix))
 		if promptBody != "" && newTokenCount > maxTokenCount {
 			break
 		}
@@ -181,7 +189,7 @@ func (gpt *chatGPTClient) buildPrompt(messages userMessageList, parentMessageId 
 		currentTokenCount = newTokenCount
 	}
 
-	var prompt = promptPrefix + promptBody + promptSuffix
+	var prompt = promptBody + promptSuffix
 
 	var numTokens = getTokenCount(prompt)
 
@@ -201,7 +209,6 @@ func getTokenCount(text string) int {
 }
 
 func (gpt *chatGPTClient) getCompletion(prompt string) (string, error) {
-	fmt.Println(prompt)
 	var input = gpt.opt
 	input.Prompt = prompt
 	marshal, _ := json.Marshal(&input)
