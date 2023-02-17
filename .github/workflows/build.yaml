@@ -28,7 +28,7 @@ jobs:
             ${{ runner.os }}-golang-
       -
         run: |
-          apt update && apt install upx
+          sudo apt update && sudo apt install upx
           make build-linux-amd64
           upx -9 app-linux-amd64
       -
