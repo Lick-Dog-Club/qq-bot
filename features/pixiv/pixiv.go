@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"math/rand"
 	"net/http"
 	"os"
@@ -48,6 +49,8 @@ func newClientCtx() (context.Context, error) {
 }
 
 func init() {
+	log.Println(config.PixivProxy)
+	log.Println(config.PixivSession)
 	rand.Seed(time.Now().UnixNano())
 	features.AddKeyword("pixiv-session", "设置 pixiv session", func(bot bot.Bot, content string) error {
 		mu.Lock()
