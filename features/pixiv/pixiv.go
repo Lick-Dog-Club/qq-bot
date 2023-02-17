@@ -45,7 +45,7 @@ func newClientCtx() (context.Context, error) {
 	}
 	// 使用 PHPSESSID Cookie 登录 (推荐)。
 	c := &client.Client{
-		Client: httpClient,
+		Client: *httpClient,
 	}
 	c.SetDefaultHeader("User-Agent", client.DefaultUserAgent)
 	c.SetPHPSESSID(s)
