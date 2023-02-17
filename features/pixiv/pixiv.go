@@ -104,8 +104,8 @@ func init() {
 		fpath := filepath.Join("/data", "images", base)
 		all, _ := io.ReadAll(get.Body)
 		os.WriteFile(fpath, all, 0644)
-		bot.Send(fmt.Sprintf("[CQ:image,file=%s]", base))
-		bot.Send(fmt.Sprintf("[CQ:image,file=%s]", filepath.Join("images", base)))
+		bot.Send(fmt.Sprintf("[CQ:image,type=image,file=%s]", base))
+		bot.Send(fmt.Sprintf("[CQ:image,type=image,file=%s]", filepath.Join("images", base)))
 		return nil
 	})
 }
