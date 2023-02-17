@@ -19,7 +19,7 @@ import (
 )
 
 var (
-	token   = config.AIToken
+	token   = config.AIToken()
 	manager = newGptManager(token)
 )
 

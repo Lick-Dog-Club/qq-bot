@@ -16,7 +16,7 @@ func init() {
 }
 
 func Tip() string {
-	get, _ := http.Get("https://apis.tianapi.com/qiaomen/index?key=" + config.TianApiKey)
+	get, _ := http.Get("https://apis.tianapi.com/qiaomen/index?key=" + config.TianApiKey())
 	defer get.Body.Close()
 	var data response
 	json.NewDecoder(get.Body).Decode(&data)

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -12,7 +13,7 @@ type Bot interface {
 	UserID() string
 	DeleteMsg(msgID int)
 	Send(msg string) int
-	SendGroup(gid int, s string) int
+	SendGroup(gid string, s string) int
 	IsGroupMessage() bool
 }
 
@@ -35,8 +36,8 @@ func (d *dummyBot) Send(msg string) int {
 	fmt.Printf("Send:\n%s", msg)
 	return 0
 }
-func (d *dummyBot) SendGroup(gid int, s string) int {
-	fmt.Printf("Send:\ngid:%d\ncontent: %s", gid, s)
+func (d *dummyBot) SendGroup(gid string, s string) int {
+	fmt.Printf("Send:\ngid:%v\ncontent: %s", gid, s)
 	return 0
 }
 
@@ -68,8 +69,13 @@ func (m *bot) Send(msg string) int {
 	return send(m.msg, msg)
 }
 
-func (m *bot) SendGroup(gid int, s string) int {
-	return send(&Message{GroupID: gid}, s)
+func toInt(s string) int {
+	atoi, _ := strconv.Atoi(s)
+	return atoi
+}
+
+func (m *bot) SendGroup(gid string, s string) int {
+	return send(&Message{GroupID: toInt(fmt.Sprintf("%v", gid))}, s)
 }
 
 const cqHost = "http://127.0.0.1:5700"

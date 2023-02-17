@@ -40,7 +40,7 @@ func init() {
 	})
 }
 
-var weatherKey = config.WeatherKey
+var weatherKey = config.WeatherKey()
 
 func get(city string) string {
 	if weatherKey == "" {

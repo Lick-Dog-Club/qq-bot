@@ -17,7 +17,7 @@ func init() {
 }
 
 func RaoKouLing() string {
-	get, _ := http.Get("https://apis.tianapi.com/rkl/index?key=" + config.TianApiKey)
+	get, _ := http.Get("https://apis.tianapi.com/rkl/index?key=" + config.TianApiKey())
 	defer get.Body.Close()
 	var data response
 	json.NewDecoder(get.Body).Decode(&data)

@@ -9,8 +9,8 @@ import (
 
 func init() {
 	cronjob.Manager().NewCommand("setu", func(robot bot.Bot) error {
-		robot.SendGroup(config.GroupId, picture.Url())
-		robot.SendGroup(config.GroupId, "每日一涩图~")
+		robot.SendGroup(config.GroupId(), picture.Url())
+		robot.SendGroup(config.GroupId(), "每日一涩图~")
 		return nil
 	}).At("16:15")
 }

@@ -21,7 +21,7 @@ import (
 )
 
 var (
-	session = config.PixivSession
+	session = config.PixivSession()
 	mu      sync.RWMutex
 
 	httpClient = &http.Client{
@@ -55,7 +55,7 @@ func newClientCtx() (context.Context, error) {
 }
 
 func init() {
-	log.Println(config.PixivSession)
+	log.Println(config.PixivSession())
 	rand.Seed(time.Now().UnixNano())
 	features.AddKeyword("pixiv-session", "设置 pixiv session", func(bot bot.Bot, content string) error {
 		mu.Lock()
