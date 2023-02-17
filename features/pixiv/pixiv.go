@@ -10,7 +10,6 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
-	"net/url"
 	"os"
 	"path/filepath"
 	"qq/bot"
@@ -50,7 +49,6 @@ func newClientCtx() (context.Context, error) {
 }
 
 func init() {
-	log.Println(config.PixivProxy)
 	log.Println(config.PixivSession)
 	rand.Seed(time.Now().UnixNano())
 	features.AddKeyword("pixiv-session", "设置 pixiv session", func(bot bot.Bot, content string) error {
@@ -86,14 +84,10 @@ func init() {
 		}
 		request, _ := http.NewRequest("GET", rank.Items[rand.Intn(len(rank.Items))].Image.Regular, nil)
 		request.Header.Add("Referer", "https://www.pixiv.net/")
-		httpClient := http.DefaultClient
-		if config.PixivProxy != "" {
-			parse, _ := url.Parse(config.PixivProxy)
-			httpClient = &http.Client{
-				Transport: &http.Transport{
-					Proxy: http.ProxyURL(parse),
-				},
-			}
+		httpClient := &http.Client{
+			Transport: &http.Transport{
+				Proxy: http.ProxyFromEnvironment,
+			},
 		}
 		get, err := httpClient.Do(request)
 		if err != nil {

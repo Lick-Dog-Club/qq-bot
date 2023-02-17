@@ -227,8 +227,10 @@ spec:
               value: <tianapi key>
             - name: PIXIV_SESSION
               value: <session id>
-            - name: PIXIV_PROXY
+            - name: HTTP_PROXY
               value: <http proxy>
+            - name: HTTPS_PROXY
+              value: <https proxy>
           ports:
             - containerPort: 5701
               name: http

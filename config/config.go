@@ -6,7 +6,6 @@ import (
 )
 
 var (
-	PixivProxy   = os.Getenv("PIXIV_PROXY")
 	PixivSession = os.Getenv("PIXIV_SESSION")
 	AIToken      = os.Getenv("AI_TOKEN")
 	GroupId      = toInt(os.Getenv("GROUP_ID"))
