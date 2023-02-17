@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"sync/atomic"
@@ -8,8 +9,18 @@ import (
 
 var c atomic.Value
 
+const configFile = "/data/qq-bot.json"
+
 func init() {
 	c.Store(mappingKV)
+	if Pod() != "" {
+		file, err := os.ReadFile(configFile)
+		if err == nil {
+			v := KV{}
+			json.Unmarshal(file, &v)
+			Set(v)
+		}
+	}
 }
 
 func Configs() KV {
@@ -68,4 +79,8 @@ func Set(m map[string]string) {
 		newKv[k] = newv
 	}
 	c.Store(newKv)
+	if Pod() != "" {
+		marshal, _ := json.Marshal(newKv)
+		os.WriteFile(configFile, marshal, 0644)
+	}
 }
