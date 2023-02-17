@@ -17,6 +17,7 @@ import (
 
 	_ "qq/features/ai"
 	_ "qq/features/bili-lottery"
+	_ "qq/features/config"
 	_ "qq/features/help"
 	_ "qq/features/lifetip"
 	_ "qq/features/picture"
