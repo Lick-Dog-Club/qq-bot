@@ -47,7 +47,7 @@ func GroupId() string {
 	return c.Load().(KV)["group_id"]
 }
 func Namespace() string {
-	return c.Load().(KV)["app_namespace"]
+	return c.Load().(KV)["namespace"]
 }
 func Pod() string {
 	return c.Load().(KV)["pod_name"]
