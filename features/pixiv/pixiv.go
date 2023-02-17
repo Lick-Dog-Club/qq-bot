@@ -7,6 +7,7 @@ import (
 	"io"
 	"math/rand"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"qq/bot"
@@ -15,19 +16,21 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cenkalti/backoff/v4"
-
 	"github.com/NateScarlet/pixiv/pkg/artwork"
 	"github.com/NateScarlet/pixiv/pkg/client"
+	"github.com/cenkalti/backoff/v4"
 )
 
 var (
 	mu sync.RWMutex
 
-	httpClient = &http.Client{
-		Transport: &http.Transport{
-			Proxy: http.ProxyFromEnvironment,
-		},
+	httpClient = func() *http.Client {
+		parse, _ := url.Parse(config.HttpProxy())
+		return &http.Client{
+			Transport: &http.Transport{
+				Proxy: http.ProxyURL(parse),
+			},
+		}
 	}
 )
 
@@ -38,7 +41,7 @@ func newClientCtx() (context.Context, error) {
 	}
 	// 使用 PHPSESSID Cookie 登录 (推荐)。
 	c := &client.Client{
-		Client: *httpClient,
+		Client: *httpClient(),
 	}
 	c.SetDefaultHeader("User-Agent", client.DefaultUserAgent)
 	c.SetPHPSESSID(s)
@@ -72,7 +75,7 @@ func init() {
 		}
 		rank := &artwork.Rank{Mode: mode}
 		err = backoff.Retry(func() error {
-			rank.Page = rand.Intn(5)
+			rank.Page = rand.Intn(2)
 			return rank.Fetch(ctx)
 		}, backoff.WithMaxRetries(backoff.NewConstantBackOff(1*time.Second), 10))
 		if err != nil {
@@ -84,7 +87,7 @@ func init() {
 		var get *http.Response
 		err = backoff.Retry(func() error {
 			var err error
-			get, err = httpClient.Do(request)
+			get, err = httpClient().Do(request)
 			return err
 		}, backoff.WithMaxRetries(backoff.NewConstantBackOff(1*time.Second), 10))
 		if err != nil {
@@ -97,7 +100,13 @@ func init() {
 		fpath := filepath.Join("/data", "images", base)
 		all, _ := io.ReadAll(get.Body)
 		os.WriteFile(fpath, all, 0644)
-		bot.Send(fmt.Sprintf("[CQ:image,file=file://%s]", fpath))
+		msgID := bot.Send(fmt.Sprintf("[CQ:image,file=file://%s]", fpath))
+		if bot.IsGroupMessage() {
+			tID := bot.Send("图片即将在 30s 之后撤回，要保存的赶紧了~")
+			time.Sleep(30 * time.Second)
+			bot.DeleteMsg(msgID)
+			bot.DeleteMsg(tID)
+		}
 		return nil
 	})
 }

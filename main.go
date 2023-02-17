@@ -13,7 +13,7 @@ import (
 
 	_ "qq/cronjob/lifetip"
 	_ "qq/cronjob/maotai"
-	_ "qq/cronjob/setu"
+	_ "qq/cronjob/picture"
 
 	_ "qq/features/ai"
 	_ "qq/features/bili-lottery"

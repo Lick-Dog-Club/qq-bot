@@ -213,20 +213,6 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
-#            - name: AI_TOKEN
-#              value: "<your-token>"
-#            - name: WEATHER_KEY
-#              value: "<高德天气 api-key>"
-#            - name: GROUP_ID
-#              value: "<定时任务群组 ID>"
-#            - name: TIAN_API_KEY
-#              value: <tianapi key>
-#            - name: PIXIV_SESSION
-#              value: <session id>
-#            - name: HTTP_PROXY
-#              value: <http proxy>
-#            - name: HTTPS_PROXY
-#              value: <https proxy>
           ports:
             - containerPort: 5701
               name: http

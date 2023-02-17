@@ -59,6 +59,10 @@ func TianApiKey() string {
 	return c.Load().(KV)["tian_api_key"]
 }
 
+func HttpProxy() string {
+	return c.Load().(KV)["http_proxy"]
+}
+
 var mappingKV = KV{
 	"pixiv_session": os.Getenv("PIXIV_SESSION"),
 	"ai_token":      os.Getenv("AI_TOKEN"),
@@ -67,6 +71,7 @@ var mappingKV = KV{
 	"pod_name":      os.Getenv("POD_NAME"),
 	"weather_key":   os.Getenv("WEATHER_KEY"),
 	"tian_api_key":  os.Getenv("TIAN_API_KEY"),
+	"http_proxy":    os.Getenv("HTTP_PROXY"),
 }
 
 func Set(m map[string]string) {
