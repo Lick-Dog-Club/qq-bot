@@ -40,6 +40,10 @@ func (k KV) String() string {
 func PixivSession() string {
 	return c.Load().(KV)["pixiv_session"]
 }
+func PixivMode() string {
+	return c.Load().(KV)["pixiv_mode"]
+}
+
 func AIToken() string {
 	return c.Load().(KV)["ai_token"]
 }
@@ -64,6 +68,7 @@ func HttpProxy() string {
 }
 
 var mappingKV = KV{
+	"pixiv_mode":    "daily",
 	"pixiv_session": os.Getenv("PIXIV_SESSION"),
 	"ai_token":      os.Getenv("AI_TOKEN"),
 	"group_id":      os.Getenv("GROUP_ID"),

@@ -4,12 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"qq/bot"
 	"qq/cronjob"
 	"qq/features"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 
 	_ "qq/cronjob/lifetip"
 	_ "qq/cronjob/maotai"
@@ -30,6 +31,10 @@ import (
 	_ "qq/features/zhihu"
 )
 
+func init() {
+	log.SetReportCaller(true)
+}
+
 func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		var message *bot.Message
@@ -37,7 +42,7 @@ func main() {
 		if message.PostType == "meta_event" {
 			return
 		}
-		log.Printf("receive %#v\n", message)
+		fmt.Printf("receive %d: %v\n", message.UserID, message.Message)
 		atMsg := fmt.Sprintf("[CQ:at,qq=%v]", message.SelfID)
 		if (strings.Contains(message.Message, atMsg) && message.MessageType == "group") || message.MessageType == "private" {
 			msg := strings.ReplaceAll(message.Message, atMsg, "")

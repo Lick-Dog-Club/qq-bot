@@ -2,10 +2,11 @@ package cronjob
 
 import (
 	"context"
-	"log"
 	"strings"
 	"sync"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/robfig/cron/v3"
 )

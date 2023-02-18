@@ -1,10 +1,11 @@
 package lottery
 
 import (
-	"log"
 	"qq/bot"
 	"qq/features"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func init() {

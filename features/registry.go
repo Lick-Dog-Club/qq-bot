@@ -28,9 +28,17 @@ func WithSysCmd() Option {
 	}
 }
 
+func WithHidden() Option {
+	return func(cmd *cmd) error {
+		cmd.hidden = true
+		return nil
+	}
+}
+
 type commandFunc func(bot bot.Bot, content string) error
 
 type CommandImp interface {
+	Hidden() bool
 	IsSysCmd() bool
 	Keyword() string
 	Description() string
@@ -101,11 +109,14 @@ func (s sortCommands) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
 
-func AllKeywordCommands() []CommandImp {
+func AllKeywordCommands(hidden bool) []CommandImp {
 	mu.RLock()
 	defer mu.RUnlock()
 	var cmds sortCommands
 	for _, imp := range commands {
+		if hidden && imp.Hidden() {
+			continue
+		}
 		cmds = append(cmds, imp)
 	}
 
@@ -120,11 +131,17 @@ type cmd struct {
 	desc    string
 	fn      commandFunc
 	sysCmd  bool
+	hidden  bool
 }
 
 func (c cmd) IsSysCmd() bool {
 	return c.sysCmd
 }
+
+func (c cmd) Hidden() bool {
+	return c.hidden
+}
+
 func (c cmd) Keyword() string {
 	return c.keyword
 }

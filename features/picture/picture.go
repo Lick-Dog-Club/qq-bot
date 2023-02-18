@@ -3,12 +3,13 @@ package picture
 import (
 	"errors"
 	"fmt"
-	"log"
 	"math/rand"
 	"net/http"
 	"qq/bot"
 	"qq/features"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/cenkalti/backoff/v4"
 )

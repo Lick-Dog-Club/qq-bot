@@ -3,10 +3,11 @@ package cronjob
 import (
 	"context"
 	"fmt"
-	"log"
 	"qq/bot"
 	"sort"
 	"sync"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var cronManager = newManager(newRobfigCronV3Runner())

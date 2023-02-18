@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	features.AddKeyword("config-set", "设置环境变量, ex: ai_token=xxx,GroupId=xxx", func(bot bot.Bot, content string) error {
+	features.AddKeyword("cs", "设置环境变量, ex: ai_token=xxx,GroupId=xxx", func(bot bot.Bot, content string) error {
 		var conf = map[string]string{}
 		split := strings.Split(content, ",")
 		for _, s := range split {
@@ -20,9 +20,9 @@ func init() {
 		config.Set(conf)
 		bot.Send("已设置: " + content)
 		return nil
-	}, features.WithSysCmd())
-	features.AddKeyword("config-show", "显示环境变量", func(bot bot.Bot, content string) error {
+	}, features.WithSysCmd(), features.WithHidden())
+	features.AddKeyword("cg", "显示环境变量", func(bot bot.Bot, content string) error {
 		bot.Send(config.Configs().String())
 		return nil
-	}, features.WithSysCmd())
+	}, features.WithSysCmd(), features.WithHidden())
 }

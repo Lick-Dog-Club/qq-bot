@@ -3,10 +3,11 @@ package zhihu
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"qq/bot"
 	"qq/features"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func init() {

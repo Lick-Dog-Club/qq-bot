@@ -6,12 +6,13 @@ import (
 	"fmt"
 	"html/template"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var httpClient = &http.Client{}
@@ -143,7 +144,9 @@ func (u *User) lotteryNotice(up, dynamicId string) noticeBody {
 		ThirdPrize:     data.Data.ThirdPrize,
 		Forwarded:      ok,
 	}
-	lotteryNoticeTemplate.Execute(log.Writer(), in)
+	bf := &bytes.Buffer{}
+	lotteryNoticeTemplate.Execute(bf, in)
+	log.Println(bf.String())
 
 	return in
 }

@@ -3,10 +3,11 @@ package bot
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type Bot interface {
@@ -66,6 +67,7 @@ func (m *bot) DeleteMsg(msgID int) {
 }
 
 func (m *bot) Send(msg string) int {
+	fmt.Println("send: ", msg)
 	return send(m.msg, msg)
 }
 

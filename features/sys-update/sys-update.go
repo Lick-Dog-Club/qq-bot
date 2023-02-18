@@ -4,12 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"qq/bot"
 	cfg "qq/config"
 	"qq/features"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -19,10 +20,10 @@ import (
 var gitCommit = ""
 
 func init() {
-	features.AddKeyword("更新系统", "更新至最新版本", func(bot bot.Bot, content string) error {
+	features.AddKeyword("up", "更新至最新版本", func(bot bot.Bot, content string) error {
 		updateVersion(bot)
 		return nil
-	}, features.WithSysCmd())
+	}, features.WithSysCmd(), features.WithHidden())
 }
 
 type response []struct {
