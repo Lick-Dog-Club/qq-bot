@@ -100,7 +100,7 @@ func (s sortCommands) Len() int {
 
 func (s sortCommands) Less(i, j int) bool {
 	if s[i].IsSysCmd() == s[j].IsSysCmd() {
-		return s[i].Keyword() < s[j].Keyword()
+		return len([]rune(s[i].Keyword()+s[i].Description())) > len([]rune(s[j].Keyword()+s[j].Description()))
 	}
 	return !s[i].IsSysCmd() && s[j].IsSysCmd()
 }
