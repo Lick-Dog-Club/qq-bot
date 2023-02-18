@@ -2,6 +2,8 @@ package picture
 
 import (
 	"fmt"
+	"os"
+
 	"qq/bot"
 	"qq/config"
 	"qq/cronjob"
@@ -20,10 +22,11 @@ func init() {
 		if uid == "" {
 			return nil
 		}
-		image, err := pixiv.Image("r18_ai")
+		image, err := pixiv.Image("")
 		if err == nil {
 			robot.SendToUser(uid, fmt.Sprintf("[CQ:image,file=file://%s]", image))
+			os.Remove(image)
 		}
 		return nil
-	}).DailyAt("9-18").HourlyAt([]int{5, 10})
+	}).DailyAt("9-18").HourlyAt([]int{10})
 }
