@@ -15,10 +15,14 @@ func init() {
 		return nil
 	}).Weekdays().At("9,13,17").HourlyAt([]int{30})
 	cronjob.Manager().NewCommand("tome", func(robot bot.Bot) error {
+		uid := config.UserID()
+		if uid == "" {
+			return nil
+		}
 		image, err := pixiv.Image("r18_ai")
 		if err == nil {
-			robot.SendToUser(config.UserID(), image)
+			robot.SendToUser(uid, image)
 		}
 		return nil
-	}).DailyAt("9-18")
+	}).DailyAt("9-18").HourlyAt([]int{5})
 }
