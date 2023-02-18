@@ -20,5 +20,5 @@ func init() {
 			robot.SendToUser(config.UserID(), image)
 		}
 		return nil
-	}).At("9-18").Hourly()
+	}).DailyAt("9-18")
 }
