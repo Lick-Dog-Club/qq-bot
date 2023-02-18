@@ -74,7 +74,7 @@ func updateVersion(bot bot.Bot) {
 		ns := cfg.Namespace()
 		pod := cfg.Pod()
 		if ns != "" && pod != "" {
-			bot.Send(fmt.Sprintf("更新到最新版本 [%s %s: %s](%v)...", data[0].Commit.Committer.Name, data[0].Commit.Committer.Date.Local().Format("2006-01-02 15:04:05"), data[0].Commit.Message, data[0].HTMLURL))
+			bot.Send(fmt.Sprintf("更新到最新版本\n%s %s: %s\n%v", data[0].Commit.Committer.Name, data[0].Commit.Committer.Date.Local().Format("2006-01-02 15:04:05"), data[0].Commit.Message, data[0].HTMLURL))
 			clientset.CoreV1().Pods(ns).Delete(context.TODO(), pod, v1.DeleteOptions{})
 		}
 		return
