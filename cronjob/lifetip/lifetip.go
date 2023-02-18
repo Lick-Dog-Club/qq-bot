@@ -11,5 +11,5 @@ func init() {
 	cronjob.Manager().NewCommand("lifetip", func(robot bot.Bot) error {
 		robot.SendGroup(config.GroupId(), lifetip.Tip())
 		return nil
-	}).DailyAt("9:20")
+	}).Weekdays().DailyAt("9:20")
 }

@@ -4,13 +4,16 @@ import (
 	"qq/bot"
 	"qq/config"
 	"qq/cronjob"
-	"qq/features/picture"
+	"qq/features/pixiv"
 )
 
 func init() {
 	cronjob.Manager().NewCommand("setu", func(robot bot.Bot) error {
-		robot.SendGroup(config.GroupId(), picture.Url())
-		robot.SendGroup(config.GroupId(), "每日一图~")
+		image, err := pixiv.Image("n")
+		if err == nil {
+			robot.SendGroup(config.GroupId(), image)
+			robot.SendGroup(config.GroupId(), "每日一图~")
+		}
 		return nil
-	}).At("16:15")
+	}).Weekdays().At("9,13,17").HourlyAt([]int{30})
 }

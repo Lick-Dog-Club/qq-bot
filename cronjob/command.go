@@ -438,7 +438,7 @@ func (c *command) Days(days []int) CommandImp {
 		daysStr = append(daysStr, strconv.Itoa(day))
 	}
 	c.spliceIntoPosition(pos_second, "0")
-	c.spliceIntoPosition(5, strings.Join(daysStr, ","))
+	c.spliceIntoPosition(pos_day_of_week, strings.Join(daysStr, ","))
 	return c
 }
 
