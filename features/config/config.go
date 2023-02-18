@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	features.AddKeyword("cs", "设置环境变量, ex: ai_token=xxx,GroupId=xxx", func(bot bot.Bot, content string) error {
+	features.AddKeyword("cs", "设置环境变量, ex: ai_token=xxx,group_id=xxx", func(bot bot.Bot, content string) error {
 		var conf = map[string]string{}
 		split := strings.Split(content, ",")
 		for _, s := range split {

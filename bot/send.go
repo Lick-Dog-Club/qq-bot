@@ -15,6 +15,7 @@ type Bot interface {
 	DeleteMsg(msgID int)
 	Send(msg string) int
 	SendGroup(gid string, s string) int
+	SendToUser(uid string, s string) int
 	IsGroupMessage() bool
 }
 
@@ -37,8 +38,14 @@ func (d *dummyBot) Send(msg string) int {
 	fmt.Printf("Send:\n%s", msg)
 	return 0
 }
+
 func (d *dummyBot) SendGroup(gid string, s string) int {
 	fmt.Printf("Send:\ngid:%v\ncontent: %s", gid, s)
+	return 0
+}
+
+func (d *dummyBot) SendToUser(uid string, s string) int {
+	fmt.Printf("Send:\nuid:%v\ncontent: %s", uid, s)
 	return 0
 }
 
@@ -78,6 +85,10 @@ func toInt(s string) int {
 
 func (m *bot) SendGroup(gid string, s string) int {
 	return send(&Message{GroupID: toInt(fmt.Sprintf("%v", gid))}, s)
+}
+
+func (m *bot) SendToUser(uid string, s string) int {
+	return send(&Message{sender: sender{UserID: toInt(fmt.Sprintf("%v", uid))}}, s)
 }
 
 const cqHost = "http://127.0.0.1:5700"
