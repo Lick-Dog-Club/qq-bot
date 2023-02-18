@@ -9,6 +9,11 @@ import (
 
 func init() {
 	features.AddKeyword("cs", "设置环境变量, ex: ai_token=xxx,group_id=xxx", func(bot bot.Bot, content string) error {
+		if content == "me" {
+			config.Set(map[string]string{"user_id": bot.UserID()})
+			bot.Send("已设置: user_id=" + bot.UserID())
+			return nil
+		}
 		var conf = map[string]string{}
 		split := strings.Split(content, ",")
 		for _, s := range split {
