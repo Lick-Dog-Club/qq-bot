@@ -40,6 +40,7 @@ func (k KV) String() string {
 func PixivSession() string {
 	return c.Load().(KV)["pixiv_session"]
 }
+
 func PixivMode() string {
 	return c.Load().(KV)["pixiv_mode"]
 }

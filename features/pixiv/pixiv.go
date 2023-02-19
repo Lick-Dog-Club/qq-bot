@@ -3,7 +3,6 @@ package pixiv
 import (
 	"context"
 	"crypto/tls"
-	"errors"
 	"fmt"
 	"io"
 	"math/rand"
@@ -14,6 +13,7 @@ import (
 	"qq/bot"
 	"qq/config"
 	"qq/features"
+	"strings"
 	"time"
 
 	"github.com/NateScarlet/pixiv/pkg/artwork"
@@ -40,9 +40,6 @@ var (
 
 func newClientCtx() (context.Context, error) {
 	var s string = config.PixivSession()
-	if s == "" {
-		return nil, errors.New("请先设置session: pixiv-session +<session>")
-	}
 	// 使用 PHPSESSID Cookie 登录 (推荐)。
 	c := &client.Client{
 		Client: *httpClient(),
@@ -68,7 +65,12 @@ func init() {
 		bot.Send("pixiv_mode 已设置成 weekly")
 		return nil
 	}, features.WithHidden())
-	features.AddKeyword("p", "+<n/r18/r18_ai> pixiv 热榜图片", func(bot bot.Bot, content string) error {
+	features.AddKeyword("pm", "pixiv_mode 设置成 monthly", func(bot bot.Bot, content string) error {
+		config.Set(map[string]string{"pixiv_mode": "monthly"})
+		bot.Send("pixiv_mode 已设置成 monthly")
+		return nil
+	}, features.WithHidden())
+	features.AddKeyword("p", "+<n/r/rai> pixiv 热榜图片", func(bot bot.Bot, content string) error {
 		image, err := Image(content)
 		if err != nil {
 			bot.Send(err.Error())
@@ -91,15 +93,25 @@ func Image(content string) (string, error) {
 	//daily_r18
 	//daily
 	//daily_ai
+	//monthly
+	isDaily := func() bool {
+		return strings.Contains(config.PixivMode(), "daily")
+	}
 	var mode = config.PixivMode()
 	switch content {
 	case "n":
-	case "r18":
+	case "r":
 		mode = mode + "_r18"
-	case "r18_ai":
-		mode = mode + "_r18_ai"
+	case "rai":
+		if isDaily() {
+			mode = mode + "_r18_ai"
+			break
+		}
+		mode = mode + "_r18"
 	default:
-		mode = mode + "_ai"
+		if isDaily() {
+			mode = mode + "_ai"
+		}
 	}
 	ctx, err := newClientCtx()
 	if err != nil {
@@ -109,7 +121,7 @@ func Image(content string) (string, error) {
 	rank := &artwork.Rank{Mode: mode}
 	err = retry(func() error {
 		rank.Page = 1
-		if config.PixivMode() != "daily" {
+		if !isDaily() {
 			rank.Page = rand.Intn(5) + 1
 		}
 		return rank.Fetch(ctx)
