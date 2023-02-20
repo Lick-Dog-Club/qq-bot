@@ -11,14 +11,14 @@ import (
 )
 
 type botimp interface {
-	UserID() string
 	DeleteMsg(msgID int)
 	SendGroup(gid string, s string) int
 	SendToUser(uid string, s string) int
-	IsGroupMessage() bool
 }
 type Bot interface {
 	botimp
+	UserID() string
+	IsGroupMessage() bool
 	Send(msg string) int
 }
 
