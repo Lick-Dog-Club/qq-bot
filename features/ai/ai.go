@@ -120,6 +120,7 @@ func (gpt *chatGPTClient) send(msg string) string {
 	}
 	conversation = append(conversation, um)
 	prompt := gpt.buildPrompt(conversation, um.id)
+	log.Printf("###########\n%s", prompt)
 	result, err := gpt.getCompletion(prompt)
 	if err != nil {
 		gpt.status.Asked()
@@ -221,7 +222,6 @@ func (gpt *chatGPTClient) getCompletion(prompt string) (string, error) {
 	if err := json.NewDecoder(do.Body).Decode(&data); err != nil {
 		return "", err
 	}
-	log.Println(do.Status, data)
 	var res string = "没有结果"
 	if len(data.Choices) > 0 {
 		res = data.Choices[0].Text
