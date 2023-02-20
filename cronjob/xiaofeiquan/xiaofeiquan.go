@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"qq/bot"
+	"qq/config"
 	"qq/cronjob"
 	"strconv"
 	"time"
@@ -16,7 +17,7 @@ func init() {
 	cronjob.Manager().NewCommand("xiaofeiquan", func(bot bot.Bot) error {
 		res := Fetch()
 		if len(res) > 0 {
-			bot.Send(res)
+			bot.SendGroup(config.GroupID(), res)
 		}
 		return nil
 	}).DailyAt("9:40")
