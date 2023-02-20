@@ -14,7 +14,7 @@ import (
 )
 
 func init() {
-	cronjob.Manager().NewCommand("xiaofeiquan", func(bot bot.Bot) error {
+	cronjob.Manager().NewCommand("xiaofeiquan", func(bot bot.CronBot) error {
 		res := Fetch()
 		if len(res) > 0 {
 			bot.SendGroup(config.GroupID(), res)

@@ -10,13 +10,20 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type Bot interface {
+type botimp interface {
 	UserID() string
 	DeleteMsg(msgID int)
-	Send(msg string) int
 	SendGroup(gid string, s string) int
 	SendToUser(uid string, s string) int
 	IsGroupMessage() bool
+}
+type Bot interface {
+	botimp
+	Send(msg string) int
+}
+
+type CronBot interface {
+	botimp
 }
 
 type dummyBot struct {

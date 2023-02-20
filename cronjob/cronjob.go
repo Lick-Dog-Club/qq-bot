@@ -29,7 +29,7 @@ type CronRunner interface {
 }
 
 type CronManager interface {
-	NewCommand(name string, fn func(bot bot.Bot) error) CommandImp
+	NewCommand(name string, fn func(bot bot.CronBot) error) CommandImp
 	Run(ctx context.Context) error
 	Shutdown(context.Context) error
 
@@ -46,7 +46,7 @@ func newManager(runner CronRunner) *manager {
 	return &manager{commands: make(map[string]*command), runner: runner}
 }
 
-func (m *manager) NewCommand(name string, fn func(bot bot.Bot) error) CommandImp {
+func (m *manager) NewCommand(name string, fn func(bot bot.CronBot) error) CommandImp {
 	m.Lock()
 	defer m.Unlock()
 	if _, ok := m.commands[name]; ok {
