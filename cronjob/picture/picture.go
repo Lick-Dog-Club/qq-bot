@@ -28,5 +28,5 @@ func init() {
 			os.Remove(image)
 		}
 		return nil
-	}).DailyAt("9-18").HourlyAt([]int{10})
+	}).DailyAt("9-23").HourlyAt([]int{10})
 }
