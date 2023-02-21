@@ -2,17 +2,16 @@ package pixiv
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
 	"io"
 	"math/rand"
 	"net/http"
-	"net/url"
 	"os"
 	"path/filepath"
 	"qq/bot"
 	"qq/config"
 	"qq/features"
+	"qq/features/util/proxy"
 	"strings"
 	"time"
 
@@ -24,18 +23,7 @@ import (
 )
 
 var (
-	httpClient = func() *http.Client {
-		parse, _ := url.Parse(config.HttpProxy())
-		return &http.Client{
-			Transport: &http.Transport{
-				Proxy: http.ProxyURL(parse),
-				TLSClientConfig: &tls.Config{
-					InsecureSkipVerify: true,
-				},
-				MaxConnsPerHost: 1000,
-			},
-		}
-	}
+	httpClient = proxy.NewHttpProxyClient
 )
 
 func newClientCtx() (context.Context, error) {

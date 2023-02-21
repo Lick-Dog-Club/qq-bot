@@ -6,33 +6,50 @@ import (
 	"encoding/json"
 	"net/http"
 	"qq/config"
+	"qq/features/util/proxy"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
-	log "github.com/sirupsen/logrus"
 )
 
-var bmanager = newGptManager[*browserChatGPTClient](func() userImp {
-	return newBrowserChatGPTClient()
+var chatConversationManager = &globalConversationManger{m: map[string]string{}}
+
+type globalConversationManger struct {
+	sync.RWMutex
+	m map[string]string
+}
+
+func (m *globalConversationManger) GetConversationIdByUser(uid string) string {
+	m.RLock()
+	defer m.RUnlock()
+	return m.m[uid]
+}
+
+func (m *globalConversationManger) SetConversationIdByUser(uid string, cid string) {
+	m.Lock()
+	defer m.Unlock()
+	m.m[uid] = cid
+}
+
+var bmanager = newGptManager[*browserChatGPTClient](func(uid string) userImp {
+	return newBrowserChatGPTClient(uid)
 })
 
 type browserChatGPTClient struct {
+	uid    string
 	cache  *keyValue
 	status *status
 }
 
 func BrowserRequest(userID string, ask string) string {
-	user := bmanager.getByUser(userID)
-	if user.lastAskTime().Add(10 * time.Minute).Before(time.Now()) {
-		bmanager.deleteUser(userID)
-		user = bmanager.getByUser(userID)
-	}
-	return user.send(ask)
+	return bmanager.getByUser(userID).send(ask)
 }
 
-func newBrowserChatGPTClient() *browserChatGPTClient {
+func newBrowserChatGPTClient(uid string) *browserChatGPTClient {
 	return &browserChatGPTClient{
+		uid:    uid,
 		cache:  newKV(map[string]any{"namespace": "chatgpt-browser"}),
 		status: &status{},
 	}
@@ -57,6 +74,7 @@ func (gpt *browserChatGPTClient) send(msg string) string {
 	gpt.status.Asking()
 	gpt.status.SetMsg(msg)
 	var opts *sendOpts = gpt.status.GetOpts(true)
+	opts.ConversationId = chatConversationManager.GetConversationIdByUser(gpt.uid)
 
 	var conversation []browserUserMessage
 
@@ -101,6 +119,7 @@ func (gpt *browserChatGPTClient) send(msg string) string {
 		ParentMessageId: reply.id,
 	})
 	gpt.status.Asked()
+	chatConversationManager.SetConversationIdByUser(gpt.uid, opts.ConversationId)
 
 	return reply.message
 }
@@ -147,11 +166,11 @@ func (gpt *browserChatGPTClient) postConversation(message browserUserMessage) *r
 		Model:           config.AiBrowserModel(),
 	}
 	marshal, _ := json.Marshal(&input)
-	log.Println(string(marshal))
+	//log.Println(string(marshal))
 	request, _ := http.NewRequest("POST", config.AiProxyUrl(), bytes.NewReader(marshal))
 	request.Header.Add("Content-Type", "application/json")
 	request.Header.Add("Authorization", "Bearer "+config.AiAccessToken())
-	do, err := (&http.Client{Timeout: 5 * time.Minute}).Do(request)
+	do, err := proxy.NewHttpProxyClient().Do(request)
 	if err != nil {
 		return nil
 	}
@@ -161,7 +180,7 @@ func (gpt *browserChatGPTClient) postConversation(message browserUserMessage) *r
 		var resp response
 		s := strings.TrimPrefix(scanner.Text(), "data: ")
 		json.NewDecoder(strings.NewReader(s)).Decode(&resp)
-		log.Println(s)
+		//log.Println(s)
 		if resp.Message.EndTurn {
 			return &resp
 		}

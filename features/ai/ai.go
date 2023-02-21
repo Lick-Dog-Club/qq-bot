@@ -20,8 +20,8 @@ import (
 )
 
 var (
-	manager = newGptManager[*chatGPTClient](func() userImp {
-		return newChatGPTClient()
+	manager = newGptManager[*chatGPTClient](func(uid string) userImp {
+		return newChatGPTClient(uid)
 	})
 )
 
@@ -75,10 +75,10 @@ func Request(userID string, ask string) string {
 type gptManager[T userImp] struct {
 	sync.RWMutex
 	users map[string]userImp
-	newFn func() userImp
+	newFn func(userID string) userImp
 }
 
-func newGptManager[T userImp](newFn func() userImp) *gptManager[T] {
+func newGptManager[T userImp](newFn func(uid string) userImp) *gptManager[T] {
 	return &gptManager[T]{users: map[string]userImp{}, newFn: newFn}
 }
 
@@ -93,20 +93,22 @@ func (m *gptManager[T]) getByUser(userID string) userImp {
 	defer m.Unlock()
 	client, ok := m.users[userID]
 	if !ok {
-		client = m.newFn()
+		client = m.newFn(userID)
 		m.users[userID] = client
 	}
 	return client
 }
 
 type chatGPTClient struct {
+	uid    string
 	opt    completionRequest
 	cache  *keyValue
 	status *status
 }
 
-func newChatGPTClient() *chatGPTClient {
+func newChatGPTClient(uid string) *chatGPTClient {
 	return &chatGPTClient{
+		uid: uid,
 		opt: completionRequest{
 			Model:           "text-davinci-003",
 			Temperature:     0.8,
