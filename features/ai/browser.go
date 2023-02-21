@@ -8,7 +8,6 @@ import (
 	"qq/config"
 	"qq/features/util/proxy"
 	"strings"
-	"sync"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -16,33 +15,15 @@ import (
 	"github.com/google/uuid"
 )
 
-var chatConversationManager = &globalConversationManger{m: map[string]string{}}
-
-type globalConversationManger struct {
-	sync.RWMutex
-	m map[string]string
-}
-
-func (m *globalConversationManger) GetConversationIdByUser(uid string) string {
-	m.RLock()
-	defer m.RUnlock()
-	return m.m[uid]
-}
-
-func (m *globalConversationManger) SetConversationIdByUser(uid string, cid string) {
-	m.Lock()
-	defer m.Unlock()
-	m.m[uid] = cid
-}
-
 var bmanager = newGptManager[*browserChatGPTClient](func(uid string) userImp {
 	return newBrowserChatGPTClient(uid)
 })
 
 type browserChatGPTClient struct {
-	uid    string
-	cache  *keyValue
-	status *status
+	uid            string
+	cache          *keyValue
+	status         *status
+	conversationId string
 }
 
 func BrowserRequest(userID string, ask string) string {
@@ -76,7 +57,7 @@ func (gpt *browserChatGPTClient) send(msg string) string {
 	gpt.status.Asking()
 	gpt.status.SetMsg(msg)
 	var opts *sendOpts = gpt.status.GetOpts(true)
-	opts.ConversationId = chatConversationManager.GetConversationIdByUser(gpt.uid)
+	opts.ConversationId = gpt.conversationId
 
 	var conversation []browserUserMessage
 
@@ -121,7 +102,7 @@ func (gpt *browserChatGPTClient) send(msg string) string {
 		ParentMessageId: reply.id,
 	})
 	gpt.status.Asked()
-	chatConversationManager.SetConversationIdByUser(gpt.uid, opts.ConversationId)
+	gpt.conversationId = opts.ConversationId
 
 	return reply.message
 }
@@ -182,6 +163,9 @@ func (gpt *browserChatGPTClient) postConversation(message browserUserMessage) *r
 		s := strings.TrimPrefix(scanner.Text(), "data: ")
 		json.NewDecoder(strings.NewReader(s)).Decode(&resp)
 		log.Println(s)
+		if strings.Contains(s, "Conversation not found") {
+			gpt.conversationId = ""
+		}
 		if resp.Message.EndTurn {
 			return &resp
 		}
