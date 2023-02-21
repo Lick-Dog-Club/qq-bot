@@ -88,13 +88,15 @@ type status struct {
 	lastAskTime time.Time
 }
 
-func (s *status) GetOpts() *sendOpts {
+func (s *status) GetOpts(noConversationId bool) *sendOpts {
 	s.RLock()
 	defer s.RUnlock()
 	if s.opts == nil {
 		s.opts = &sendOpts{
-			ConversationId:  uuid.NewString(),
 			ParentMessageId: uuid.NewString(),
+		}
+		if !noConversationId {
+			s.opts.ConversationId = uuid.NewString()
 		}
 	}
 	return s.opts

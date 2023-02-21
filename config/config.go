@@ -40,14 +40,30 @@ func (k KV) String() string {
 func PixivSession() string {
 	return c.Load().(KV)["pixiv_session"]
 }
+func AiBrowserModel() string {
+	return c.Load().(KV)["ai_browser_model"]
+}
+
+func AiProxyUrl() string {
+	return c.Load().(KV)["ai_browser_proxy_url"]
+}
+
+func AiToken() string {
+	return c.Load().(KV)["ai_token"]
+}
+
+func AiMode() string {
+	return c.Load().(KV)["ai_mode"]
+}
+
+func AiAccessToken() string {
+	return c.Load().(KV)["ai_browser_access_token"]
+}
 
 func PixivMode() string {
 	return c.Load().(KV)["pixiv_mode"]
 }
 
-func AIToken() string {
-	return c.Load().(KV)["ai_token"]
-}
 func GroupID() string {
 	return c.Load().(KV)["group_id"]
 }
@@ -59,12 +75,15 @@ func UserID() string {
 func Namespace() string {
 	return c.Load().(KV)["namespace"]
 }
+
 func Pod() string {
 	return c.Load().(KV)["pod_name"]
 }
+
 func WeatherKey() string {
 	return c.Load().(KV)["weather_key"]
 }
+
 func TianApiKey() string {
 	return c.Load().(KV)["tian_api_key"]
 }
@@ -74,16 +93,20 @@ func HttpProxy() string {
 }
 
 var mappingKV = KV{
-	"user_id":       "",
-	"pixiv_mode":    "daily",
-	"pixiv_session": os.Getenv("PIXIV_SESSION"),
-	"ai_token":      os.Getenv("AI_TOKEN"),
-	"group_id":      os.Getenv("GROUP_ID"),
-	"namespace":     os.Getenv("APP_NAMESPACE"),
-	"pod_name":      os.Getenv("POD_NAME"),
-	"weather_key":   os.Getenv("WEATHER_KEY"),
-	"tian_api_key":  os.Getenv("TIAN_API_KEY"),
-	"http_proxy":    os.Getenv("HTTP_PROXY"),
+	"ai_mode":                 "api",
+	"ai_browser_access_token": "",
+	"ai_browser_proxy_url":    "https://chatgpt.duti.tech/api/conversation",
+	"ai_browser_model":        "text-davinci-002-render-sha",
+	"user_id":                 "",
+	"pixiv_mode":              "daily",
+	"pixiv_session":           os.Getenv("PIXIV_SESSION"),
+	"ai_token":                os.Getenv("AI_TOKEN"),
+	"group_id":                os.Getenv("GROUP_ID"),
+	"namespace":               os.Getenv("APP_NAMESPACE"),
+	"pod_name":                os.Getenv("POD_NAME"),
+	"weather_key":             os.Getenv("WEATHER_KEY"),
+	"tian_api_key":            os.Getenv("TIAN_API_KEY"),
+	"http_proxy":              os.Getenv("HTTP_PROXY"),
 }
 
 func Set(m map[string]string) {
