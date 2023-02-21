@@ -11,6 +11,8 @@ import (
 	"sync"
 	"time"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/google/uuid"
 )
 
@@ -166,7 +168,6 @@ func (gpt *browserChatGPTClient) postConversation(message browserUserMessage) *r
 		Model:           config.AiBrowserModel(),
 	}
 	marshal, _ := json.Marshal(&input)
-	//log.Println(string(marshal))
 	request, _ := http.NewRequest("POST", config.AiProxyUrl(), bytes.NewReader(marshal))
 	request.Header.Add("Content-Type", "application/json")
 	request.Header.Add("Authorization", "Bearer "+config.AiAccessToken())
@@ -180,7 +181,7 @@ func (gpt *browserChatGPTClient) postConversation(message browserUserMessage) *r
 		var resp response
 		s := strings.TrimPrefix(scanner.Text(), "data: ")
 		json.NewDecoder(strings.NewReader(s)).Decode(&resp)
-		//log.Println(s)
+		log.Println(s)
 		if resp.Message.EndTurn {
 			return &resp
 		}

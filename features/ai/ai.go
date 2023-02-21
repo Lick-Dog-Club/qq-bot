@@ -44,7 +44,7 @@ func init() {
 		config.Set(map[string]string{"ai_mode": m})
 		bot.Send("已设置 ai_mode: " + m)
 		return nil
-	})
+	}, features.WithHidden())
 	features.SetDefault("ai 自动回答", func(bot bot.Bot, content string) error {
 		req := Request
 		if config.AiMode() == "api" && config.AiToken() == "" {
