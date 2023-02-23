@@ -3,6 +3,7 @@ package ai
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math"
 	"net/http"
@@ -10,6 +11,7 @@ import (
 	"qq/config"
 	"qq/features"
 	"qq/features/ai/encoder"
+	"qq/features/util/retry"
 	"strings"
 	"sync"
 	"time"
@@ -153,7 +155,12 @@ func (gpt *chatGPTClient) send(msg string) string {
 	conversation = append(conversation, um)
 	prompt := gpt.buildPrompt(conversation, um.id)
 	log.Printf("###########\n%s", prompt)
-	result, err := gpt.getCompletion(prompt)
+	var result string
+	err := retry.Times(3, func() error {
+		var err error
+		result, err = gpt.getCompletion(prompt)
+		return err
+	})
 	if err != nil {
 		gpt.status.Asked()
 		return err.Error()
@@ -250,6 +257,9 @@ func (gpt *chatGPTClient) getCompletion(prompt string) (string, error) {
 		return "", err
 	}
 	defer do.Body.Close()
+	if do.StatusCode == 400 {
+		return "", errors.New("没有结果")
+	}
 	var data gptResponse
 	if err := json.NewDecoder(do.Body).Decode(&data); err != nil {
 		return "", err
