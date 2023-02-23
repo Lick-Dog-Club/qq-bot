@@ -8,10 +8,9 @@ import (
 	"net/http"
 	"qq/config"
 	"qq/features/util/proxy"
+	"qq/features/util/retry"
 	"strings"
 	"time"
-
-	"github.com/cenkalti/backoff/v4"
 
 	log "github.com/sirupsen/logrus"
 
@@ -81,7 +80,7 @@ func (gpt *browserChatGPTClient) send(msg string) string {
 	}
 	conversation = append(conversation, um)
 	var resp *response
-	err := retry(func() error {
+	err := retry.Times(3, func() error {
 		resp = gpt.postConversation(browserUserMessage{
 			id:              opts.ConversationId,
 			parentMessageId: opts.ParentMessageId,
@@ -208,8 +207,4 @@ type response struct {
 	} `json:"message"`
 	ConversationID string      `json:"conversation_id"`
 	Error          interface{} `json:"error"`
-}
-
-func retry(fn func() error) error {
-	return backoff.Retry(fn, backoff.WithMaxRetries(backoff.NewConstantBackOff(1*time.Second), 3))
 }

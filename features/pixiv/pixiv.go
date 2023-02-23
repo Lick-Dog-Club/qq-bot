@@ -12,6 +12,7 @@ import (
 	"qq/config"
 	"qq/features"
 	"qq/features/util/proxy"
+	"qq/features/util/retry"
 	"strings"
 	"time"
 
@@ -19,7 +20,6 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/NateScarlet/pixiv/pkg/client"
-	"github.com/cenkalti/backoff/v4"
 )
 
 var (
@@ -107,7 +107,7 @@ func Image(content string) (string, error) {
 		return "", err
 	}
 	rank := &artwork.Rank{Mode: mode}
-	err = retry(func() error {
+	err = retry.Times(20, func() error {
 		rank.Page = 1
 		if !isDaily() {
 			rank.Page = rand.Intn(5) + 1
@@ -122,7 +122,7 @@ func Image(content string) (string, error) {
 	a := artwork.Artwork{
 		ID: image.ID,
 	}
-	err = retry(func() error {
+	err = retry.Times(20, func() error {
 		return a.Fetch(ctx)
 	})
 	if err != nil {
@@ -131,7 +131,7 @@ func Image(content string) (string, error) {
 	}
 	var get *http.Response
 	c := httpClient()
-	err = retry(func() error {
+	err = retry.Times(20, func() error {
 		var err error
 		request, _ := http.NewRequest("GET", a.Image.Original, nil)
 		request.Header.Add("Referer", "https://www.pixiv.net/")
@@ -162,8 +162,4 @@ func Image(content string) (string, error) {
 	}
 
 	return fpath, err
-}
-
-func retry(fn func() error) error {
-	return backoff.Retry(fn, backoff.WithMaxRetries(backoff.NewConstantBackOff(1*time.Second), 20))
 }
