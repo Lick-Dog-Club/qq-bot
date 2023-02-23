@@ -4,11 +4,14 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"qq/config"
 	"qq/features/util/proxy"
 	"strings"
 	"time"
+
+	"github.com/cenkalti/backoff/v4"
 
 	log "github.com/sirupsen/logrus"
 
@@ -77,15 +80,22 @@ func (gpt *browserChatGPTClient) send(msg string) string {
 		message:         msg,
 	}
 	conversation = append(conversation, um)
-	resp := gpt.postConversation(browserUserMessage{
-		id:              opts.ConversationId,
-		parentMessageId: opts.ParentMessageId,
-		action:          "next",
-		message:         msg,
+	var resp *response
+	err := retry(func() error {
+		resp = gpt.postConversation(browserUserMessage{
+			id:              opts.ConversationId,
+			parentMessageId: opts.ParentMessageId,
+			action:          "next",
+			message:         msg,
+		})
+		if resp == nil {
+			return errors.New("服务端负载过大，暂时无法回复~")
+		}
+		return nil
 	})
-	if resp == nil {
+	if err != nil {
 		gpt.status.Asked()
-		return ""
+		return err.Error()
 	}
 
 	reply := browserUserMessage{
@@ -198,4 +208,8 @@ type response struct {
 	} `json:"message"`
 	ConversationID string      `json:"conversation_id"`
 	Error          interface{} `json:"error"`
+}
+
+func retry(fn func() error) error {
+	return backoff.Retry(fn, backoff.WithMaxRetries(backoff.NewConstantBackOff(1*time.Second), 3))
 }
