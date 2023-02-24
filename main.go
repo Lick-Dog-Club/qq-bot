@@ -12,7 +12,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	_ "qq/cronjob/lifetip"
+	// _ "qq/cronjob/lifetip"
 	_ "qq/cronjob/maotai"
 	_ "qq/cronjob/picture"
 	_ "qq/cronjob/xiaofeiquan"
