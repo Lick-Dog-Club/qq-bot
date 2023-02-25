@@ -35,12 +35,12 @@ func init() {
 		if city == "" {
 			city = "杭州"
 		}
-		bot.Send(get(city))
+		bot.Send(Get(city))
 		return nil
 	})
 }
 
-func get(city string) string {
+func Get(city string) string {
 	if config.WeatherKey() == "" {
 		return "请先设置环境变量: WEATHER_KEY "
 	}

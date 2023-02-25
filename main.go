@@ -15,6 +15,7 @@ import (
 	// _ "qq/cronjob/lifetip"
 	_ "qq/cronjob/maotai"
 	_ "qq/cronjob/picture"
+	_ "qq/cronjob/tianqi"
 	_ "qq/cronjob/xiaofeiquan"
 
 	_ "qq/features/ai"
