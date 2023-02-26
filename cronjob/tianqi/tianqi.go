@@ -9,7 +9,7 @@ import (
 
 func init() {
 	cronjob.Manager().NewCommand("tianqi", func(robot bot.CronBot) error {
-		robot.SendGroup(config.GroupID(), weather.Get("杭州"))
+		robot.SendToUser(config.UserID(), weather.Get("杭州"))
 		return nil
 	}).DailyAt("8:15")
 }
