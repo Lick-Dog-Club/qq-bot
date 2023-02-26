@@ -80,7 +80,7 @@ func (gpt *browserChatGPTClient) send(msg string) string {
 	}
 	conversation = append(conversation, um)
 	var resp *response
-	err := retry.Times(10, func() error {
+	err := retry.Times(5, func() error {
 		resp = gpt.postConversation(browserUserMessage{
 			id:              opts.ConversationId,
 			parentMessageId: opts.ParentMessageId,
