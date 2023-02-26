@@ -13,6 +13,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	// _ "qq/cronjob/lifetip"
+	_ "qq/cronjob/kfc"
 	_ "qq/cronjob/maotai"
 	_ "qq/cronjob/picture"
 	_ "qq/cronjob/tianqi"
@@ -22,6 +23,7 @@ import (
 	_ "qq/features/bili-lottery"
 	_ "qq/features/config"
 	_ "qq/features/help"
+	_ "qq/features/kfc"
 	_ "qq/features/lifetip"
 	_ "qq/features/picture"
 	_ "qq/features/pixiv"
