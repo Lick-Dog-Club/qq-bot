@@ -2,7 +2,6 @@ package proxy
 
 import (
 	"crypto/tls"
-	"errors"
 	"net/http"
 	"net/url"
 	"qq/config"
@@ -18,7 +17,7 @@ func proxyFunc(r *http.Request) (*url.URL, error) {
 	if environment != nil && environment.Host != "" {
 		return environment, nil
 	}
-	return nil, errors.New("proxy not found")
+	return nil, nil
 }
 
 func NewHttpProxyClient() *http.Client {
