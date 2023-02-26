@@ -175,7 +175,7 @@ func (gpt *browserChatGPTClient) postConversation(message browserUserMessage) *r
 		if strings.Contains(s, "Conversation not found") {
 			gpt.conversationId = ""
 		}
-		if resp.Message.EndTurn {
+		if resp.Message.EndTurn != nil && !*resp.Message.EndTurn {
 			return &resp
 		}
 	}
@@ -193,7 +193,7 @@ type response struct {
 			ContentType string   `json:"content_type"`
 			Parts       []string `json:"parts"`
 		} `json:"content"`
-		EndTurn  bool    `json:"end_turn"`
+		EndTurn  *bool   `json:"end_turn"`
 		Weight   float64 `json:"weight"`
 		Metadata struct {
 			FinishDetails struct {
