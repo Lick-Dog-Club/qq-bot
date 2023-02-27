@@ -11,5 +11,5 @@ func init() {
 	cronjob.Manager().NewCommand("kfc", func(robot bot.CronBot) error {
 		robot.SendGroup(config.GroupID(), kfc.Get())
 		return nil
-	}).Weekdays().At("5")
+	}).Thursdays().At("17")
 }

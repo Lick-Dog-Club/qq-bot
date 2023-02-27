@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"qq/config"
 	"qq/features/util/proxy"
@@ -165,7 +166,10 @@ func (gpt *browserChatGPTClient) postConversation(message browserUserMessage) *r
 	if err != nil {
 		return nil
 	}
-	defer do.Body.Close()
+	defer func() {
+		io.Copy(io.Discard, do.Body)
+		do.Body.Close()
+	}()
 	scanner := bufio.NewScanner(do.Body)
 	for scanner.Scan() {
 		var resp response
