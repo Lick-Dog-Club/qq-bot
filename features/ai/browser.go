@@ -170,6 +170,7 @@ func (gpt *browserChatGPTClient) postConversation(message browserUserMessage) *r
 		io.Copy(io.Discard, do.Body)
 		do.Body.Close()
 	}()
+	log.Println(do.StatusCode)
 	scanner := bufio.NewScanner(do.Body)
 	for scanner.Scan() {
 		var resp response
