@@ -164,6 +164,7 @@ func (gpt *browserChatGPTClient) postConversation(message browserUserMessage) *r
 	request.Header.Add("Authorization", "Bearer "+config.AiAccessToken())
 	do, err := proxy.NewHttpProxyClient().Do(request)
 	if err != nil {
+		log.Println(err.Error())
 		return nil
 	}
 	defer func() {
