@@ -47,6 +47,15 @@ func init() {
 		bot.Send("已设置 ai_mode: " + m)
 		return nil
 	}, features.WithHidden())
+	features.AddKeyword("ap", "ai 切换 browser 代理", func(bot bot.Bot, content string) error {
+		var p = config.AIProxyOne
+		if config.AiProxyUrl() == p {
+			p = config.AIProxyTwo
+		}
+		config.Set(map[string]string{"ai_browser_proxy_url": p})
+		bot.Send(fmt.Sprintf("已设置: %s", p))
+		return nil
+	}, features.WithHidden())
 	features.SetDefault("ai 自动回答", func(bot bot.Bot, content string) error {
 		req := Request
 		if config.AiMode() == "api" && config.AiToken() == "" {

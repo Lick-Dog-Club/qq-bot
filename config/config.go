@@ -92,10 +92,15 @@ func HttpProxy() string {
 	return c.Load().(KV)["http_proxy"]
 }
 
+const (
+	AIProxyOne = "https://gpt.pawan.krd/backend-api/conversation"
+	AIProxyTwo = "https://chat.duti.tech/api/conversation"
+)
+
 var mappingKV = KV{
 	"ai_mode":                 "api",
 	"ai_browser_access_token": "",
-	"ai_browser_proxy_url":    "https://gpt.pawan.krd/backend-api/conversation",
+	"ai_browser_proxy_url":    AIProxyTwo,
 	"ai_browser_model":        "text-davinci-002-render-sha",
 	"user_id":                 "",
 	"pixiv_mode":              "daily",
