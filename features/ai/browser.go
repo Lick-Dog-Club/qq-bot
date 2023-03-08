@@ -171,6 +171,9 @@ func (gpt *browserChatGPTClient) postConversation(message browserUserMessage) *r
 		io.Copy(io.Discard, do.Body)
 		do.Body.Close()
 	}()
+	if do.StatusCode != 200 {
+		return nil
+	}
 	log.Println(do.StatusCode)
 	scanner := bufio.NewScanner(do.Body)
 	var res *response
