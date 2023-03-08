@@ -173,6 +173,7 @@ func (gpt *browserChatGPTClient) postConversation(message browserUserMessage) *r
 	}()
 	log.Println(do.StatusCode)
 	scanner := bufio.NewScanner(do.Body)
+	trueCount := 0
 	for scanner.Scan() {
 		var resp response
 		s := strings.TrimPrefix(scanner.Text(), "data: ")
@@ -181,8 +182,11 @@ func (gpt *browserChatGPTClient) postConversation(message browserUserMessage) *r
 		if strings.Contains(s, "Conversation not found") {
 			gpt.conversationId = ""
 		}
-		if resp.Message.EndTurn != nil && !*resp.Message.EndTurn {
-			return &resp
+		if resp.Message.EndTurn != nil && *resp.Message.EndTurn {
+			trueCount++
+			if trueCount == 2 {
+				return &resp
+			}
 		}
 	}
 	return nil

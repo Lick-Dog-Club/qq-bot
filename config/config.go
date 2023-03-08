@@ -95,7 +95,7 @@ func HttpProxy() string {
 var mappingKV = KV{
 	"ai_mode":                 "api",
 	"ai_browser_access_token": "",
-	"ai_browser_proxy_url":    "https://chatgpt.duti.tech/api/conversation",
+	"ai_browser_proxy_url":    "https://gpt.pawan.krd/backend-api/conversation",
 	"ai_browser_model":        "text-davinci-002-render-sha",
 	"user_id":                 "",
 	"pixiv_mode":              "daily",
