@@ -179,15 +179,20 @@ func (gpt *browserChatGPTClient) postConversation(message browserUserMessage) *r
 	var res *response
 	for scanner.Scan() {
 		var resp response
-		s := strings.TrimPrefix(scanner.Text(), "data: ")
+		text := scanner.Text()
+		log.Println(text)
+		s := strings.TrimPrefix(text, "data: ")
 		if strings.Contains(s, "Conversation not found") {
 			gpt.conversationId = ""
 			break
 		}
 		if strings.Contains(s, "[DONE]") {
+			log.Println("DONE")
 			break
 		}
-		json.NewDecoder(strings.NewReader(s)).Decode(&resp)
+		if err := json.NewDecoder(strings.NewReader(s)).Decode(&resp); err != nil {
+			log.Println(err.Error())
+		}
 		if len(resp.Message.Content.Parts) > 0 {
 			res = &resp
 		}
