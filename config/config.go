@@ -94,7 +94,7 @@ func HttpProxy() string {
 
 const (
 	AIProxyOne = "https://gpt.pawan.krd/backend-api/conversation"
-	AIProxyTwo = "https://chat.duti.tech/api/conversation"
+	AIProxyTwo = "https://chatgpt.duti.tech/api/conversation"
 )
 
 var mappingKV = KV{
