@@ -172,6 +172,9 @@ func (gpt *browserChatGPTClient) postConversation(message browserUserMessage) *r
 		do.Body.Close()
 	}()
 	if do.StatusCode != 200 {
+		all, _ := io.ReadAll(do.Body)
+
+		log.Println(do.StatusCode, string(all))
 		return nil
 	}
 	log.Println(do.StatusCode)
