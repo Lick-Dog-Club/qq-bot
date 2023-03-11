@@ -40,6 +40,15 @@ kind: ConfigMap
 metadata:
   name: qq-bot-cm
 data:
+  clash-config.yml: |
+    # clash 配置
+    mixed-port: 7890
+    allow-lan: true
+    mode: rule
+    log-level: info
+    external-controller: '0.0.0.0:9090'
+    external-ui: ui/clash-dashboard-gh-pages
+    secret: ''
   config.yml: |
     # go-cqhttp 默认配置文件
 
@@ -169,11 +178,16 @@ spec:
     type: Recreate
   template:
     metadata:
+      annotations:
+        kubectl.kubernetes.io/default-container: app
       name: qq-bot
       labels:
         app: qq-bot
     spec:
+      terminationGracePeriodSeconds: 5
       volumes:
+        - name: clash-ui
+          emptyDir: { }
         - name: data
           persistentVolumeClaim:
             claimName: qq-bot-pvc
@@ -184,7 +198,35 @@ spec:
               - key: config.yml
                 path: config.yml
       serviceAccountName: qq-bot
+      initContainers:
+        - name: clash-ui
+          image: alpine
+          volumeMounts:
+            - mountPath: /ui
+              name: clash-ui
+          command:
+            - sh
+            - -c
+            - >
+              cd /tmp &&
+              wget https://ghproxy.com/https://github.com/Dreamacro/clash-dashboard/archive/gh-pages.zip &&
+              unzip gh-pages.zip -d /ui/
       containers:
+        - name: clash
+          image: dreamacro/clash
+          ports:
+            - containerPort: 7890
+              name: proxy
+              protocol: TCP
+            - containerPort: 9090
+              name: http
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /root/.config/clash/ui/
+              name: clash-ui
+            - mountPath: /root/.config/clash/config.yaml
+              name: clash-config
+              subPath: config.yml
         - name: bot
           image: silicer/go-cqhttp
           imagePullPolicy: IfNotPresent

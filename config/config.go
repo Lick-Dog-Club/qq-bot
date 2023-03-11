@@ -100,7 +100,7 @@ const (
 var mappingKV = KV{
 	"ai_mode":                 "api",
 	"ai_browser_access_token": "",
-	"ai_browser_proxy_url":    AIProxyTwo,
+	"ai_browser_proxy_url":    AIProxyOne,
 	"ai_browser_model":        "text-davinci-002-render-sha",
 	"user_id":                 "",
 	"pixiv_mode":              "daily",
