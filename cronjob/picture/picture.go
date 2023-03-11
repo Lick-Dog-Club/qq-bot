@@ -12,10 +12,10 @@ import (
 )
 
 func init() {
-	cronjob.Manager().NewCommand("setu", func(robot bot.CronBot) error {
-		robot.SendGroup(config.GroupID(), picture.Url())
-		return nil
-	}).Weekdays().At("9,13,17").HourlyAt([]int{30})
+	// cronjob.Manager().NewCommand("setu", func(robot bot.CronBot) error {
+	// 	robot.SendGroup(config.GroupID(), picture.Url())
+	// 	return nil
+	// }).Weekdays().At("9,13,17").HourlyAt([]int{30})
 	cronjob.Manager().NewCommand("tome", func(robot bot.CronBot) error {
 		uid := config.UserID()
 		if uid == "" {
