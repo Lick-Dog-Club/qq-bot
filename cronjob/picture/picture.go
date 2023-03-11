@@ -7,7 +7,6 @@ import (
 	"qq/bot"
 	"qq/config"
 	"qq/cronjob"
-	"qq/features/picture"
 	"qq/features/pixiv"
 )
 
