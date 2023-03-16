@@ -14,10 +14,17 @@ import (
 )
 
 func init() {
-	cronjob.Manager().NewCommand("xiaofeiquan", func(bot bot.CronBot) error {
-		res := Fetch()
+	cronjob.Manager().NewCommand("hangzhou-xiaofeiquan", func(bot bot.CronBot) error {
+		res := Fetch("杭州消费券")
 		if len(res) > 0 {
 			bot.SendGroup(config.GroupID(), res)
+		}
+		return nil
+	}).DailyAt("9:40")
+	cronjob.Manager().NewCommand("shaoxin-xiaofeiquan", func(bot bot.CronBot) error {
+		res := Fetch("绍兴消费券")
+		if len(res) > 0 {
+			bot.SendToUser(config.UserID(), res)
 		}
 		return nil
 	}).DailyAt("9:40")
@@ -28,8 +35,8 @@ func isToday(t time.Time) bool {
 	return t.Format(format) == time.Now().Format(format)
 }
 
-func Fetch() string {
-	get, err := http.Get("https://so.zjol.com.cn/s?wd=%E6%9D%AD%E5%B7%9E%E6%B6%88%E8%B4%B9%E5%88%B8&chnl=0&app=site176_zjol&field=title")
+func Fetch(keyword string) string {
+	get, err := http.Get(fmt.Sprintf("https://so.zjol.com.cn/s?wd=%s&chnl=0&app=site176_zjol&field=title", keyword))
 	if err != nil {
 		log.Println(err)
 	}
@@ -40,6 +47,8 @@ func Fetch() string {
 	for _, item := range data.Msg.Result.Items {
 		if isToday(strToDate(item.Issuetime)) {
 			res += fmt.Sprintf("%s\nhttps:%s\n", item.Title, item.Docpuburl)
+		} else {
+			log.Println("[SKIP]: ", item.Title)
 		}
 	}
 	return res
