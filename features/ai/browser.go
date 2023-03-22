@@ -173,6 +173,9 @@ func (gpt *browserChatGPTClient) postConversation(message browserUserMessage) *r
 	}()
 	if do.StatusCode != 200 {
 		all, _ := io.ReadAll(do.Body)
+		if strings.Contains(string(all), "please try reloading the conversation") {
+			gpt.cache.Clear()
+		}
 
 		log.Println(do.StatusCode, string(all))
 		return nil

@@ -80,6 +80,12 @@ func (kv *keyValue) Set(k string, v any) {
 	kv.kv[k] = v
 }
 
+func (kv *keyValue) Clear() {
+	kv.Lock()
+	defer kv.Unlock()
+	kv.kv = map[string]any{}
+}
+
 type status struct {
 	sync.RWMutex
 	isAsking    bool
