@@ -9,6 +9,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/samber/lo v1.37.0
+	github.com/sashabaranov/go-openai v1.5.6
 	github.com/sirupsen/logrus v1.9.0
 	k8s.io/apimachinery v0.26.1
 	k8s.io/client-go v0.26.1

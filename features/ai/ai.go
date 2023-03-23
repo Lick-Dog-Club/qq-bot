@@ -1,24 +1,22 @@
 package ai
 
 import (
-	"bytes"
-	"encoding/json"
+	"context"
 	"errors"
 	"fmt"
-	"math"
-	"net/http"
+	"io"
 	"qq/bot"
 	"qq/config"
 	"qq/features"
-	"qq/features/ai/encoder"
+	"qq/features/util/proxy"
 	"qq/features/util/retry"
 	"strings"
 	"sync"
 	"time"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/google/uuid"
+	"github.com/sashabaranov/go-openai"
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -113,20 +111,13 @@ func (m *gptManager[T]) getByUser(userID string) userImp {
 
 type chatGPTClient struct {
 	uid    string
-	opt    completionRequest
 	cache  *keyValue
 	status *status
 }
 
 func newChatGPTClient(uid string) *chatGPTClient {
 	return &chatGPTClient{
-		uid: uid,
-		opt: completionRequest{
-			Model:           "text-davinci-003",
-			Temperature:     0.8,
-			Stop:            []string{endToken},
-			PresencePenalty: 1,
-		},
+		uid:    uid,
 		cache:  newKV(map[string]any{"namespace": "chatgpt"}),
 		status: &status{},
 	}
@@ -135,11 +126,6 @@ func newChatGPTClient(uid string) *chatGPTClient {
 func (gpt *chatGPTClient) lastAskTime() time.Time {
 	return gpt.status.LastAskTime()
 }
-
-const (
-	endToken       = "<|endoftext|>"
-	separatorToken = "<|endoftext|>"
-)
 
 func (gpt *chatGPTClient) send(msg string) string {
 	if gpt.status.IsAsking() {
@@ -158,18 +144,21 @@ func (gpt *chatGPTClient) send(msg string) string {
 	um := userMessage{
 		id:              uuid.NewString(),
 		parentMessageId: opts.ParentMessageId,
-		role:            "User",
+		role:            openai.ChatMessageRoleUser,
 		message:         msg,
 	}
 	conversation = append(conversation, um)
 	prompt := gpt.buildPrompt(conversation, um.id)
-	log.Printf("###########\n%s", prompt)
+	log.Printf("###########\n%s\n%s", gpt.uid, prompt)
 	var result string
-	err := retry.Times(3, func() error {
+	err := retry.Times(5, func() error {
 		var err error
 		result, err = gpt.getCompletion(prompt)
 		return err
 	})
+	for strings.HasPrefix(result, "\n") {
+		result = strings.TrimPrefix(result, "\n")
+	}
 	if err != nil {
 		gpt.status.Asked()
 		return err.Error()
@@ -177,7 +166,7 @@ func (gpt *chatGPTClient) send(msg string) string {
 	reply := userMessage{
 		id:              uuid.NewString(),
 		parentMessageId: um.id,
-		role:            "ChatGPT",
+		role:            openai.ChatMessageRoleUser,
 		message:         result,
 	}
 	conversation = append(conversation, reply)
@@ -191,7 +180,7 @@ func (gpt *chatGPTClient) send(msg string) string {
 	return reply.message
 }
 
-func (gpt *chatGPTClient) buildPrompt(messages userMessageList, parentMessageId string) string {
+func (gpt *chatGPTClient) buildPrompt(messages userMessageList, parentMessageId string) (res []openai.ChatCompletionMessage) {
 	var orderedMessages []userMessage
 	var currentMessageId = parentMessageId
 	for currentMessageId != "" {
@@ -202,80 +191,48 @@ func (gpt *chatGPTClient) buildPrompt(messages userMessageList, parentMessageId 
 		orderedMessages = append([]userMessage{*m}, orderedMessages...)
 		currentMessageId = m.parentMessageId
 	}
-
-	currentDateString := time.Now().Format("2006-01-02")
-	promptPrefix := fmt.Sprintf("\n%sInstructions: \nYou are ChatGPT, a large language model trained by OpenAI. \nCurrent date: %s%s\n\n", separatorToken, currentDateString, separatorToken)
-	promptSuffix := "ChatGPT:\n"
-	currentTokenCount := getTokenCount(promptPrefix + promptSuffix)
-	promptBody := ""
-	maxTokenCount := 3097
-
-	for currentTokenCount < maxTokenCount && len(orderedMessages) > 0 {
-		m := orderedMessages[len(orderedMessages)-1]
-		roleLabel := "User"
-		if m.role != "User" {
-			roleLabel = "ChatGPT"
-		}
-		orderedMessages = append([]userMessage{}, orderedMessages[:len(orderedMessages)-1]...)
-		messageString := fmt.Sprintf("%s:\n%s%s\n", roleLabel, m.message, endToken)
-		newPromptBody := ""
-		newTokenCount := getTokenCount(promptPrefix + newPromptBody + promptSuffix)
-
-		if promptBody != "" {
-			newPromptBody = fmt.Sprintf("%s%s", messageString, promptBody)
-		} else {
-			newPromptBody = fmt.Sprintf("%s%s%s", promptPrefix, messageString, promptBody)
-		}
-
-		newTokenCount = getTokenCount(fmt.Sprintf("%s%s%s", promptPrefix, promptBody, promptSuffix))
-		if promptBody != "" && newTokenCount > maxTokenCount {
-			break
-		}
-		promptBody = newPromptBody
-		currentTokenCount = newTokenCount
+	for _, message := range orderedMessages {
+		res = append(res, openai.ChatCompletionMessage{
+			Role:    openai.ChatMessageRoleUser,
+			Content: message.message,
+		})
 	}
 
-	var prompt = promptBody + promptSuffix
-
-	var numTokens = getTokenCount(prompt)
-
-	gpt.opt.MaxTokens = int(math.Min(4097-float64(numTokens), 1000))
-	return prompt
+	return
 }
 
-const (
-	imEnd = "<|im_end|>"
-	imSep = "<|im_sep|>"
-)
-
-func getTokenCount(text string) int {
-	encoder, _ := encoder.NewEncoder()
-	encode, _ := encoder.Encode(strings.ReplaceAll(strings.ReplaceAll(text, imSep, endToken), imEnd, endToken))
-	return len(encode)
-}
-
-func (gpt *chatGPTClient) getCompletion(prompt string) (string, error) {
-	var input = gpt.opt
-	input.Prompt = prompt
-	marshal, _ := json.Marshal(&input)
-	request, _ := http.NewRequest("POST", "https://api.openai.com/v1/completions", bytes.NewReader(marshal))
-	request.Header.Add("Content-Type", "application/json")
-	request.Header.Add("Authorization", "Bearer "+config.AiToken())
-	do, err := (&http.Client{Timeout: 3 * time.Minute}).Do(request)
+func (gpt *chatGPTClient) getCompletion(messages []openai.ChatCompletionMessage) (string, error) {
+	req := openai.ChatCompletionRequest{
+		Model:     openai.GPT3Dot5Turbo,
+		MaxTokens: 800,
+		Messages:  messages,
+		Stream:    true,
+	}
+	cfg := openai.DefaultConfig(config.AiToken())
+	cfg.HTTPClient = proxy.NewHttpProxyClient()
+	c := openai.NewClientWithConfig(cfg)
+	stream, err := c.CreateChatCompletionStream(context.TODO(), req)
 	if err != nil {
+		fmt.Printf("ChatCompletionStream error: %v\n", err)
 		return "", err
 	}
-	defer do.Body.Close()
-	if do.StatusCode == 400 {
-		return "", errors.New("没有结果")
+	defer stream.Close()
+
+	fmt.Printf("Stream response: ")
+	var res string
+	for {
+		resp, err := stream.Recv()
+		if errors.Is(err, io.EOF) {
+			fmt.Println("\nStream finished")
+			return res, nil
+		}
+
+		if err != nil {
+			fmt.Printf("\nStream error: %v\n", err)
+			return res, err
+		}
+
+		res += resp.Choices[0].Delta.Content
+		fmt.Printf(resp.Choices[0].Delta.Content)
 	}
-	var data gptResponse
-	if err := json.NewDecoder(do.Body).Decode(&data); err != nil {
-		return "", err
-	}
-	var res string = "没有结果"
-	if len(data.Choices) > 0 {
-		res = data.Choices[0].Text
-	}
-	return res, nil
 }
