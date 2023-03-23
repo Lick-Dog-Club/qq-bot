@@ -2,9 +2,7 @@ package ai
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"io"
 	"qq/bot"
 	"qq/config"
 	"qq/features"
@@ -166,7 +164,7 @@ func (gpt *chatGPTClient) send(msg string) string {
 	reply := userMessage{
 		id:              uuid.NewString(),
 		parentMessageId: um.id,
-		role:            openai.ChatMessageRoleUser,
+		role:            openai.ChatMessageRoleAssistant,
 		message:         result,
 	}
 	conversation = append(conversation, reply)
@@ -193,7 +191,7 @@ func (gpt *chatGPTClient) buildPrompt(messages userMessageList, parentMessageId 
 	}
 	for _, message := range orderedMessages {
 		res = append(res, openai.ChatCompletionMessage{
-			Role:    openai.ChatMessageRoleUser,
+			Role:    message.role,
 			Content: message.message,
 		})
 	}
@@ -206,33 +204,17 @@ func (gpt *chatGPTClient) getCompletion(messages []openai.ChatCompletionMessage)
 		Model:     openai.GPT3Dot5Turbo,
 		MaxTokens: 800,
 		Messages:  messages,
-		Stream:    true,
+		Stream:    false,
 	}
 	cfg := openai.DefaultConfig(config.AiToken())
 	cfg.HTTPClient = proxy.NewHttpProxyClient()
 	c := openai.NewClientWithConfig(cfg)
-	stream, err := c.CreateChatCompletionStream(context.TODO(), req)
+	timeout, cancelFunc := context.WithTimeout(context.TODO(), 15*time.Second)
+	defer cancelFunc()
+	stream, err := c.CreateChatCompletion(timeout, req)
 	if err != nil {
 		fmt.Printf("ChatCompletionStream error: %v\n", err)
 		return "", err
 	}
-	defer stream.Close()
-
-	fmt.Printf("Stream response: ")
-	var res string
-	for {
-		resp, err := stream.Recv()
-		if errors.Is(err, io.EOF) {
-			fmt.Println("\nStream finished")
-			return res, nil
-		}
-
-		if err != nil {
-			fmt.Printf("\nStream error: %v\n", err)
-			return res, err
-		}
-
-		res += resp.Choices[0].Delta.Content
-		fmt.Printf(resp.Choices[0].Delta.Content)
-	}
+	return stream.Choices[0].Message.Content, nil
 }
