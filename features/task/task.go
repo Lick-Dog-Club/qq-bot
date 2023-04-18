@@ -57,8 +57,8 @@ func init() {
 					return nil
 				})
 				b.Send(fmt.Sprintf("已设置:\n时间: %s, 命令: %s\n取消任务请执行: canceltask %d", parse.Time.Format(time.DateTime), k, tid))
+				return nil
 			}
-			return nil
 		}
 		tid = cronjob.Manager().NewOnceCommand(content, parse.Time, func(bot.Bot) error {
 			b.Send(content)
