@@ -22,6 +22,10 @@ func init() {
 	w.Add(zh.All...)
 	w.Add(common.All...)
 
+	features.AddKeyword("listtask", "任务列表", func(bot bot.Bot, content string) error {
+		bot.Send(cronjob.Manager().ListOnceCommands())
+		return nil
+	})
 	features.AddKeyword("canceltask", "取消任务", func(bot bot.Bot, content string) error {
 		atoi, err := strconv.Atoi(strings.TrimSpace(content))
 		if err != nil {

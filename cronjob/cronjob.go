@@ -40,6 +40,7 @@ type CronManager interface {
 	Shutdown(context.Context) error
 
 	List() []CommandImp
+	ListOnceCommands() string
 }
 
 type manager struct {
@@ -86,6 +87,17 @@ func (m *manager) RemoveOnceCommand(id int) error {
 	defer m.Unlock()
 	delete(m.onceCommands, id)
 	return m.runner.Remove(id)
+}
+
+func (m *manager) ListOnceCommands() (res string) {
+	m.RLock()
+	defer m.RUnlock()
+
+	res = "任务列表:\n"
+	for _, o := range m.onceCommands {
+		res += fmt.Sprintf("ID: %d 时间：%s, 任务: %s\n", o.id, o.date.Format(time.DateTime), o.name)
+	}
+	return
 }
 
 func (m *manager) Run(ctx context.Context) error {
