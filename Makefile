@@ -1,4 +1,4 @@
-VERSION_PATH=$(shell go list -m -f "{{.Path}}")/features/sys-update
+VERSION_PATH=$(shell go list -m -f "{{.Path}}")/features/sysupdate
 LDFLAGS=-w -s \
 -X ${VERSION_PATH}.gitCommit=$(shell git rev-parse --short HEAD)
 
