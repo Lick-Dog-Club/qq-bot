@@ -1,4 +1,4 @@
-package sys_update
+package sysupdate
 
 import (
 	"context"

@@ -3,6 +3,7 @@ package cronjob
 import (
 	"strconv"
 	"strings"
+	"time"
 )
 
 type CommandImp interface {
@@ -128,6 +129,14 @@ const (
 type command struct {
 	name       string
 	expression string
+
+	fn func()
+}
+
+type onceCommand struct {
+	name string
+	id   int
+	date time.Time
 
 	fn func()
 }

@@ -6,6 +6,7 @@ import (
 	"qq/bot"
 	"sort"
 	"sync"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -24,13 +25,18 @@ func Manager() CronManager {
 
 type CronRunner interface {
 	AddCommand(name string, expression string, fn func()) error
+	AddOnceCommand(t time.Time, fn func()) int
+	Remove(int) error
 	Run(context.Context) error
 	Shutdown(context.Context) error
 }
 
 type CronManager interface {
 	NewCommand(name string, fn func(bot bot.CronBot) error) CommandImp
+	NewOnceCommand(name string, t time.Time, fn func(bot bot.Bot) error) int
 	Run(ctx context.Context) error
+	RemoveOnceCommand(id int) error
+
 	Shutdown(context.Context) error
 
 	List() []CommandImp
@@ -39,11 +45,12 @@ type CronManager interface {
 type manager struct {
 	runner CronRunner
 	sync.RWMutex
-	commands map[string]*command
+	commands     map[string]*command
+	onceCommands map[int]*onceCommand
 }
 
 func newManager(runner CronRunner) *manager {
-	return &manager{commands: make(map[string]*command), runner: runner}
+	return &manager{commands: make(map[string]*command), runner: runner, onceCommands: map[int]*onceCommand{}}
 }
 
 func (m *manager) NewCommand(name string, fn func(bot bot.CronBot) error) CommandImp {
@@ -57,6 +64,28 @@ func (m *manager) NewCommand(name string, fn func(bot bot.CronBot) error) Comman
 	}}
 	m.commands[name] = cmd
 	return cmd
+}
+
+func (m *manager) NewOnceCommand(name string, t time.Time, fn func(bot bot.Bot) error) int {
+	m.Lock()
+	defer m.Unlock()
+	cmd := &onceCommand{
+		name: name,
+		date: t,
+		fn: func() {
+			_ = fn(newBotFunc(nil))
+		},
+	}
+	cmd.id = m.runner.AddOnceCommand(cmd.date, cmd.fn)
+	m.onceCommands[cmd.id] = cmd
+	return cmd.id
+}
+
+func (m *manager) RemoveOnceCommand(id int) error {
+	m.Lock()
+	defer m.Unlock()
+	delete(m.onceCommands, id)
+	return m.runner.Remove(id)
 }
 
 func (m *manager) Run(ctx context.Context) error {

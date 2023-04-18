@@ -42,6 +42,42 @@ func (c *robfigCronV3Runner) AddCommand(name string, expression string, fn func(
 	return nil
 }
 
+type onceSchedule struct {
+	sync.Once
+
+	next time.Time
+	c    *cron.Cron
+	id   cron.EntryID
+}
+
+func newOnceSchedule(next time.Time, c *cron.Cron) cron.Schedule {
+	return &onceSchedule{next: next, c: c}
+}
+
+func (o *onceSchedule) Next(t time.Time) time.Time {
+	res := o.next
+	o.Once.Do(func() {
+		o.next = time.Time{}
+	})
+	return res
+}
+
+func (c *robfigCronV3Runner) Remove(id int) error {
+	c.c.Remove(cron.EntryID(id))
+	return nil
+}
+
+func (c *robfigCronV3Runner) AddOnceCommand(t time.Time, fn func()) int {
+	c.Lock()
+	defer c.Unlock()
+	s := newOnceSchedule(t, c.c).(*onceSchedule)
+	s.id = c.c.Schedule(s, cron.FuncJob(func() {
+		c.c.Remove(s.id)
+		fn()
+	}))
+	return int(s.id)
+}
+
 func (c *robfigCronV3Runner) Run(ctx context.Context) error {
 	go func() {
 		defer func() {

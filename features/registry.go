@@ -74,6 +74,15 @@ func SetDefault(desc string, fn commandFunc) {
 	}
 }
 
+func Match(key string) bool {
+	for _, c := range commands {
+		if key == c.Keyword() {
+			return true
+		}
+	}
+	return false
+}
+
 func Run(msg *bot.Message, keyword string, content string) error {
 	var command CommandImp
 	func() {

@@ -8,6 +8,7 @@ import (
 	"qq/bot"
 	"qq/cronjob"
 	"qq/features"
+	"qq/util"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -31,7 +32,8 @@ import (
 	_ "qq/features/picture"
 	_ "qq/features/pixiv"
 	_ "qq/features/raokouling"
-	_ "qq/features/sys-update"
+	_ "qq/features/sysupdate"
+	_ "qq/features/task"
 	_ "qq/features/version"
 	_ "qq/features/weather"
 	_ "qq/features/weibo"
@@ -43,6 +45,9 @@ func init() {
 }
 
 func main() {
+	cm := cronjob.Manager()
+	cm.Run(context.TODO())
+	defer cm.Shutdown(context.TODO())
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		var message *bot.Message
 		json.NewDecoder(r.Body).Decode(&message)
@@ -53,30 +58,13 @@ func main() {
 		atMsg := fmt.Sprintf("[CQ:at,qq=%v]", message.SelfID)
 		if (strings.Contains(message.Message, atMsg) && message.MessageType == "group") || message.MessageType == "private" {
 			msg := strings.ReplaceAll(message.Message, atMsg, "")
-			keyword, content := getKeywordAndContent(msg)
+			keyword, content := util.GetKeywordAndContent(msg)
 			if err := features.Run(message, keyword, content); err != nil {
 				log.Println(err)
 			}
 		}
 	})
-	cm := cronjob.Manager()
-	cm.Run(context.TODO())
-	defer cm.Shutdown(context.TODO())
 
 	log.Println("[HTTP]: start...")
 	log.Println(http.ListenAndServe(":5701", nil))
-}
-
-func getKeywordAndContent(msg string) (string, string) {
-	msg = trimSpace(msg)
-	split := strings.SplitN(msg, " ", 2)
-	if len(split) == 2 {
-		return strings.ToLower(split[0]), trimSpace(split[1])
-	}
-
-	return strings.ToLower(msg), ""
-}
-
-func trimSpace(s string) string {
-	return strings.TrimSpace(s)
 }

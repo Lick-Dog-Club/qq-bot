@@ -3,12 +3,12 @@ package help
 import (
 	"qq/bot"
 	"qq/features"
-	sys_update "qq/features/sys-update"
+	"qq/features/sysupdate"
 )
 
 func init() {
 	features.AddKeyword("version", "系统版本", func(sender bot.Bot, content string) error {
-		sender.Send(sys_update.Version())
+		sender.Send(sysupdate.Version())
 		return nil
 	}, features.WithSysCmd(), features.WithHidden())
 }

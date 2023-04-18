@@ -20,6 +20,7 @@ type Bot interface {
 	UserID() string
 	IsGroupMessage() bool
 	Send(msg string) int
+	Message() *Message
 }
 
 type CronBot interface {
@@ -31,6 +32,10 @@ type dummyBot struct {
 
 func NewDummyBot(message *Message) Bot {
 	return &dummyBot{}
+}
+
+func (d *dummyBot) Message() *Message {
+	return &Message{}
 }
 
 func (d *dummyBot) UserID() string {
@@ -66,6 +71,10 @@ type bot struct {
 
 func NewBot(msg *Message) Bot {
 	return &bot{msg: msg}
+}
+
+func (m *bot) Message() *Message {
+	return m.msg
 }
 
 func (m *bot) UserID() string {
