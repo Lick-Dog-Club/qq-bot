@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"sync/atomic"
+
+	"github.com/sashabaranov/go-openai"
 )
 
 var c atomic.Value
@@ -56,6 +58,19 @@ func AiMode() string {
 	return c.Load().(KV)["ai_mode"]
 }
 
+func ChatGPTApiModel() string {
+	return c.Load().(KV)["chatgpt_model"]
+}
+func AzureToken() string {
+	return c.Load().(KV)["azure_token"]
+}
+func AzureModel() string {
+	return c.Load().(KV)["azure_model"]
+}
+func AzureUrl() string {
+	return c.Load().(KV)["azure_url"]
+}
+
 func AiAccessToken() string {
 	return c.Load().(KV)["ai_browser_access_token"]
 }
@@ -98,6 +113,10 @@ const (
 )
 
 var mappingKV = KV{
+	"azure_token":             "",
+	"azure_model":             "",
+	"azure_url":               "",
+	"chatgpt_model":           openai.GPT3Dot5Turbo,
 	"ai_mode":                 "api",
 	"ai_browser_access_token": "",
 	"ai_browser_proxy_url":    AIProxyOne,
