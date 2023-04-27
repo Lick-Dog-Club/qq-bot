@@ -72,6 +72,7 @@ func (c *robfigCronV3Runner) AddOnceCommand(t time.Time, fn func()) int {
 	defer c.Unlock()
 	s := newOnceSchedule(t, c.c).(*onceSchedule)
 	s.id = c.c.Schedule(s, cron.FuncJob(func() {
+		cronManager.RemoveOnceCommand(int(s.id))
 		c.c.Remove(s.id)
 		fn()
 	}))
