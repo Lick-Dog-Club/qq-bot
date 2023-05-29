@@ -17,5 +17,5 @@ func init() {
 			lottery.Run(func(s string) { robot.SendToUser(config.UserID(), s) }, cookie)
 		}
 		return nil
-	}).DailyAt("15:20")
+	}).DailyAt("09:10")
 }
