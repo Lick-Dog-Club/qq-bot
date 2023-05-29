@@ -10,17 +10,20 @@ import (
 
 func init() {
 	features.AddKeyword("抽奖", "+<bilibili-cookie> 自动转发up主的抽奖活动", func(bot bot.Bot, content string) error {
-		bot.Send(run(bot, content))
+		bot.Send(Run(func(s string) { bot.Send(s) }, content))
 		return nil
 	})
 }
 
-func run(bot bot.Bot, cookie string) string {
+func Run(send func(string), cookie string) string {
 	user := User{
 		cookie: cookiePair(cookie),
 	}
-	user.info()
-	bot.Send(user.me.Data.Uname + " 登录成功，现在开始处理抽奖请求~")
+	_, err := user.info()
+	if err != nil {
+		return err.Error()
+	}
+	send(user.me.Data.Uname + " 登录成功，现在开始处理抽奖请求~")
 	user.forwards = user.myForwards(user.me.Data.Mid)
 	var results noticeBodyList
 	for _, in := range user.lotteryDynamics() {

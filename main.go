@@ -16,6 +16,7 @@ import (
 	// _ "qq/cronjob/lifetip"
 	_ "qq/cronjob/dx"
 	//_ "qq/cronjob/kfc"
+	_ "qq/cronjob/lottery"
 	_ "qq/cronjob/maotai"
 
 	_ "qq/cronjob/picture"

@@ -87,6 +87,10 @@ func UserID() string {
 	return c.Load().(KV)["user_id"]
 }
 
+func BiliCookie() string {
+	return c.Load().(KV)["bili_cookie"]
+}
+
 func Namespace() string {
 	return c.Load().(KV)["namespace"]
 }
@@ -113,6 +117,7 @@ const (
 )
 
 var mappingKV = KV{
+	"bili_cookie":             "",
 	"azure_token":             "",
 	"azure_model":             "",
 	"azure_url":               "",

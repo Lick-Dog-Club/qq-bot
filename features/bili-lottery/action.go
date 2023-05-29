@@ -37,16 +37,16 @@ func (u *User) buildRequest(url string) *http.Request {
 }
 
 // info https://api.bilibili.com/x/member/web/account
-func (u *User) info() userInfo {
+func (u *User) info() (userInfo, error) {
 	response, err := httpClient.Do(u.buildRequest("https://api.bilibili.com/x/member/web/account"))
 	if err != nil {
-		log.Fatal(err)
+		return userInfo{}, err
 	}
 	defer closeBody(response.Body)
 	var info userInfo
 	err = json.NewDecoder(response.Body).Decode(&info)
 	if err != nil {
-		log.Fatal(err)
+		return userInfo{}, err
 	}
 	if info.Code == 0 {
 		log.Println(info.Data.Uname, info.Data.Mid)
@@ -54,7 +54,7 @@ func (u *User) info() userInfo {
 		log.Fatal(info.Message)
 	}
 	u.me = info
-	return info
+	return info, nil
 }
 
 // myForwards https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/space?offset=&host_mid=345516933&timezone_offset=-480
