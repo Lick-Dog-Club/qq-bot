@@ -16,7 +16,7 @@ func init() {
 		log.Printf("开始处理抽奖: uid: %s\n", config.UserID())
 		if cookie != "" {
 			robot.SendToUser(uid, lottery.Run(func(s string) { robot.SendToUser(uid, s) }, cookie))
-			robot.SendGroup(uid, "抽奖结束")
+			robot.SendToUser(uid, "抽奖结束")
 		}
 		return nil
 	}).DailyAt("09:10")
