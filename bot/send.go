@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strconv"
 	"strings"
 	"sync"
 
@@ -104,11 +103,6 @@ func (m *qqBot) DeleteMsg(msgID string) {
 func (m *qqBot) Send(msg string) string {
 	fmt.Println("send: ", msg)
 	return send(m.msg, msg)
-}
-
-func toInt(s string) int {
-	atoi, _ := strconv.Atoi(s)
-	return atoi
 }
 
 func (m *qqBot) SendGroup(gid string, s string) string {
@@ -213,6 +207,7 @@ func deleteMsg(msgID string) {
 }
 
 func send(message *Message, msg string) string {
+	log.Println(message.GroupID, message.SenderUserID, "message.GroupID, message.SenderUserID")
 	if message.GroupID == "" && message.SenderUserID == "" {
 		log.Println("GroupID == 0, UserID == 0")
 		return ""
