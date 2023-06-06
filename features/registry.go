@@ -8,15 +8,15 @@ import (
 )
 
 var (
-	newBotFunc func(msg *bot.Message) bot.Bot = bot.NewBot
+	newBot bot.Bot
 
 	defaultCommand cmd
 	commands       = make(map[string]CommandImp)
 	mu             sync.RWMutex
 )
 
-func SetNewBotFunc(fn func(msg *bot.Message) bot.Bot) {
-	newBotFunc = fn
+func SetNewBotFunc(bot bot.Bot) {
+	newBot = bot
 }
 
 type Option func(cmd *cmd) error
@@ -83,7 +83,7 @@ func Match(key string) bool {
 	return false
 }
 
-func Run(msg *bot.Message, keyword string, content string) error {
+func Run(bot bot.Bot, keyword string, content string) error {
 	var command CommandImp
 	func() {
 		mu.RLock()
@@ -95,7 +95,8 @@ func Run(msg *bot.Message, keyword string, content string) error {
 			content = keyword + " " + content
 		}
 	}()
-	return command.Run(newBotFunc(msg), content)
+
+	return command.Run(bot, content)
 }
 
 type sortCommands []CommandImp

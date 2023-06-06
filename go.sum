@@ -63,6 +63,8 @@ github.com/duc-cnzj/when-rules v0.0.0-20230418144926-a3ea9a3fa30a h1:OfoQ2KWMHNK
 github.com/duc-cnzj/when-rules v0.0.0-20230418144926-a3ea9a3fa30a/go.mod h1:gi71E1TwDJbms5EYANd64+yzaFF3ZCKO/acr5R0oI1w=
 github.com/duc-cnzj/when-rules v0.0.0-20230427085034-04cfb63088f8 h1:BEMkH5cWjPRVcIR7a6XNhQ2wPTYvKIJ+G9Pe2iNZxhg=
 github.com/duc-cnzj/when-rules v0.0.0-20230427085034-04cfb63088f8/go.mod h1:gi71E1TwDJbms5EYANd64+yzaFF3ZCKO/acr5R0oI1w=
+github.com/eatmoreapple/openwechat v1.4.3 h1:hpqR3M0c180GN5e6sfkqdTmna1+vnvohqv8LkS7MecI=
+github.com/eatmoreapple/openwechat v1.4.3/go.mod h1:ZxMcq7IpVWVU9JG7ERjExnm5M8/AQ6yZTtX30K3rwRQ=
 github.com/emicklei/go-restful/v3 v3.9.0 h1:XwGDlfxEnQZzuopoqxwSEllNcCOM9DhhFyhFIIGKwxE=
 github.com/emicklei/go-restful/v3 v3.9.0/go.mod h1:6n3XBCmQQb25CM2LCACGz8ukIrRry+4bhvbpWn3mrbc=
 github.com/envoyproxy/go-control-plane v0.9.0/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=

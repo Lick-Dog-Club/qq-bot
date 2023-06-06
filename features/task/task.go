@@ -53,7 +53,7 @@ func init() {
 		if len(after) == 2 {
 			if k, v := util.GetKeywordAndContent(after[1]); features.Match(k) {
 				tid = cronjob.Manager().NewOnceCommand(content, parse.Time, func(bot.Bot) error {
-					features.Run(b.Message(), k, v)
+					features.Run(b, k, v)
 					return nil
 				})
 				b.Send(fmt.Sprintf("已设置:\n时间: %s, 命令: %s\n取消任务请执行: canceltask %d", parse.Time.Format(time.DateTime), k, tid))

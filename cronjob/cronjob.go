@@ -13,7 +13,7 @@ import (
 
 var cronManager = newManager(newRobfigCronV3Runner())
 
-var newBotFunc func(msg *bot.Message) bot.Bot = bot.NewBot
+var newBotFunc func(msg *bot.Message) bot.Bot = bot.NewQQBot
 
 func SetNewBotFunc(fn func(msg *bot.Message) bot.Bot) {
 	newBotFunc = fn

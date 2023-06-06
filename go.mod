@@ -1,6 +1,6 @@
 module qq
 
-go 1.19
+go 1.20
 
 require (
 	github.com/NateScarlet/pixiv v0.7.0
@@ -21,6 +21,7 @@ require (
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/duc-cnzj/when-rules v0.0.0-20230427085034-04cfb63088f8 // indirect
+	github.com/eatmoreapple/openwechat v1.4.3 // indirect
 	github.com/emicklei/go-restful/v3 v3.9.0 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
