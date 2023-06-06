@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -206,18 +207,25 @@ func deleteMsg(msgID string) {
 	defer do.Body.Close()
 }
 
+func toInt(s string) int {
+	atoi, _ := strconv.Atoi(strings.TrimSpace(s))
+	return atoi
+}
+
 func send(message *Message, msg string) string {
-	if message.GroupID == "" && message.SenderUserID == "" {
+	var gid int = toInt(message.GroupID)
+	var sid int = toInt(message.SenderUserID)
+	if gid == 0 && sid == 0 {
 		log.Println("GroupID == 0, UserID == 0")
 		return ""
 	}
 	var req *http.Request
-	if message.GroupID != "" {
-		log.Println("send to group: ", message.GroupID)
-		req, _ = http.NewRequest("POST", cqHost+"/send_group_msg", strings.NewReader(fmt.Sprintf(`{"group_id": %s, "message": %q}`, message.GroupID, strings.Trim(msg, "\n"))))
+	if gid > 0 {
+		log.Println("send to group: ", gid)
+		req, _ = http.NewRequest("POST", cqHost+"/send_group_msg", strings.NewReader(fmt.Sprintf(`{"group_id": %d, "message": %q}`, gid, strings.Trim(msg, "\n"))))
 	} else {
 		log.Println("send to user: ", message.SenderUserID)
-		req, _ = http.NewRequest("POST", cqHost+"/send_msg", strings.NewReader(fmt.Sprintf(`{"user_id": %s, "message": %q}`, message.SenderUserID, strings.Trim(msg, "\n"))))
+		req, _ = http.NewRequest("POST", cqHost+"/send_msg", strings.NewReader(fmt.Sprintf(`{"user_id": %d, "message": %q}`, sid, strings.Trim(msg, "\n"))))
 	}
 	req.Header.Add("content-type", "application/json")
 	do, _ := c.Do(req)
