@@ -31,15 +31,23 @@ type CronBot interface {
 	botimp
 }
 
-type dummyBot struct {
-}
+type dummyBot struct{}
 
-func NewDummyBot(message *Message) Bot {
+func NewDummyBot() Bot {
 	return &dummyBot{}
 }
 
 func (d *dummyBot) Message() *Message {
-	return &Message{}
+	return &Message{
+		WeReply: func(content string) (*openwechat.SentMessage, error) {
+			log.Println("weReply: ", content)
+			return nil, nil
+		},
+		WeSendImg: func(file io.Reader) (*openwechat.SentMessage, error) {
+			log.Println("WeSendImg")
+			return nil, nil
+		},
+	}
 }
 
 func (d *dummyBot) UserID() string {
@@ -251,11 +259,7 @@ func (w *WeMsgMap) Delete(id string) {
 	delete(w.m, id)
 }
 
-var (
-	WeMessageMap = &WeMsgMap{m: map[string]*openwechat.SentMessage{}}
-	WeGroups     openwechat.Groups
-	WeFriends    openwechat.Friends
-)
+var WeMessageMap = &WeMsgMap{m: map[string]*openwechat.SentMessage{}}
 
 func NewWechatBot(msg Message) Bot {
 	return &wechatBot{message: msg}
@@ -272,16 +276,10 @@ func (w *wechatBot) DeleteMsg(msgID string) {
 }
 
 func (w *wechatBot) SendGroup(gid string, s string) string {
-	log.Println("SendGroup, gid: %v, s: %v ", gid, s)
-	g := WeGroups.SearchByID(gid)
-	g.SendText(s)
 	return ""
 }
 
 func (w *wechatBot) SendToUser(uid string, s string) string {
-	log.Println("SendToUser, uid: %v, s: %v ", uid, s)
-	user := WeFriends.SearchByID(uid)
-	user.SendText(s)
 	return ""
 }
 
