@@ -207,15 +207,16 @@ func deleteMsg(msgID string) {
 }
 
 func send(message *Message, msg string) string {
-	log.Println(message.GroupID, message.SenderUserID, "message.GroupID, message.SenderUserID")
 	if message.GroupID == "" && message.SenderUserID == "" {
 		log.Println("GroupID == 0, UserID == 0")
 		return ""
 	}
 	var req *http.Request
 	if message.GroupID != "" {
+		log.Println("send to group: ", message.GroupID)
 		req, _ = http.NewRequest("POST", cqHost+"/send_group_msg", strings.NewReader(fmt.Sprintf(`{"group_id": %s, "message": %q}`, message.GroupID, strings.Trim(msg, "\n"))))
 	} else {
+		log.Println("send to user: ", message.SenderUserID)
 		req, _ = http.NewRequest("POST", cqHost+"/send_msg", strings.NewReader(fmt.Sprintf(`{"user_id": %s, "message": %q}`, message.SenderUserID, strings.Trim(msg, "\n"))))
 	}
 	req.Header.Add("content-type", "application/json")
@@ -279,7 +280,7 @@ func (w *wechatBot) SendToUser(uid string, s string) string {
 }
 
 func (w *wechatBot) UserID() string {
-	return fmt.Sprintf("%v", w.message.SenderUserID)
+	return w.message.SenderUserID
 }
 
 func (w *wechatBot) IsGroupMessage() bool {
