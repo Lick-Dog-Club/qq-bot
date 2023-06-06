@@ -20,7 +20,7 @@ func init() {
 }
 
 func RunWechat(b bot.Bot) {
-	webot := openwechat.DefaultBot(openwechat.Normal) // 桌面模式
+	webot := openwechat.DefaultBot(openwechat.Desktop) // 桌面模式
 
 	// 注册消息处理函数
 	webot.MessageHandler = func(msg *openwechat.Message) {
