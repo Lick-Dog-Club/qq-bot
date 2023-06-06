@@ -62,11 +62,21 @@ func main() {
 		if (strings.Contains(message.Message, atMsg) && message.MessageType == "group") || message.MessageType == "private" {
 			msg := strings.ReplaceAll(message.Message, atMsg, "")
 			keyword, content := util.GetKeywordAndContent(msg)
+			var (
+				gid string
+				sid string
+			)
+			if message.UserID > 0 {
+				sid = fmt.Sprintf("%d", message.UserID)
+			}
+			if message.GroupID > 0 {
+				gid = fmt.Sprintf("%d", message.GroupID)
+			}
 			if err := features.Run(bot.NewQQBot(&bot.Message{
-				SenderUserID:  fmt.Sprintf("%d", message.UserID),
+				SenderUserID:  sid,
 				Message:       content,
 				IsSendByGroup: message.MessageType == "group",
-				GroupID:       fmt.Sprintf("%d", message.GroupID),
+				GroupID:       gid,
 			}), keyword, content); err != nil {
 				log.Println(err)
 			}
