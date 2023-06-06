@@ -28,12 +28,14 @@ var (
 )
 
 func init() {
-	rand.Seed(time.Now().UnixNano())
-}
-
-func init() {
 	features.AddKeyword("图片", "返回动漫图片~", func(bot bot.Bot, content string) error {
-		bot.Send(Url())
+		path := Url()
+		if bot.Message().WeSendImg != nil {
+			resp, _ := http.Get(path)
+			defer resp.Body.Close()
+			return nil
+		}
+		bot.Send(fmt.Sprintf("[CQ:image,file=%s]", path))
 		return nil
 	})
 }
@@ -57,7 +59,7 @@ func Url() string {
 	}, backoff.WithMaxRetries(backoff.NewConstantBackOff(1*time.Second), 10)); err != nil {
 		return "没图了~"
 	}
-	url := fmt.Sprintf("[CQ:image,file=%s]", response.Header.Get("Location"))
+	url := response.Header.Get("Location")
 	log.Println("图片url: ", url)
 	return url
 }

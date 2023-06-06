@@ -37,6 +37,7 @@ import (
 	_ "qq/features/task"
 	_ "qq/features/version"
 	_ "qq/features/weather"
+	_ "qq/features/webot"
 	_ "qq/features/weibo"
 	_ "qq/features/zhihu"
 )
@@ -49,8 +50,9 @@ func main() {
 	cm := cronjob.Manager()
 	cm.Run(context.TODO())
 	defer cm.Shutdown(context.TODO())
+	features.SetNewBotFunc(bot.NewDummyBot())
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		var message *bot.Message
+		var message *bot.QQMessage
 		json.NewDecoder(r.Body).Decode(&message)
 		if message.PostType == "meta_event" {
 			return
@@ -60,7 +62,12 @@ func main() {
 		if (strings.Contains(message.Message, atMsg) && message.MessageType == "group") || message.MessageType == "private" {
 			msg := strings.ReplaceAll(message.Message, atMsg, "")
 			keyword, content := util.GetKeywordAndContent(msg)
-			if err := features.Run(message, keyword, content); err != nil {
+			if err := features.Run(bot.NewQQBot(&bot.Message{
+				SenderUserID:  fmt.Sprintf("%d", message.UserID),
+				Message:       content,
+				IsSendByGroup: message.MessageType == "group",
+				GroupID:       fmt.Sprintf("%d", message.GroupID),
+			}), keyword, content); err != nil {
 				log.Println(err)
 			}
 		}

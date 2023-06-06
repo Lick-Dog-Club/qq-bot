@@ -64,7 +64,15 @@ func init() {
 			bot.Send(err.Error())
 			return nil
 		}
-		msgID := bot.Send(fmt.Sprintf("[CQ:image,file=file://%s]", image))
+		var msgID string
+		if bot.Message().WeSendImg != nil {
+			open, _ := os.Open(image)
+			defer open.Close()
+			img, _ := bot.Message().WeSendImg(open)
+			msgID = img.MsgId
+		} else {
+			msgID = bot.Send(fmt.Sprintf("[CQ:image,file=file://%s]", image))
+		}
 		os.Remove(image)
 		if bot.IsGroupMessage() {
 			tID := bot.Send("图片即将在 30s 之后撤回，要保存的赶紧了~")

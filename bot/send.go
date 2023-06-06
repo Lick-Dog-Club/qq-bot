@@ -3,23 +3,27 @@ package bot
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
+
+	"github.com/eatmoreapple/openwechat"
 
 	log "github.com/sirupsen/logrus"
 )
 
 type botimp interface {
-	DeleteMsg(msgID int)
-	SendGroup(gid string, s string) int
-	SendToUser(uid string, s string) int
+	DeleteMsg(msgID string)
+	SendGroup(gid string, s string) string
+	SendToUser(uid string, s string) string
 }
 type Bot interface {
 	botimp
 	UserID() string
 	IsGroupMessage() bool
-	Send(msg string) int
+	Send(msg string) string
 	Message() *Message
 }
 
@@ -27,69 +31,77 @@ type CronBot interface {
 	botimp
 }
 
-type dummyBot struct {
-}
+type dummyBot struct{}
 
-func NewDummyBot(message *Message) Bot {
+func NewDummyBot() Bot {
 	return &dummyBot{}
 }
 
 func (d *dummyBot) Message() *Message {
-	return &Message{}
+	return &Message{
+		WeReply: func(content string) (*openwechat.SentMessage, error) {
+			log.Println("weReply: ", content)
+			return nil, nil
+		},
+		WeSendImg: func(file io.Reader) (*openwechat.SentMessage, error) {
+			log.Println("WeSendImg")
+			return nil, nil
+		},
+	}
 }
 
 func (d *dummyBot) UserID() string {
 	return ""
 }
 
-func (d *dummyBot) DeleteMsg(msgID int) {
-	fmt.Printf("delete %d", msgID)
+func (d *dummyBot) DeleteMsg(msgID string) {
+	fmt.Printf("delete %s", msgID)
 }
 
-func (d *dummyBot) Send(msg string) int {
+func (d *dummyBot) Send(msg string) string {
 	fmt.Printf("Send:\n%s", msg)
-	return 0
+	return ""
 }
 
-func (d *dummyBot) SendGroup(gid string, s string) int {
+func (d *dummyBot) SendGroup(gid string, s string) string {
 	fmt.Printf("Send:\ngid:%v\ncontent: %s", gid, s)
-	return 0
+	return ""
 }
 
-func (d *dummyBot) SendToUser(uid string, s string) int {
+func (d *dummyBot) SendToUser(uid string, s string) string {
 	fmt.Printf("Send:\nuid:%v\ncontent: %s", uid, s)
-	return 0
+	return ""
 }
 
 func (d *dummyBot) IsGroupMessage() bool {
 	return false
 }
 
-type bot struct {
+type qqBot struct {
 	msg *Message
 }
 
-func NewBot(msg *Message) Bot {
-	return &bot{msg: msg}
+func NewQQBot(msg *Message) Bot {
+	return &qqBot{msg: msg}
 }
 
-func (m *bot) Message() *Message {
+func (m *qqBot) Message() *Message {
 	return m.msg
 }
 
-func (m *bot) UserID() string {
-	return fmt.Sprintf("%d", m.msg.UserID)
+func (m *qqBot) UserID() string {
+	return m.msg.SenderUserID
 }
 
-func (m *bot) IsGroupMessage() bool {
-	return m.msg.MessageType == "group"
+func (m *qqBot) IsGroupMessage() bool {
+	return m.msg.IsSendByGroup
 }
 
-func (m *bot) DeleteMsg(msgID int) {
+func (m *qqBot) DeleteMsg(msgID string) {
 	deleteMsg(msgID)
 }
 
-func (m *bot) Send(msg string) int {
+func (m *qqBot) Send(msg string) string {
 	fmt.Println("send: ", msg)
 	return send(m.msg, msg)
 }
@@ -99,19 +111,19 @@ func toInt(s string) int {
 	return atoi
 }
 
-func (m *bot) SendGroup(gid string, s string) int {
-	return send(&Message{GroupID: toInt(fmt.Sprintf("%v", gid))}, s)
+func (m *qqBot) SendGroup(gid string, s string) string {
+	return send(&Message{GroupID: gid}, s)
 }
 
-func (m *bot) SendToUser(uid string, s string) int {
-	return send(&Message{sender: sender{UserID: toInt(fmt.Sprintf("%v", uid))}}, s)
+func (m *qqBot) SendToUser(uid string, s string) string {
+	return send(&Message{SenderUserID: uid}, s)
 }
 
 const cqHost = "http://127.0.0.1:5700"
 
 var c = http.Client{}
 
-type Message struct {
+type QQMessage struct {
 	PostType      string `json:"post_type"`
 	MetaEventType string `json:"meta_event_type"` // heartbeat
 	MessageType   string `json:"message_type"`
@@ -125,6 +137,19 @@ type Message struct {
 	Anonymous     *anonymous
 	Message       string `json:"message"`
 	sender
+}
+
+type WechatMessage = openwechat.Message
+
+type Message struct {
+	SenderUserID  string
+	Message       string
+	IsSendByGroup bool
+	GroupID       string
+
+	// For WeChat
+	WeReply   func(content string) (*openwechat.SentMessage, error)
+	WeSendImg func(file io.Reader) (*openwechat.SentMessage, error)
 }
 
 /*
@@ -180,28 +205,102 @@ type sendResponse struct {
 	} `json:"data"`
 }
 
-func deleteMsg(msgID int) {
-	req, _ := http.NewRequest("POST", cqHost+"/delete_msg", strings.NewReader(fmt.Sprintf(`{"message_id": %d}`, msgID)))
+func deleteMsg(msgID string) {
+	req, _ := http.NewRequest("POST", cqHost+"/delete_msg", strings.NewReader(fmt.Sprintf(`{"message_id": %s}`, msgID)))
 	req.Header.Add("content-type", "application/json")
 	do, _ := c.Do(req)
 	defer do.Body.Close()
 }
 
-func send(message *Message, msg string) int {
-	if message.GroupID == 0 && message.UserID == 0 {
+func send(message *Message, msg string) string {
+	if message.GroupID == "" && message.SenderUserID == "" {
 		log.Println("GroupID == 0, UserID == 0")
-		return 0
+		return ""
 	}
 	var req *http.Request
-	if message.GroupID > 0 {
-		req, _ = http.NewRequest("POST", cqHost+"/send_group_msg", strings.NewReader(fmt.Sprintf(`{"group_id": %d, "message": %q}`, message.GroupID, strings.Trim(msg, "\n"))))
+	if message.GroupID != "" {
+		req, _ = http.NewRequest("POST", cqHost+"/send_group_msg", strings.NewReader(fmt.Sprintf(`{"group_id": %s, "message": %q}`, message.GroupID, strings.Trim(msg, "\n"))))
 	} else {
-		req, _ = http.NewRequest("POST", cqHost+"/send_msg", strings.NewReader(fmt.Sprintf(`{"user_id": %d, "message": %q}`, message.UserID, strings.Trim(msg, "\n"))))
+		req, _ = http.NewRequest("POST", cqHost+"/send_msg", strings.NewReader(fmt.Sprintf(`{"user_id": %s, "message": %q}`, message.SenderUserID, strings.Trim(msg, "\n"))))
 	}
 	req.Header.Add("content-type", "application/json")
 	do, _ := c.Do(req)
 	defer do.Body.Close()
 	var res sendResponse
 	json.NewDecoder(do.Body).Decode(&res)
-	return res.Data.MessageID
+	return fmt.Sprintf("%d", res.Data.MessageID)
+}
+
+type wechatBot struct {
+	message Message
+}
+
+type WeMsgMap struct {
+	sync.RWMutex
+	m map[string]*openwechat.SentMessage
+}
+
+func (w *WeMsgMap) Get(id string) *openwechat.SentMessage {
+	w.RLock()
+	defer w.RUnlock()
+	return w.m[id]
+}
+
+func (w *WeMsgMap) Add(id string, text *openwechat.SentMessage) {
+	w.Lock()
+	defer w.Unlock()
+	w.m[id] = text
+}
+
+func (w *WeMsgMap) Delete(id string) {
+	w.Lock()
+	defer w.Unlock()
+	log.Println("WeMsgMap delete ", id)
+	delete(w.m, id)
+}
+
+var WeMessageMap = &WeMsgMap{m: map[string]*openwechat.SentMessage{}}
+
+func NewWechatBot(msg Message) Bot {
+	return &wechatBot{message: msg}
+}
+
+func (w *wechatBot) DeleteMsg(msgID string) {
+	log.Println("DeleteMsgID: ", msgID)
+	if message := WeMessageMap.Get(msgID); message != nil {
+		if message.CanRevoke() {
+			message.Revoke()
+		}
+		WeMessageMap.Delete(msgID)
+	}
+}
+
+func (w *wechatBot) SendGroup(gid string, s string) string {
+	return ""
+}
+
+func (w *wechatBot) SendToUser(uid string, s string) string {
+	return ""
+}
+
+func (w *wechatBot) UserID() string {
+	return fmt.Sprintf("%v", w.message.SenderUserID)
+}
+
+func (w *wechatBot) IsGroupMessage() bool {
+	return w.message.IsSendByGroup
+}
+
+func (w *wechatBot) Send(msg string) string {
+	text, err := w.message.WeReply(msg)
+	if err != nil {
+		log.Println(err)
+	}
+	//WeMessageMap.Add(text.MsgId, text)
+	log.Println("text.MsgId: ", text)
+	return text.MsgId
+}
+
+func (w *wechatBot) Message() *Message {
+	return &w.message
 }
