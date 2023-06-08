@@ -42,7 +42,6 @@ func newClientCtx() (context.Context, error) {
 }
 
 func init() {
-	rand.Seed(time.Now().UnixNano())
 	features.AddKeyword("pd", "pixiv_mode 设置成 daily", func(bot bot.Bot, content string) error {
 		config.Set(map[string]string{"pixiv_mode": "daily"})
 		bot.Send("pixiv_mode 已设置成 daily")
