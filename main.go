@@ -18,7 +18,6 @@ import (
 	//_ "qq/cronjob/kfc"
 	_ "qq/cronjob/lottery"
 	_ "qq/cronjob/maotai"
-
 	_ "qq/cronjob/picture"
 	_ "qq/cronjob/tianqi"
 	_ "qq/cronjob/xiaofeiquan"
@@ -50,7 +49,7 @@ func main() {
 	cm := cronjob.Manager()
 	cm.Run(context.TODO())
 	defer cm.Shutdown(context.TODO())
-	features.SetNewBotFunc(bot.NewDummyBot())
+
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		var message *bot.QQMessage
 		json.NewDecoder(r.Body).Decode(&message)

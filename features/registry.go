@@ -8,16 +8,10 @@ import (
 )
 
 var (
-	newBot bot.Bot
-
 	defaultCommand cmd
 	commands       = make(map[string]CommandImp)
 	mu             sync.RWMutex
 )
-
-func SetNewBotFunc(bot bot.Bot) {
-	newBot = bot
-}
 
 type Option func(cmd *cmd) error
 
