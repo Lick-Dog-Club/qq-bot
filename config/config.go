@@ -111,6 +111,18 @@ func HttpProxy() string {
 	return c.Load().(KV)["http_proxy"]
 }
 
+func BinanceKey() string {
+	return c.Load().(KV)["binance_key"]
+}
+
+func BinanceSecret() string {
+	return c.Load().(KV)["binance_secret"]
+}
+
+func BinanceDiff() string {
+	return c.Load().(KV)["binance_diff"]
+}
+
 const (
 	AIProxyOne = "https://gpt.pawan.krd/backend-api/conversation"
 	AIProxyTwo = "https://chatgpt.duti.tech/api/conversation"
@@ -136,6 +148,9 @@ var mappingKV = KV{
 	"weather_key":             os.Getenv("WEATHER_KEY"),
 	"tian_api_key":            os.Getenv("TIAN_API_KEY"),
 	"http_proxy":              os.Getenv("HTTP_PROXY"),
+	"binance_key":             "",
+	"binance_secret":          "",
+	"binance_diff":            "100",
 }
 
 func Set(m map[string]string) {
