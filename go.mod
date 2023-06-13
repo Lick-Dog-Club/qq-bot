@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/NateScarlet/pixiv v0.7.0
+	github.com/adshao/go-binance/v2 v2.4.2
 	github.com/cenkalti/backoff/v4 v4.2.0
 	github.com/duc-cnzj/when-rules v0.0.0-20230427085034-04cfb63088f8
 	github.com/eatmoreapple/openwechat v1.4.3
@@ -12,6 +13,7 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/sashabaranov/go-openai v1.5.6
 	github.com/sirupsen/logrus v1.9.0
+	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1
 	k8s.io/apimachinery v0.26.1
 	k8s.io/client-go v0.26.1
 )
@@ -19,7 +21,6 @@ require (
 require (
 	github.com/AlekSi/pointer v1.2.0 // indirect
 	github.com/PuerkitoBio/goquery v1.8.0 // indirect
-	github.com/adshao/go-binance/v2 v2.4.2 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/bitly/go-simplejson v0.5.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect

@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"time"
 
+	"golang.org/x/exp/constraints"
+
 	"github.com/adshao/go-binance/v2"
 	"github.com/adshao/go-binance/v2/futures"
 )
@@ -46,7 +48,7 @@ func (cn *ContractNotifier) Alert() (string, bool) {
 	return cn.alert()
 }
 
-func max[T ~int | ~float64](items []T) (res T) {
+func max[T constraints.Float](items []T) (res T) {
 	if len(items) < 1 {
 		return
 	}
@@ -58,7 +60,7 @@ func max[T ~int | ~float64](items []T) (res T) {
 	}
 	return
 }
-func min[T ~int | ~float64](items []T) (res T) {
+func min[T constraints.Float](items []T) (res T) {
 	if len(items) < 1 {
 		return
 	}
