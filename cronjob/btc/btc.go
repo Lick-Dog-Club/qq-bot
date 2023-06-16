@@ -48,7 +48,7 @@ func (cn *ContractNotifier) Alert() (string, bool) {
 	return cn.alert()
 }
 
-func max[T constraints.Float](items []T) (res T) {
+func max[T constraints.Ordered](items []T) (res T) {
 	if len(items) < 1 {
 		return
 	}
@@ -60,7 +60,7 @@ func max[T constraints.Float](items []T) (res T) {
 	}
 	return
 }
-func min[T constraints.Float](items []T) (res T) {
+func min[T constraints.Ordered](items []T) (res T) {
 	if len(items) < 1 {
 		return
 	}
