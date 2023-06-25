@@ -37,6 +37,7 @@ func RunWechat(b bot.Bot) {
 			atMsg := fmt.Sprintf("@%s", msg.Owner().NickName)
 			body := strings.ReplaceAll(msg.Content, atMsg, "")
 			keyword, content := util.GetKeywordAndContent(body)
+			log.Printf("body: %v\n, key: %v\n,content: %v", body, keyword, content)
 
 			if err := features.Run(bot.NewWechatBot(bot.Message{
 				SenderUserID:  senderID,
