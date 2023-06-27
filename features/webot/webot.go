@@ -21,6 +21,93 @@ func init() {
 	})
 }
 
+func RunWechat(b bot.Bot) {
+	webot := openwechat.DefaultBot(openwechat.Desktop) // 桌面模式
+	var sb = &superBot{bot: webot, msgMap: bot.NewWeMsgMap(), um: newUserMaps()}
+
+	// 注册消息处理函数
+	webot.MessageHandler = func(msg *openwechat.Message) {
+		if msg.IsText() && sb.IsBotEnabledForThisMsg(msg) {
+			gid := ""
+			receiver, err := msg.Receiver()
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			senderID := receiver.ID()
+			if msg.IsComeFromGroup() {
+				gid = receiver.ID()
+				sender, _ := msg.SenderInGroup()
+				senderID = sender.ID()
+			}
+
+			atMsg := fmt.Sprintf("@%s", msg.Owner().NickName)
+			body := strings.ReplaceAll(msg.Content, atMsg, "")
+			keyword, content := util.GetKeywordAndContent(body)
+			log.Printf("body: %v\n, key: %v\n,content: %v", body, keyword, content)
+
+			sender, _ := msg.Sender()
+			user, _ := msg.Receiver()
+			if user.NickName == sender.NickName {
+				log.Println("自己给自己发！！")
+				return
+			}
+			if holdUp(sb, keyword, content) && msg.IsSendBySelf() {
+				send := func(text string) {
+					replyText(msg)(text)
+				}
+				if keyword == "list" {
+					send(sb.um.String())
+					return
+				}
+				send("done!")
+			}
+
+			if err := features.Run(bot.NewWechatBot(bot.Message{
+				SenderUserID:  senderID,
+				Message:       msg.Content,
+				IsSendByGroup: msg.IsComeFromGroup(),
+				GroupID:       gid,
+				WeReply:       replyText(msg),
+				WeSendImg: func(file io.Reader) (*openwechat.SentMessage, error) {
+					image, err := msg.ReplyImage(file)
+					if err != nil {
+						return nil, err
+					}
+					sb.msgMap.Add(image.MsgId, image)
+					return image, err
+				},
+			}, sb.msgMap), keyword, content); err != nil {
+				log.Println(err)
+			}
+		}
+	}
+	// 注册登陆二维码回调
+	webot.UUIDCallback = func(uuid string) {
+		b.Send("访问下面网址扫描二维码登录")
+		qrcodeUrl := openwechat.GetQrcodeUrl(uuid)
+		log.Println(qrcodeUrl)
+		b.Send(qrcodeUrl)
+	}
+
+	// 登陆
+	if err := webot.Login(); err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// 获取登陆的用户
+	self, err := webot.GetCurrentUser()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	log.Println("当前用户是：", self.DisplayName)
+	// 阻塞主goroutine, 直到发生异常或者用户主动退出
+	webot.Block()
+}
+
 func (sb *superBot) IsBotEnabledForThisMsg(msg *openwechat.Message) bool {
 	log.Printf(`
 msg.IsSendBySelf(): %v
@@ -29,12 +116,14 @@ msg.IsAt(): %v
 msg.IsSendByFriend(): %v
 msg.Owner().NickName: %v
 `, msg.IsSendBySelf(), msg.IsSendByGroup(), msg.IsAt(), msg.IsSendByFriend(), msg.Owner().NickName)
-	if msg.IsSendBySelf() && !msg.IsSendByGroup() {
+	sender, _ := msg.Sender()
+	receiver, _ := msg.Receiver()
+	// 自己给自己发消息
+	if msg.IsSendBySelf() && sender.NickName == receiver.NickName {
 		return true
 	}
 
-	if (msg.IsSendByGroup() && msg.IsAt()) || msg.IsSendByFriend() {
-		sender, _ := msg.Sender()
+	if (msg.IsSendByGroup() && msg.IsAt()) || msg.IsSendByFriend() && !msg.IsSendBySelf() {
 		if sb.um.exists(sender.NickName) {
 			return true
 		}
@@ -102,88 +191,6 @@ func replyText(msg *openwechat.Message) func(content string) (*openwechat.SentMe
 		}
 	}
 	return msg.ReplyText
-}
-
-func RunWechat(b bot.Bot) {
-	webot := openwechat.DefaultBot(openwechat.Desktop) // 桌面模式
-	var sb = &superBot{bot: webot, msgMap: bot.NewWeMsgMap(), um: newUserMaps()}
-
-	// 注册消息处理函数
-	webot.MessageHandler = func(msg *openwechat.Message) {
-		if msg.IsText() && sb.IsBotEnabledForThisMsg(msg) {
-			gid := ""
-			receiver, err := msg.Receiver()
-			if err != nil {
-				log.Println(err)
-				return
-			}
-			senderID := receiver.ID()
-			if msg.IsComeFromGroup() {
-				gid = receiver.ID()
-				sender, _ := msg.SenderInGroup()
-				senderID = sender.ID()
-			}
-
-			atMsg := fmt.Sprintf("@%s", msg.Owner().NickName)
-			body := strings.ReplaceAll(msg.Content, atMsg, "")
-			keyword, content := util.GetKeywordAndContent(body)
-			log.Printf("body: %v\n, key: %v\n,content: %v", body, keyword, content)
-
-			if holdUp(sb, keyword, content) && msg.IsSendBySelf() {
-				send := func(text string) {
-					replyText(msg)(text)
-				}
-				if keyword == "list" {
-					send(sb.um.String())
-					return
-				}
-				send("done!")
-				return
-			}
-
-			if err := features.Run(bot.NewWechatBot(bot.Message{
-				SenderUserID:  senderID,
-				Message:       msg.Content,
-				IsSendByGroup: msg.IsComeFromGroup(),
-				GroupID:       gid,
-				WeReply:       replyText(msg),
-				WeSendImg: func(file io.Reader) (*openwechat.SentMessage, error) {
-					image, err := msg.ReplyImage(file)
-					if err != nil {
-						return nil, err
-					}
-					sb.msgMap.Add(image.MsgId, image)
-					return image, err
-				},
-			}, sb.msgMap), keyword, content); err != nil {
-				log.Println(err)
-			}
-		}
-	}
-	// 注册登陆二维码回调
-	webot.UUIDCallback = func(uuid string) {
-		b.Send("访问下面网址扫描二维码登录")
-		qrcodeUrl := openwechat.GetQrcodeUrl(uuid)
-		log.Println(qrcodeUrl)
-		b.Send(qrcodeUrl)
-	}
-
-	// 登陆
-	if err := webot.Login(); err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	// 获取登陆的用户
-	self, err := webot.GetCurrentUser()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	log.Println("当前用户是：", self.DisplayName)
-	// 阻塞主goroutine, 直到发生异常或者用户主动退出
-	webot.Block()
 }
 
 func holdUp(sb *superBot, keyword string, content string) bool {
