@@ -111,7 +111,11 @@ func RunWechat(b bot.Bot) {
 			if holdUp(sb, keyword, content) && msg.IsSendBySelf() {
 				send := func(text string) {
 					me, _ := msg.Owner().AsFriend()
-					msg.Owner().SendTextToFriend(me, text)
+					user, _ := msg.Bot().GetCurrentUser()
+					_, err := user.SendTextToFriend(me, text)
+					if err != nil {
+						log.Println(err)
+					}
 				}
 				if keyword == "list" {
 					send(sb.um.String())
