@@ -90,10 +90,10 @@ type superBot struct {
 
 func replyText(msg *openwechat.Message) func(content string) (*openwechat.SentMessage, error) {
 	if msg.IsSendBySelf() {
-		me, _ := msg.Owner().AsFriend()
 		user, _ := msg.Bot().GetCurrentUser()
+		helper := user.FileHelper()
 		return func(content string) (*openwechat.SentMessage, error) {
-			return user.SendTextToFriend(me, content)
+			return user.SendTextToFriend(helper, content)
 		}
 	}
 	return msg.ReplyText
