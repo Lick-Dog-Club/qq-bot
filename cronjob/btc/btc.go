@@ -6,13 +6,13 @@ import (
 	"qq/bot"
 	"qq/config"
 	"qq/cronjob"
+	"qq/util"
 	"strconv"
 	"time"
 
-	"golang.org/x/exp/constraints"
-
 	"github.com/adshao/go-binance/v2"
 	"github.com/adshao/go-binance/v2/futures"
+	"golang.org/x/exp/constraints"
 )
 
 var cn = &ContractNotifier{}
@@ -23,6 +23,7 @@ func init() {
 			cn.client = binance.NewFuturesClient(config.BinanceKey(), config.BinanceSecret())
 			if alert, ok := cn.Alert(); ok {
 				bot.SendToUser(config.UserID(), alert)
+				util.Bark("BTC", alert, config.BarkUrls()...)
 			}
 		}
 		return nil

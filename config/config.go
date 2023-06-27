@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 	"sync/atomic"
 
 	"github.com/sashabaranov/go-openai"
@@ -123,12 +124,18 @@ func BinanceDiff() string {
 	return c.Load().(KV)["binance_diff"]
 }
 
+func BarkUrls() []string {
+	return strings.Split(c.Load().(KV)["bark_url"], ",")
+}
+
 const (
 	AIProxyOne = "https://gpt.pawan.krd/backend-api/conversation"
 	AIProxyTwo = "https://chatgpt.duti.tech/api/conversation"
 )
 
 var mappingKV = KV{
+	// https://api.day.app/xxxxxx/标题/内容
+	"bark_url":                "",
 	"bili_cookie":             "",
 	"azure_token":             "",
 	"azure_model":             "",
