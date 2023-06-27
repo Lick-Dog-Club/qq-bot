@@ -1,6 +1,7 @@
 package webot
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"qq/bot"
@@ -32,12 +33,11 @@ msg.Owner().NickName: %v
 		return true
 	}
 
-	if msg.IsSendByGroup() && msg.IsAt() && sb.um.exists(msg.Owner().NickName) {
-		return true
-	}
-
-	if msg.IsSendByFriend() && sb.um.exists(msg.Owner().NickName) {
-		return true
+	if (msg.IsSendByGroup() && msg.IsAt()) || msg.IsSendByFriend() {
+		sender, _ := msg.Sender()
+		if sb.um.exists(sender.NickName) {
+			return true
+		}
 	}
 
 	return false
@@ -90,6 +90,11 @@ type superBot struct {
 
 func replyText(msg *openwechat.Message) func(content string) (*openwechat.SentMessage, error) {
 	if msg.IsSendBySelf() {
+		if msg.IsSendByGroup() {
+			return func(content string) (*openwechat.SentMessage, error) {
+				return nil, errors.New("群里面不能自己用机器人")
+			}
+		}
 		user, _ := msg.Bot().GetCurrentUser()
 		helper := user.FileHelper()
 		return func(content string) (*openwechat.SentMessage, error) {
@@ -107,7 +112,11 @@ func RunWechat(b bot.Bot) {
 	webot.MessageHandler = func(msg *openwechat.Message) {
 		if msg.IsText() && sb.IsBotEnabledForThisMsg(msg) {
 			gid := ""
-			receiver, _ := msg.Receiver()
+			receiver, err := msg.Receiver()
+			if err != nil {
+				log.Println(err)
+				return
+			}
 			senderID := receiver.ID()
 			if msg.IsComeFromGroup() {
 				gid = receiver.ID()

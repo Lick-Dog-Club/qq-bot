@@ -302,6 +302,7 @@ func (w *wechatBot) Send(msg string) string {
 	text, err := w.message.WeReply(msg)
 	if err != nil {
 		log.Println(err)
+		return ""
 	}
 	//WeMessageMap.Add(text.MsgId, text)
 	log.Println("text.MsgId: ", text)
