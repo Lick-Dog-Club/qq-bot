@@ -108,12 +108,16 @@ func RunWechat(b bot.Bot) {
 			body := strings.ReplaceAll(msg.Content, atMsg, "")
 			keyword, content := util.GetKeywordAndContent(body)
 			log.Printf("body: %v\n, key: %v\n,content: %v", body, keyword, content)
-			if holdUp(sb, keyword, content) {
+			if holdUp(sb, keyword, content) && msg.IsSendBySelf() {
+				send := func(text string) {
+					me, _ := msg.Owner().AsFriend()
+					msg.Owner().SendTextToFriend(me, text)
+				}
 				if keyword == "list" {
-					msg.ReplyText(sb.um.String())
+					send(sb.um.String())
 					return
 				}
-				msg.ReplyText("done!")
+				send("done!")
 				return
 			}
 
