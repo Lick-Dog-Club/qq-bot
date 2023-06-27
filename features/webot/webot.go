@@ -21,6 +21,12 @@ func init() {
 }
 
 func (sb *superBot) IsBotEnabledForThisMsg(msg *openwechat.Message) bool {
+	log.Printf(`
+msg.IsSendBySelf(): %v
+msg.IsSendByGroup(): %v
+msg.IsAt(): %v
+msg.IsSendByFriend(): %v
+`, msg.IsSendBySelf(), msg.IsSendByGroup(), msg.IsAt(), msg.IsSendByFriend())
 	if msg.IsSendBySelf() {
 		return true
 	}
