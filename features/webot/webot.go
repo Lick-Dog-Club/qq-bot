@@ -65,8 +65,9 @@ func RunWechat(b bot.Bot) {
 				GroupID:       gid,
 				WeReply:       replyText(msg),
 				WeSendImg: func(file io.Reader) (*openwechat.SentMessage, error) {
-					image, err := msg.ReplyImage(file)
+					image, err := replyImg(msg)(file)
 					if err != nil {
+						log.Println(err)
 						return nil, err
 					}
 					sb.msgMap.Add(image.MsgId, image)
@@ -186,6 +187,22 @@ func replyText(msg *openwechat.Message) func(content string) (*openwechat.SentMe
 		}
 	}
 	return msg.ReplyText
+}
+
+func replyImg(msg *openwechat.Message) func(file io.Reader) (*openwechat.SentMessage, error) {
+	if msg.IsSendBySelf() {
+		if msg.IsSendByGroup() {
+			return func(file io.Reader) (*openwechat.SentMessage, error) {
+				return nil, errors.New("群里面不能自己用机器人")
+			}
+		}
+		user, _ := msg.Bot().GetCurrentUser()
+		helper := user.FileHelper()
+		return func(file io.Reader) (*openwechat.SentMessage, error) {
+			return user.SendImageToFriend(helper, file)
+		}
+	}
+	return msg.ReplyImage
 }
 
 func holdUp(sb *superBot, keyword string, content string) bool {
