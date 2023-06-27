@@ -88,6 +88,17 @@ type superBot struct {
 	um     *userMaps
 }
 
+func replyText(msg *openwechat.Message) func(content string) (*openwechat.SentMessage, error) {
+	if msg.IsSendBySelf() {
+		me, _ := msg.Owner().AsFriend()
+		user, _ := msg.Bot().GetCurrentUser()
+		return func(content string) (*openwechat.SentMessage, error) {
+			return user.SendTextToFriend(me, content)
+		}
+	}
+	return msg.ReplyText
+}
+
 func RunWechat(b bot.Bot) {
 	webot := openwechat.DefaultBot(openwechat.Desktop) // 桌面模式
 	var sb = &superBot{bot: webot, msgMap: bot.NewWeMsgMap(), um: newUserMaps()}
@@ -108,14 +119,10 @@ func RunWechat(b bot.Bot) {
 			body := strings.ReplaceAll(msg.Content, atMsg, "")
 			keyword, content := util.GetKeywordAndContent(body)
 			log.Printf("body: %v\n, key: %v\n,content: %v", body, keyword, content)
+
 			if holdUp(sb, keyword, content) && msg.IsSendBySelf() {
 				send := func(text string) {
-					me, _ := msg.Owner().AsFriend()
-					user, _ := msg.Bot().GetCurrentUser()
-					_, err := user.SendTextToFriend(me, text)
-					if err != nil {
-						log.Println(err)
-					}
+					replyText(msg)(text)
 				}
 				if keyword == "list" {
 					send(sb.um.String())
@@ -130,7 +137,7 @@ func RunWechat(b bot.Bot) {
 				Message:       msg.Content,
 				IsSendByGroup: msg.IsComeFromGroup(),
 				GroupID:       gid,
-				WeReply:       msg.ReplyText,
+				WeReply:       replyText(msg),
 				WeSendImg: func(file io.Reader) (*openwechat.SentMessage, error) {
 					image, err := msg.ReplyImage(file)
 					if err != nil {
