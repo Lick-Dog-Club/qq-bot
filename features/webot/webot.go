@@ -18,6 +18,10 @@ import (
 //2. 扫码登陆
 //3. 微信需要对自己发送 "add 群组昵称" 才能开启机器人模式，不发就不会变成机器人
 //4. 需要对用户开启的话也是 "add 用户昵称"
+//5. 对自己发送的特殊指令：
+//      list 列出所有开启机器人的用户或者群组
+//      add 用户昵称/群组昵称
+//      del 用户昵称/群组昵称
 
 func init() {
 	features.AddKeyword("webot", "微信机器人扫码登录", func(bot bot.Bot, content string) error {
