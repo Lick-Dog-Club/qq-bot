@@ -46,12 +46,6 @@ func RunWechat(b bot.Bot) {
 			keyword, content := util.GetKeywordAndContent(body)
 			log.Printf("body: %v\n, key: %v\n,content: %v", body, keyword, content)
 
-			sender, _ := msg.Sender()
-			user, _ := msg.Receiver()
-			if user.NickName == sender.NickName {
-				log.Println("自己给自己发！！")
-				return
-			}
 			if holdUp(sb, keyword, content) && msg.IsSendBySelf() {
 				send := func(text string) {
 					replyText(msg)(text)
