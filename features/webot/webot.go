@@ -7,6 +7,7 @@ import (
 	"qq/features"
 	"qq/util"
 	"strings"
+	"sync"
 
 	"github.com/eatmoreapple/openwechat"
 	log "github.com/sirupsen/logrus"
@@ -19,12 +20,74 @@ func init() {
 	})
 }
 
+func (sb *superBot) IsBotEnabledForThisMsg(msg *openwechat.Message) bool {
+	if msg.IsSendBySelf() {
+		return true
+	}
+
+	if msg.IsSendByGroup() && msg.IsAt() && sb.um.exists(msg.Owner().NickName) {
+		return true
+	}
+
+	if msg.IsSendByFriend() && sb.um.exists(msg.Owner().NickName) {
+		return true
+	}
+
+	return false
+}
+
+type userMaps struct {
+	sync.RWMutex
+	users map[string]struct{}
+}
+
+func newUserMaps() *userMaps {
+	return &userMaps{users: map[string]struct{}{}}
+}
+
+func (um *userMaps) add(nick string) {
+	um.Lock()
+	defer um.Unlock()
+	um.users[nick] = struct{}{}
+}
+
+func (um *userMaps) del(nick string) {
+	um.Lock()
+	defer um.Unlock()
+	delete(um.users, nick)
+}
+
+func (um *userMaps) exists(nick string) bool {
+	um.RLock()
+	defer um.RUnlock()
+	_, ok := um.users[nick]
+	return ok
+}
+
+func (um *userMaps) String() (res string) {
+	um.RLock()
+	defer um.RUnlock()
+	var users []string
+	for user, _ := range um.users {
+		users = append(users, user)
+	}
+
+	return strings.Join(users, "\n")
+}
+
+type superBot struct {
+	bot    *openwechat.Bot
+	msgMap *bot.WeMsgMap
+	um     *userMaps
+}
+
 func RunWechat(b bot.Bot) {
 	webot := openwechat.DefaultBot(openwechat.Desktop) // 桌面模式
+	var sb = &superBot{bot: webot, msgMap: bot.NewWeMsgMap(), um: newUserMaps()}
 
 	// 注册消息处理函数
 	webot.MessageHandler = func(msg *openwechat.Message) {
-		if msg.IsText() && ((msg.IsSendByGroup() && msg.IsAt()) || msg.IsSendByFriend()) && !msg.IsSendBySelf() {
+		if msg.IsText() && sb.IsBotEnabledForThisMsg(msg) {
 			gid := ""
 			receiver, _ := msg.Receiver()
 			senderID := receiver.ID()
@@ -38,6 +101,14 @@ func RunWechat(b bot.Bot) {
 			body := strings.ReplaceAll(msg.Content, atMsg, "")
 			keyword, content := util.GetKeywordAndContent(body)
 			log.Printf("body: %v\n, key: %v\n,content: %v", body, keyword, content)
+			if holdUp(sb, keyword, content) {
+				if keyword == "list" {
+					msg.ReplyText(sb.um.String())
+					return
+				}
+				msg.ReplyText("done!")
+				return
+			}
 
 			if err := features.Run(bot.NewWechatBot(bot.Message{
 				SenderUserID:  senderID,
@@ -50,10 +121,10 @@ func RunWechat(b bot.Bot) {
 					if err != nil {
 						return nil, err
 					}
-					bot.WeMessageMap.Add(image.MsgId, image)
+					sb.msgMap.Add(image.MsgId, image)
 					return image, err
 				},
-			}), keyword, content); err != nil {
+			}, sb.msgMap), keyword, content); err != nil {
 				log.Println(err)
 			}
 		}
@@ -82,4 +153,21 @@ func RunWechat(b bot.Bot) {
 	log.Println("当前用户是：", self.DisplayName)
 	// 阻塞主goroutine, 直到发生异常或者用户主动退出
 	webot.Block()
+}
+
+func holdUp(sb *superBot, keyword string, content string) bool {
+	switch keyword {
+	case "add":
+		log.Println("add: ", content)
+		sb.um.add(content)
+		return true
+	case "del":
+		log.Println("del: ", content)
+		sb.um.del(content)
+		return true
+	case "list":
+		return true
+	default:
+		return false
+	}
 }

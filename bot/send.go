@@ -237,11 +237,16 @@ func send(message *Message, msg string) string {
 
 type wechatBot struct {
 	message Message
+	msgMap  *WeMsgMap
 }
 
 type WeMsgMap struct {
 	sync.RWMutex
 	m map[string]*openwechat.SentMessage
+}
+
+func NewWeMsgMap() *WeMsgMap {
+	return &WeMsgMap{m: map[string]*openwechat.SentMessage{}}
 }
 
 func (w *WeMsgMap) Get(id string) *openwechat.SentMessage {
@@ -263,19 +268,17 @@ func (w *WeMsgMap) Delete(id string) {
 	delete(w.m, id)
 }
 
-var WeMessageMap = &WeMsgMap{m: map[string]*openwechat.SentMessage{}}
-
-func NewWechatBot(msg Message) Bot {
-	return &wechatBot{message: msg}
+func NewWechatBot(msg Message, msgMap *WeMsgMap) Bot {
+	return &wechatBot{message: msg, msgMap: msgMap}
 }
 
 func (w *wechatBot) DeleteMsg(msgID string) {
 	log.Println("DeleteMsgID: ", msgID)
-	if message := WeMessageMap.Get(msgID); message != nil {
+	if message := w.msgMap.Get(msgID); message != nil {
 		if message.CanRevoke() {
 			message.Revoke()
 		}
-		WeMessageMap.Delete(msgID)
+		w.msgMap.Delete(msgID)
 	}
 }
 
