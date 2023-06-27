@@ -55,6 +55,7 @@ func RunWechat(b bot.Bot) {
 					return
 				}
 				send("done!")
+				return
 			}
 
 			if err := features.Run(bot.NewWechatBot(bot.Message{
