@@ -26,7 +26,8 @@ msg.IsSendBySelf(): %v
 msg.IsSendByGroup(): %v
 msg.IsAt(): %v
 msg.IsSendByFriend(): %v
-`, msg.IsSendBySelf(), msg.IsSendByGroup(), msg.IsAt(), msg.IsSendByFriend())
+msg.Owner().NickName: %v
+`, msg.IsSendBySelf(), msg.IsSendByGroup(), msg.IsAt(), msg.IsSendByFriend(), msg.Owner().NickName)
 	if msg.IsSendBySelf() {
 		return true
 	}
