@@ -29,7 +29,7 @@ msg.IsAt(): %v
 msg.IsSendByFriend(): %v
 msg.Owner().NickName: %v
 `, msg.IsSendBySelf(), msg.IsSendByGroup(), msg.IsAt(), msg.IsSendByFriend(), msg.Owner().NickName)
-	if msg.IsSendBySelf() {
+	if msg.IsSendBySelf() && !msg.IsSendByGroup() {
 		return true
 	}
 
