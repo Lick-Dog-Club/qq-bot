@@ -27,9 +27,9 @@ func init() {
 					t = "多"
 				}
 				bot.SendToUser(config.UserID(), alert.msg)
-				// 五分钟之内如果开过一次仓就不再继续开仓
+				// 5 分钟之内如果开过一次仓就不再继续开仓
 				// 因为防止误开，比如暴跌之后的回调，也可能出发报警，但不需要开仓
-				if cn.currentAlert.date.IsZero() || cn.currentAlert.date.Add(15*time.Minute).Before(alert.date) {
+				if cn.currentAlert.date.IsZero() || cn.currentAlert.date.Add(5*time.Minute).Before(alert.date) {
 					bot.SendToUser(config.UserID(), fmt.Sprintf("开%s，价格是 %v", t, alert.openPrice))
 					cn.currentAlert = alert
 				}
@@ -107,12 +107,13 @@ func (cn *ContractNotifier) alert() (alertBody, bool) {
 		cn.prices = nil
 		cn.alertAt = time.Now()
 		var openPrice = minPrice - 100
-		if maxIdx > minIdx {
+		isMore := maxIdx < minIdx
+		if !isMore {
 			openPrice = maxPrice + 100
 		}
 		return alertBody{
-			msg:       fmt.Sprintf("BTC 出现异动，当前最低值为 %.0f, 最高为 %.0f", minPrice, maxPrice),
-			isMore:    maxIdx < minIdx,
+			msg:       fmt.Sprintf("BTC 出现异动，当前最低值为 %.0f, 最高为 %.0f, 涨: %t", minPrice, maxPrice, isMore),
+			isMore:    isMore,
 			openPrice: openPrice,
 			date:      time.Now(),
 		}, true
