@@ -151,6 +151,7 @@ func fetchDetail(url string) (m *movie) {
 		log.Fatal(err)
 	}
 
+	m = &movie{}
 	m.Url = url
 
 	// Title
