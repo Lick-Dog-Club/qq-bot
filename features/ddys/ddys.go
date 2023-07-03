@@ -65,7 +65,7 @@ func buildRequest(url string) *http.Request {
 	return request
 }
 
-func Get(param string, duration time.Duration) (res []movie) {
+func Get(param string, duration time.Duration) (res []*movie) {
 	url := "https://ddys.art/category/movie/"
 	if param == "dm" {
 		url = "https://ddys.art/category/anime/new-bangumi/"
@@ -84,7 +84,7 @@ func Get(param string, duration time.Duration) (res []movie) {
 	var (
 		articleDetailUrlCh chan string = make(chan string, 20)
 		wg                             = sync.WaitGroup{}
-		resultCh           chan movie  = make(chan movie, 20)
+		resultCh           chan *movie = make(chan *movie, 20)
 	)
 
 	for i := 0; i < 5; i++ {
@@ -98,7 +98,10 @@ func Get(param string, duration time.Duration) (res []movie) {
 						log.Println("articleDetailUrlCh done")
 						return
 					}
-					resultCh <- fetchDetail(path)
+					detail := fetchDetail(path)
+					if detail != nil {
+						resultCh <- detail
+					}
 				}
 			}
 		}()
@@ -126,9 +129,13 @@ func Get(param string, duration time.Duration) (res []movie) {
 	return res
 }
 
-func fetchDetail(url string) (m movie) {
+func fetchDetail(url string) (m *movie) {
 	log.Println(url)
-	do, _ := proxy.NewHttpProxyClient().Do(buildRequest(url))
+	do, err := proxy.NewHttpProxyClient().Do(buildRequest(url))
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
 	defer do.Body.Close()
 	parse, err := htmlquery.Parse(do.Body)
 	if err != nil {
