@@ -2,10 +2,7 @@ package ddys
 
 import (
 	"bytes"
-	"io"
 	"net/http"
-	"os"
-	"path/filepath"
 	"qq/bot"
 	"qq/features"
 	"qq/features/util/proxy"
@@ -29,20 +26,15 @@ func init() {
 }
 
 type movie struct {
-	Url            string
-	Title          string
-	Director       string
-	Year           string
-	Kind           string
-	HeadImageUrl   string
-	Rating         string
-	Country        string
-	UpdateAt       time.Time
-	ImageLocalPath string
-}
-
-func (m *movie) fetchImage() {
-	m.ImageLocalPath = writeImage(m.HeadImageUrl)
+	Url          string
+	Title        string
+	Director     string
+	Year         string
+	Kind         string
+	HeadImageUrl string
+	Rating       string
+	Country      string
+	UpdateAt     time.Time
 }
 
 func dateStr(t time.Time) string {
@@ -57,7 +49,7 @@ var temp, _ = template.New("").Funcs(map[string]any{"datestr": dateStr}).Parse(`
 影片地址：{{ .Url }}
 更新时间: {{ .UpdateAt | datestr }}
 
-[CQ:image,file=file://{{ .ImageLocalPath }}]
+[CQ:image,file={{.HeadImageUrl}}]
 `)
 
 func (m *movie) String() string {
@@ -144,39 +136,11 @@ func Get(param string, duration time.Duration) (res []*movie) {
 	}()
 	for ch := range resultCh {
 		if ch.isNew(duration) {
-			ch.fetchImage()
 			res = append(res, ch)
 		}
 	}
 
 	return res
-}
-
-func writeImage(imageUrl string) string {
-	base := filepath.Base(imageUrl)
-	fpath := filepath.Join("/data", "ddys-images", base)
-
-	os.MkdirAll(filepath.Join("/data", "ddys-images"), 0755)
-	get, err := doRequest(buildRequest(imageUrl))
-	if err != nil {
-		return ""
-	}
-	err = func() error {
-		file, err := os.OpenFile(fpath, os.O_TRUNC|os.O_RDWR|os.O_CREATE, 0644)
-		if err != nil {
-			log.Println(err)
-			return err
-		}
-		defer file.Close()
-		_, err = io.Copy(file, get.Body)
-		return err
-	}()
-	if err != nil {
-		log.Println(err)
-		return ""
-	}
-
-	return fpath
 }
 
 func fetchDetail(url string) (m *movie) {
