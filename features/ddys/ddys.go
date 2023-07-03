@@ -109,7 +109,7 @@ func Get(param string, duration time.Duration) (res []*movie) {
 		resultCh           chan *movie = make(chan *movie, 20)
 	)
 
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 15; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
