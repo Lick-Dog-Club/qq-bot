@@ -2,7 +2,10 @@ package ddys
 
 import (
 	"bytes"
+	"io"
 	"net/http"
+	"os"
+	"path/filepath"
 	"qq/bot"
 	"qq/features"
 	"qq/features/util/proxy"
@@ -26,25 +29,31 @@ func init() {
 }
 
 type movie struct {
-	Url          string
-	Title        string
-	Director     string
-	Year         string
-	Kind         string
-	HeadImageUrl string
-	Rating       string
-	Country      string
-	UpdateAt     time.Time
+	Url            string
+	Title          string
+	Director       string
+	Year           string
+	Kind           string
+	HeadImageUrl   string
+	Rating         string
+	Country        string
+	UpdateAt       time.Time
+	ImageLocalPath string
 }
 
-var temp, _ = template.New("").Parse(`
+func dateStr(t time.Time) string {
+	return t.Local().Format(time.DateTime)
+}
+
+var temp, _ = template.New("").Funcs(map[string]any{"datestr": dateStr}).Parse(`
 {{ .Title }} -- ({{ .Director }} {{ .Year }})
 类型：{{ .Kind }}
 评分：{{ .Rating }}
 国家：{{ .Country }}
 影片地址：{{ .Url }}
+更新时间: {{ .UpdateAt | datestr }}
 
-[CQ:image,file={{.HeadImageUrl}}]
+[CQ:image,file=file://{{ .ImageLocalPath }}]
 `)
 
 func (m *movie) String() string {
@@ -138,6 +147,33 @@ func Get(param string, duration time.Duration) (res []*movie) {
 	return res
 }
 
+func writeImage(imageUrl string) string {
+	base := filepath.Base(imageUrl)
+	fpath := filepath.Join("/data", "ddys-images", base)
+
+	os.MkdirAll(filepath.Join("/data", "ddys-images"), 0755)
+	get, err := doRequest(buildRequest(imageUrl))
+	if err != nil {
+		return ""
+	}
+	err = func() error {
+		file, err := os.OpenFile(fpath, os.O_TRUNC|os.O_RDWR|os.O_CREATE, 0644)
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+		defer file.Close()
+		_, err = io.Copy(file, get.Body)
+		return err
+	}()
+	if err != nil {
+		log.Println(err)
+		return ""
+	}
+
+	return fpath
+}
+
 func fetchDetail(url string) (m *movie) {
 	log.Println(url)
 	do, err := doRequest(buildRequest(url))
@@ -195,6 +231,8 @@ func fetchDetail(url string) (m *movie) {
 			}
 		}
 	}
+	m.ImageLocalPath = writeImage(m.HeadImageUrl)
+
 	// rating
 	rating := htmlquery.Find(parse, `//div[@class="rating"]/span[@class="rating_nums"]/text()`)
 	for _, node := range rating {
