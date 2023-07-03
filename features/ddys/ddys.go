@@ -189,7 +189,8 @@ func fetchDetail(url string) (m *movie) {
 	defer do.Body.Close()
 	parse, err := htmlquery.Parse(do.Body)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return nil
 	}
 
 	m = &movie{}
