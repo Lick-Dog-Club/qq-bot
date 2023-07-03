@@ -41,6 +41,10 @@ type movie struct {
 	ImageLocalPath string
 }
 
+func (m *movie) fetchImage() {
+	m.ImageLocalPath = writeImage(m.HeadImageUrl)
+}
+
 func dateStr(t time.Time) string {
 	return t.Local().Format(time.DateTime)
 }
@@ -140,6 +144,7 @@ func Get(param string, duration time.Duration) (res []*movie) {
 	}()
 	for ch := range resultCh {
 		if ch.isNew(duration) {
+			ch.fetchImage()
 			res = append(res, ch)
 		}
 	}
@@ -231,7 +236,6 @@ func fetchDetail(url string) (m *movie) {
 			}
 		}
 	}
-	m.ImageLocalPath = writeImage(m.HeadImageUrl)
 
 	// rating
 	rating := htmlquery.Find(parse, `//div[@class="rating"]/span[@class="rating_nums"]/text()`)
