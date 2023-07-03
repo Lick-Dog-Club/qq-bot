@@ -70,7 +70,11 @@ func Get(param string, duration time.Duration) (res []movie) {
 	if param == "dm" {
 		url = "https://ddys.art/category/anime/new-bangumi/"
 	}
-	do, _ := proxy.NewHttpProxyClient().Do(buildRequest(url))
+	do, err := proxy.NewHttpProxyClient().Do(buildRequest(url))
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
 	defer do.Body.Close()
 	doc, err := htmlquery.Parse(do.Body)
 	if err != nil {
