@@ -60,10 +60,7 @@ func (m *movie) String() string {
 }
 
 func (m *movie) isNew(duration time.Duration) bool {
-	now := time.Now()
-	fromDate := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local).Add(-duration)
-
-	return m.UpdateAt.After(fromDate)
+	return m.UpdateAt.After(time.Now().Add(-duration))
 }
 
 func buildRequest(url string) *http.Request {
