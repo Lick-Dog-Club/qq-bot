@@ -6,6 +6,7 @@ import (
 	"qq/bot"
 	"qq/features"
 	"qq/features/util/proxy"
+	"qq/features/util/retry"
 	"strings"
 	"sync"
 	"text/template"
@@ -65,12 +66,20 @@ func buildRequest(url string) *http.Request {
 	return request
 }
 
+func doRequest(req *http.Request) (resp *http.Response, err error) {
+	retry.Times(10, func() error {
+		resp, err = proxy.NewHttpProxyClient().Do(req)
+		return err
+	})
+	return
+}
+
 func Get(param string, duration time.Duration) (res []*movie) {
 	url := "https://ddys.art/category/movie/"
 	if param == "dm" {
 		url = "https://ddys.art/category/anime/new-bangumi/"
 	}
-	do, err := proxy.NewHttpProxyClient().Do(buildRequest(url))
+	do, err := doRequest(buildRequest(url))
 	if err != nil {
 		log.Println(err)
 		return nil
@@ -131,7 +140,7 @@ func Get(param string, duration time.Duration) (res []*movie) {
 
 func fetchDetail(url string) (m *movie) {
 	log.Println(url)
-	do, err := proxy.NewHttpProxyClient().Do(buildRequest(url))
+	do, err := doRequest(buildRequest(url))
 	if err != nil {
 		log.Println(err)
 		return nil
