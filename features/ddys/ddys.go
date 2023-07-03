@@ -80,7 +80,7 @@ func buildRequest(url string) *http.Request {
 }
 
 func doRequest(req *http.Request) (resp *http.Response, err error) {
-	retry.Times(10, func() error {
+	retry.Times(3, func() error {
 		resp, err = proxy.NewHttpProxyClient().Do(req)
 		return err
 	})
