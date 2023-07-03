@@ -19,6 +19,7 @@ import (
 func init() {
 	features.AddKeyword("ddys", "<+dy/dm>, 获取更新的电影/动漫, 默认 +dy", func(bot bot.Bot, content string) error {
 		for _, m := range Get(content, 3*24*time.Hour) {
+			bot.Send("正在获取数据中。。。")
 			bot.Send(m.String())
 		}
 		return nil
@@ -60,7 +61,7 @@ func (m *movie) String() string {
 
 func (m *movie) isNew(duration time.Duration) bool {
 	now := time.Now()
-	fromDate := time.Date(now.Year(), now.Month(), now.Day(), 9, 10, 0, 0, time.Local).Add(-duration)
+	fromDate := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local).Add(-duration)
 
 	return m.UpdateAt.After(fromDate)
 }
