@@ -166,7 +166,9 @@ type MTInfos map[string]MaoTaiInfo
 
 func AddMaoTaiInfo(info MaoTaiInfo) {
 	var infos MTInfos
-	json.Unmarshal([]byte(c.Load().(KV)["maotai"]), &infos)
+	if err := json.Unmarshal([]byte(c.Load().(KV)["maotai"]), &infos); err != nil {
+		infos = MTInfos{}
+	}
 	infos[info.Phone] = info
 	marshal, _ := json.Marshal(&infos)
 	Set(map[string]string{"maotai": string(marshal)})
@@ -185,7 +187,11 @@ func (m *MaoTaiInfo) Expired() bool {
 
 func MaoTaiInfoMap() map[string]MaoTaiInfo {
 	var infos MTInfos
-	json.Unmarshal([]byte(c.Load().(KV)["maotai"]), &infos)
+	err := json.Unmarshal([]byte(c.Load().(KV)["maotai"]), &infos)
+	if err != nil {
+		infos = MTInfos{}
+	}
+
 	return infos
 }
 
