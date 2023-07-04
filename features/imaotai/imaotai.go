@@ -78,11 +78,10 @@ func Run(m string) string {
 		return fmt.Sprintf("用户未登陆，短信已发送，收到后执行： mt-login %s <code>", m)
 	}
 
-	doReservation(sessionID, info.Uid, info.Token)
-	return "ok"
+	return doReservation(sessionID, info.Uid, info.Token)
 }
 
-func doReservation(sessionID, uid int, token string) {
+func doReservation(sessionID, uid int, token string) (res string) {
 	// 4. reservation
 	//10213 3%vol 500ml贵州茅台酒（癸卯兔年）
 	//10214 53%vol 375ml×2贵州茅台酒（癸卯兔年）
@@ -92,8 +91,9 @@ func doReservation(sessionID, uid int, token string) {
 	}
 	for itemID, shopIDs := range items {
 		shopID := shopIDs[rand.Intn(len(shopIDs))]
-		reservation(itemID, shopID, sessionID, uid, token)
+		res += reservation(itemID, shopID, sessionID, uid, token) + "\n"
 	}
+	return
 }
 
 var (
@@ -271,8 +271,7 @@ func reservation(itemID, shopID, sessionID, userID int, token string) string {
 	do, _ := http.DefaultClient.Do(request)
 	defer do.Body.Close()
 	all, _ := io.ReadAll(do.Body)
-	log.Println(string(all))
-	return ""
+	return string(all)
 }
 
 func encrypt[T string | []byte](text T) string {
