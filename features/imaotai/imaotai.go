@@ -108,29 +108,33 @@ var (
 	SALT    = "2af72f100c356273d46284f6fd1dfc08"
 )
 
-var headers = map[string]string{
-	"MT-Lat":          "28.499562",
-	"MT-K":            "1675213490331",
-	"MT-Lng":          "102.182324",
-	"Host":            "app.moutai519.com.cn",
-	"MT-User-Tag":     "0",
-	"Accept":          "*/*",
-	"MT-Network-Type": "WIFI",
-	"MT-Token":        "1",
-	"MT-Team-ID":      "",
-	"MT-Info":         "028e7f96f6369cafe1d105579c5b9377",
-	"MT-Device-ID":    deviceID(),
-	"MT-Bundle-ID":    "com.moutai.mall",
-	"Accept-Language": "en-CN;q=1, zh-Hans-CN;q=0.9",
-	"MT-Request-ID":   fmt.Sprintf("%d", time.Now().UnixMicro()*100),
-	"MT-APP-Version":  version(),
-	"User-Agent":      "iOS;16.3;Apple;?unrecognized?",
-	"MT-R":            "clips_OlU6TmFRag5rCXwbNAQ/Tz1SKlN8THcecBp/HGhHdw==",
-	"Content-Length":  "93",
-	"Accept-Encoding": "gzip, deflate, br",
-	"Connection":      "keep-alive",
-	"Content-Type":    "application/json",
-	"userId":          "2",
+var device = deviceID()
+
+func headers() map[string]string {
+	return map[string]string{
+		"MT-Lat":          "28.499562",
+		"MT-K":            fmt.Sprintf("%d", time.Now().Unix()),
+		"MT-Lng":          "102.182314",
+		"Host":            "app.moutai519.com.cn",
+		"MT-User-Tag":     "0",
+		"Accept":          "*/*",
+		"MT-Network-Type": "WIFI",
+		"MT-Token":        "",
+		"MT-Team-ID":      "",
+		"MT-Info":         "028e7f96f6369cafe1d105579c5b9377",
+		"MT-Device-ID":    device,
+		"MT-Bundle-ID":    "com.moutai.mall",
+		"Accept-Language": "en-CN;q=1, zh-Hans-CN;q=0.9",
+		"MT-Request-ID":   fmt.Sprintf("%d", time.Now().UnixMicro()*100),
+		"MT-APP-Version":  version(),
+		"User-Agent":      "iOS;16.3;Apple;?unrecognized?",
+		"MT-R":            "clips_OlU6TmFRag5rCXwbNAQ/Tz1SKlN8THcecBp/HGhHdw==",
+		"Content-Length":  "93",
+		"Accept-Encoding": "gzip, deflate, br",
+		"Connection":      "keep-alive",
+		"Content-Type":    "application/json",
+		"userId":          "",
+	}
 }
 
 var reg = regexp.MustCompile(`版本 (\d+\.\d+\.\d+)`)
@@ -218,7 +222,7 @@ func getCode(mobile string) error {
 }
 
 func addHeaders(request *http.Request) {
-	for k, v := range headers {
+	for k, v := range headers() {
 		request.Header.Add(k, v)
 	}
 }
