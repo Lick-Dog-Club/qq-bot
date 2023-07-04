@@ -3,7 +3,6 @@ package imaotai
 import (
 	"bytes"
 	"crypto/md5"
-	"crypto/rand"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
@@ -108,7 +107,7 @@ var (
 	SALT    = "2af72f100c356273d46284f6fd1dfc08"
 )
 
-var device = deviceID()
+var device = "MFGOYB7G-R5FO-UB1K-H4VN-BAHGQM0COZHU"
 
 func headers() map[string]string {
 	return map[string]string{
@@ -221,10 +220,12 @@ func getCode(mobile string) error {
 	return nil
 }
 
-func addHeaders(request *http.Request) {
-	for k, v := range headers() {
+func addHeaders(request *http.Request) map[string]string {
+	h := headers()
+	for k, v := range h {
 		request.Header.Add(k, v)
 	}
+	return h
 }
 
 type sessionResp struct {
@@ -293,29 +294,4 @@ func encrypt[T string | []byte](text T) string {
 func decrypt[T string | []byte](text T) string {
 	dst, _ := openssl.AesCBCDecrypt([]byte(text), AES_KEY, AES_IV, openssl.PKCS7_PADDING)
 	return string(dst)
-}
-
-const letters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-
-// randomStr [0-9a-zA-Z]*
-func randomStr(length int) string {
-	if length <= 0 {
-		return ""
-	}
-
-	bytes := make([]byte, length)
-
-	if _, err := rand.Read(bytes); err != nil {
-		return ""
-	}
-
-	for i, b := range bytes {
-		bytes[i] = letters[b%byte(len(letters))]
-	}
-
-	return string(bytes)
-}
-
-func deviceID() string {
-	return fmt.Sprintf("%s-%s-%s-%s-%s", randomStr(8), randomStr(4), randomStr(4), randomStr(4), randomStr(12))
 }
