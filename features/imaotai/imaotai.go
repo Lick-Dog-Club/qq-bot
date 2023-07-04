@@ -80,7 +80,7 @@ func Run(m string) string {
 	info, ok := config.MaoTaiInfoMap()[m]
 	if (ok && info.Expired()) || !ok {
 		getCode(m)
-		return fmt.Sprintf("用户未登陆，短信已发送，收到后执行：\nmt-login %s <code>", m)
+		return fmt.Sprintf("用户未登陆，短信已发送，收到后执行：\n\nmt-login %s <code>", m)
 	}
 
 	return doReservation(sessionID, info.Uid, info.Token)
