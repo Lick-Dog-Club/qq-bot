@@ -9,6 +9,7 @@ require (
 	github.com/cenkalti/backoff/v4 v4.2.0
 	github.com/duc-cnzj/when-rules v0.0.0-20230427085034-04cfb63088f8
 	github.com/eatmoreapple/openwechat v1.4.3
+	github.com/forgoer/openssl v1.6.0
 	github.com/google/uuid v1.3.0
 	github.com/olebedev/when v0.0.0-20221205223600-4d190b02b8d8
 	github.com/robfig/cron/v3 v3.0.1

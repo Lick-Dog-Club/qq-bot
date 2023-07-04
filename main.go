@@ -30,6 +30,7 @@ import (
 	_ "qq/features/daxin"
 	_ "qq/features/ddys"
 	_ "qq/features/help"
+	_ "qq/features/imaotai"
 	_ "qq/features/kfc"
 	_ "qq/features/lifetip"
 	_ "qq/features/picture"

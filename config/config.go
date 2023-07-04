@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 	"sync/atomic"
+	"time"
 
 	"github.com/sashabaranov/go-openai"
 )
@@ -158,6 +159,34 @@ var mappingKV = KV{
 	"binance_key":             "",
 	"binance_secret":          "",
 	"binance_diff":            "100",
+	"maotai":                  "",
+}
+
+type MTInfos map[string]MaoTaiInfo
+
+func AddMaoTaiInfo(info MaoTaiInfo) {
+	var infos MTInfos
+	json.Unmarshal([]byte(c.Load().(KV)["maotai"]), &infos)
+	infos[info.Phone] = info
+	marshal, _ := json.Marshal(&infos)
+	Set(map[string]string{"maotai": string(marshal)})
+}
+
+type MaoTaiInfo struct {
+	Phone    string    `json:"phone"`
+	Uid      int       `json:"uid"`
+	Token    string    `json:"token"`
+	ExpireAt time.Time `json:"expire_at"`
+}
+
+func (m *MaoTaiInfo) Expired() bool {
+	return m.ExpireAt.Before(time.Now())
+}
+
+func MaoTaiInfoMap() map[string]MaoTaiInfo {
+	var infos MTInfos
+	json.Unmarshal([]byte(c.Load().(KV)["maotai"]), &infos)
+	return infos
 }
 
 func Set(m map[string]string) {
