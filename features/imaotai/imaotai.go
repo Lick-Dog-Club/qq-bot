@@ -3,13 +3,14 @@ package imaotai
 import (
 	"bytes"
 	"crypto/md5"
+	"crypto/rand"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
-	"math/rand"
+	mrand "math/rand"
 	"net/http"
 	"qq/bot"
 	"qq/config"
@@ -95,7 +96,7 @@ func doReservation(sessionID, uid int, token string) (res string) {
 		10214: []int{133330100008},
 	}
 	for itemID, shopIDs := range items {
-		shopID := shopIDs[rand.Intn(len(shopIDs))]
+		shopID := shopIDs[mrand.Intn(len(shopIDs))]
 		res += reservation(itemID, shopID, sessionID, uid, token) + "\n"
 	}
 	return
@@ -118,10 +119,10 @@ var headers = map[string]string{
 	"MT-Token":        "1",
 	"MT-Team-ID":      "",
 	"MT-Info":         "028e7f96f6369cafe1d105579c5b9377",
-	"MT-Device-ID":    "2F2075D0-B66C-4287-A903-DBFF6358342A",
+	"MT-Device-ID":    deviceID(),
 	"MT-Bundle-ID":    "com.moutai.mall",
 	"Accept-Language": "en-CN;q=1, zh-Hans-CN;q=0.9",
-	"MT-Request-ID":   "167560018873318465",
+	"MT-Request-ID":   fmt.Sprintf("%d", time.Now().UnixMicro()*100),
 	"MT-APP-Version":  version(),
 	"User-Agent":      "iOS;16.3;Apple;?unrecognized?",
 	"MT-R":            "clips_OlU6TmFRag5rCXwbNAQ/Tz1SKlN8THcecBp/HGhHdw==",
@@ -288,4 +289,29 @@ func encrypt[T string | []byte](text T) string {
 func decrypt[T string | []byte](text T) string {
 	dst, _ := openssl.AesCBCDecrypt([]byte(text), AES_KEY, AES_IV, openssl.PKCS7_PADDING)
 	return string(dst)
+}
+
+const letters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+// randomStr [0-9a-zA-Z]*
+func randomStr(length int) string {
+	if length <= 0 {
+		return ""
+	}
+
+	bytes := make([]byte, length)
+
+	if _, err := rand.Read(bytes); err != nil {
+		return ""
+	}
+
+	for i, b := range bytes {
+		bytes[i] = letters[b%byte(len(letters))]
+	}
+
+	return string(bytes)
+}
+
+func deviceID() string {
+	return fmt.Sprintf("%s-%s-%s-%s-%s", randomStr(8), randomStr(4), randomStr(4), randomStr(4), randomStr(12))
 }
