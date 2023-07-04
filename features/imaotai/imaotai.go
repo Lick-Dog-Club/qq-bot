@@ -58,8 +58,13 @@ func init() {
 			info.ExpireAt = time.Unix(e.Exp, 0)
 		}
 		config.AddMaoTaiInfo(info)
-		bot.Send(info.Phone + "添加成功, 过期时间是: " + info.ExpireAt.Format(time.DateTime))
-		log.Printf("uid: %v\ntoken: %v", uid, token)
+		bot.Send(fmt.Sprintf(`
+用户添加成功
+过期时间是: %s
+再次执行命令来申购茅台：
+
+mt %s
+`, info.ExpireAt.Format(time.DateTime), info.Phone))
 		return nil
 	})
 }
@@ -75,7 +80,7 @@ func Run(m string) string {
 	info, ok := config.MaoTaiInfoMap()[m]
 	if (ok && info.Expired()) || !ok {
 		getCode(m)
-		return fmt.Sprintf("用户未登陆，短信已发送，收到后执行： mt-login %s <code>", m)
+		return fmt.Sprintf("用户未登陆，短信已发送，收到后执行：\nmt-login %s <code>", m)
 	}
 
 	return doReservation(sessionID, info.Uid, info.Token)
@@ -239,6 +244,7 @@ type list struct {
 	Count  int `json:"count"`
 	ItemID int `json:"itemId"`
 }
+
 type ActParams struct {
 	ActParam     string `json:"actParam,omitempty"`
 	ItemInfoList []list `json:"itemInfoList"`
