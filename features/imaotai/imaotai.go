@@ -8,8 +8,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/forgoer/openssl"
-	log "github.com/sirupsen/logrus"
 	"io"
 	"math/rand"
 	"net/http"
@@ -20,6 +18,9 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/forgoer/openssl"
+	log "github.com/sirupsen/logrus"
 )
 
 func init() {
@@ -49,13 +50,11 @@ func init() {
 			Token:    token,
 			ExpireAt: time.Time{},
 		}
-		type exp struct {
-			Exp int64 `json:"exp"`
-		}
+
 		if token != "" {
 			decodeString, _ := base64.StdEncoding.DecodeString(strings.Split(token, ".")[1])
 			var e exp
-			json.Unmarshal(decodeString, &e)
+			json.Unmarshal([]byte(string(decodeString)+"}"), &e)
 			info.ExpireAt = time.Unix(e.Exp, 0)
 		}
 		config.AddMaoTaiInfo(info)
@@ -65,6 +64,10 @@ func init() {
 	})
 }
 
+type exp struct {
+	Exp int64 `json:"exp"`
+}
+
 func Run(m string) string {
 	// 1. sessionID
 	sessionID := GetCurrentSessionID()
@@ -72,7 +75,7 @@ func Run(m string) string {
 	info, ok := config.MaoTaiInfoMap()[m]
 	if (ok && info.Expired()) || !ok {
 		getCode(m)
-		return "请先登录"
+		return fmt.Sprintf("用户未登陆，短信已发送，收到后执行： mt-login %s <code>", m)
 	}
 
 	doReservation(sessionID, info.Uid, info.Token)
