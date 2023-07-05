@@ -16,11 +16,11 @@ import (
 	"qq/features"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/forgoer/openssl"
-	log "github.com/sirupsen/logrus"
 )
 
 func init() {
@@ -86,13 +86,69 @@ func Run(m string) string {
 	return doReservation(sessionID, info.Uid, info.Token)
 }
 
+type ItemShopResp struct {
+	Code int `json:"code"`
+	Data struct {
+		Shops []struct {
+			ShopID string `json:"shopId"`
+			Items  []struct {
+				Count               int    `json:"count"`
+				MaxReserveCount     int    `json:"maxReserveCount"`
+				DefaultReserveCount int    `json:"defaultReserveCount"`
+				ItemID              string `json:"itemId"`
+				Inventory           int    `json:"inventory"`
+				OwnerName           string `json:"ownerName"`
+			} `json:"items"`
+		} `json:"shops"`
+		ValidTime int64 `json:"validTime"`
+		Items     []struct {
+			PicURL       string `json:"picUrl"`
+			Title        string `json:"title"`
+			Price        string `json:"price"`
+			Count        int    `json:"count"`
+			ItemID       string `json:"itemId"`
+			Inventory    int    `json:"inventory"`
+			AreaLimitTag bool   `json:"areaLimitTag"`
+			AreaLimit    int    `json:"areaLimit"`
+		} `json:"items"`
+	} `json:"data"`
+}
+
+func getItemShop(url string, itemID int) (shopIDs []int) {
+	resp, _ := http.Get(url)
+	defer resp.Body.Close()
+	var data ItemShopResp
+	json.NewDecoder(resp.Body).Decode(&data)
+
+	for _, shop := range data.Data.Shops {
+		for _, item := range shop.Items {
+			if item.ItemID == fmt.Sprintf("%d", itemID) && strings.Contains(item.OwnerName, "杭州") {
+				atoi, _ := strconv.Atoi(shop.ShopID)
+				shopIDs = append(shopIDs, atoi)
+				break
+			}
+		}
+	}
+	return shopIDs
+}
+
 func doReservation(sessionID, uid int, token string) (res string) {
 	// 4. reservation
 	//10213 3%vol 500ml贵州茅台酒（癸卯兔年）
 	//10214 53%vol 375ml×2贵州茅台酒（癸卯兔年）
+	var urls = []string{
+		fmt.Sprintf(`https://static.moutai519.com.cn/mt-backend/xhr/front/mall/shop/list/slim/v3/%d/浙江省/10213/%d`, sessionID, today().UnixMilli()),
+		fmt.Sprintf(`https://static.moutai519.com.cn/mt-backend/xhr/front/mall/shop/list/slim/v3/%d/浙江省/10214/%d`, sessionID, today().UnixMilli()),
+	}
 	items := map[int][]int{
-		10213: []int{100330100004, 100330100002, 133330100001, 133330100008, 133330100011, 133330121002},
-		10214: []int{133330100008},
+		10213: []int{},
+		10214: []int{},
+	}
+	for _, url := range urls {
+		shop213 := getItemShop(url, 10213)
+		shop214 := getItemShop(url, 10214)
+		items[10213] = append(items[10213], shop213...)
+		items[10214] = append(items[10214], shop214...)
 	}
 	for itemID, shopIDs := range items {
 		shopID := shopIDs[mrand.Intn(len(shopIDs))]
@@ -235,11 +291,13 @@ type sessionResp struct {
 	} `json:"data"`
 }
 
-func GetCurrentSessionID() int {
+func today() time.Time {
 	now := time.Now()
-	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
+	return time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
+}
 
-	resp, _ := http.Get(fmt.Sprintf("https://static.moutai519.com.cn/mt-backend/xhr/front/mall/index/session/get/%d", today.UnixMilli()))
+func GetCurrentSessionID() int {
+	resp, _ := http.Get(fmt.Sprintf("https://static.moutai519.com.cn/mt-backend/xhr/front/mall/index/session/get/%d", today().UnixMilli()))
 	defer resp.Body.Close()
 	var data sessionResp
 	json.NewDecoder(resp.Body).Decode(&data)
@@ -271,7 +329,6 @@ func reservation(itemID, shopID, sessionID, userID int, token string) string {
 	}
 	marshal, _ := json.Marshal(p)
 	p.ActParam = encrypt(marshal)
-
 	b, _ := json.Marshal(p)
 	request, _ := http.NewRequest("POST", "https://app.moutai519.com.cn/xhr/front/mall/reservation/add", bytes.NewReader(b))
 	addHeaders(request)
@@ -279,16 +336,23 @@ func reservation(itemID, shopID, sessionID, userID int, token string) string {
 	request.Header.Del("MT-Token")
 	request.Header.Add("userId", fmt.Sprintf("%d", userID))
 	request.Header.Add("MT-Token", token)
-	log.Println(request.Header)
 	do, _ := http.DefaultClient.Do(request)
 	defer do.Body.Close()
-	all, _ := io.ReadAll(do.Body)
-	return string(all)
+	type resp struct {
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	}
+	var data resp
+	json.NewDecoder(do.Body).Decode(&data)
+	if data.Code == 2000 {
+		return fmt.Sprintf("申购成功：%d", itemID)
+	}
+	return fmt.Sprintf("itemID: %d, %s", itemID, data.Message)
 }
 
 func encrypt[T string | []byte](text T) string {
 	dst, _ := openssl.AesCBCEncrypt([]byte(text), AES_KEY, AES_IV, openssl.PKCS7_PADDING)
-	return string(dst)
+	return base64.StdEncoding.EncodeToString(dst)
 }
 
 func decrypt[T string | []byte](text T) string {
