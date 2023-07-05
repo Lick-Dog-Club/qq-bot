@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"net/http"
 	"qq/bot"
@@ -45,11 +46,20 @@ import (
 	_ "qq/features/zhihu"
 )
 
+var genDoc bool
+
 func init() {
 	log.SetReportCaller(true)
+	flag.BoolVar(&genDoc, "doc", false, "-doc")
 }
 
 func main() {
+	flag.Parse()
+	if genDoc {
+		printREADME()
+		return
+	}
+
 	cm := cronjob.Manager()
 	cm.Run(context.TODO())
 	defer cm.Shutdown(context.TODO())
@@ -89,3 +99,18 @@ func main() {
 	log.Println("[HTTP]: start...")
 	log.Println(http.ListenAndServe(":5701", nil))
 }
+
+func printREADME() {
+	fmt.Println(fmt.Sprintf(mdTemplate, features.BeautifulOutput(true)))
+}
+
+var mdTemplate = `
+# QQ-bot
+
+[![build-docker](https://github.com/Lick-Dog-Club/qq-bot/actions/workflows/build.yaml/badge.svg)](https://github.com/Lick-Dog-Club/qq-bot/actions/workflows/build.yaml)
+
+> qq 机器人
+
+## 指令
+
+` + "```text\n%s```"

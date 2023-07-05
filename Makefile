@@ -19,3 +19,7 @@ build:
 .PHONY: fmt
 fmt:
 	goimports -w . && gofmt -w .
+
+.PHONY: doc
+doc:
+	go run . -doc > README.md

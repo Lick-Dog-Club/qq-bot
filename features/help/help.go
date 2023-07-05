@@ -1,10 +1,8 @@
 package help
 
 import (
-	"fmt"
 	"qq/bot"
 	"qq/features"
-	"strings"
 )
 
 func init() {
@@ -19,9 +17,5 @@ func init() {
 }
 
 func showHelp(sender bot.Bot, hidden bool) {
-	var res []string
-	for _, command := range features.AllKeywordCommands(hidden) {
-		res = append(res, fmt.Sprintf("%s: %s", command.Keyword(), command.Description()))
-	}
-	sender.Send(strings.Join(res, "\n"))
+	sender.Send(features.BeautifulOutput(hidden))
 }

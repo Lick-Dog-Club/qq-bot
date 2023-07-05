@@ -110,6 +110,14 @@ func (s sortCommands) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
 
+func BeautifulOutput(hidden bool) string {
+	var cmds string
+	for _, imp := range AllKeywordCommands(hidden) {
+		cmds += fmt.Sprintf("@bot\t%-16s\t%s\n", imp.Keyword(), imp.Description())
+	}
+	return cmds
+}
+
 func AllKeywordCommands(hidden bool) []CommandImp {
 	mu.RLock()
 	defer mu.RUnlock()
