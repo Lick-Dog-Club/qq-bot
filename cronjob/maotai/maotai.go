@@ -13,7 +13,7 @@ func init() {
 		var res string
 		for _, info := range config.MaoTaiInfoMap() {
 			if info.Expired() {
-				res += fmt.Sprintf("%s: token已过期，需要重新登陆", fuzzyPhone(info.Phone))
+				res += fmt.Sprintf("%s: token已过期，需要重新登陆\n", fuzzyPhone(info.Phone))
 				continue
 			}
 			res += fmt.Sprintf("%s:\n%s\n", fuzzyPhone(info.Phone), imaotai.Run(info.Phone))
