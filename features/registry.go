@@ -118,10 +118,14 @@ func (s sortCommands) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
 
-func BeautifulOutput(hidden bool) string {
+func BeautifulOutput(hidden bool, simple bool) string {
 	var cmds string
 	for _, imp := range AllKeywordCommands(hidden) {
-		cmds += fmt.Sprintf("@bot\t%-16s\t%s\n", imp.Keyword(), imp.Description())
+		fmtStr := "@bot\t%-16s\t%s\n"
+		if simple {
+			fmtStr = "%-16s\t%s\n"
+		}
+		cmds += fmt.Sprintf(fmtStr, imp.Keyword(), imp.Description())
 	}
 	return cmds
 }

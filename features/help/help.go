@@ -17,5 +17,5 @@ func init() {
 }
 
 func showHelp(sender bot.Bot, hidden bool) {
-	sender.Send(features.BeautifulOutput(hidden))
+	sender.Send(features.BeautifulOutput(hidden, true))
 }
