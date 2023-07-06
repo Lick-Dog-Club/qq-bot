@@ -29,6 +29,7 @@ func init() {
 	features.AddKeyword("cg", "显示环境变量", func(bot bot.Bot, content string) error {
 		if bot.UserID() == config.UserID() {
 			bot.Send(config.Configs().String())
+			return nil
 		}
 		bot.Send("未授权")
 		return nil
