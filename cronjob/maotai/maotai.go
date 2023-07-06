@@ -21,7 +21,7 @@ func init() {
 		robot.SendGroup(config.GroupID(), "茅台申购结束")
 		robot.SendGroup(config.GroupID(), res)
 		return nil
-	}).DailyAt("9:15")
+	}).DailyAt("9:30")
 }
 
 func fuzzyPhone(phone string) string {
