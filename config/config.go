@@ -178,6 +178,8 @@ type MaoTaiInfo struct {
 	Phone    string    `json:"phone"`
 	Uid      int       `json:"uid"`
 	Token    string    `json:"token"`
+	Lat      float64   `json:"lat"`
+	Lng      float64   `json:"lng"`
 	ExpireAt time.Time `json:"expire_at"`
 }
 

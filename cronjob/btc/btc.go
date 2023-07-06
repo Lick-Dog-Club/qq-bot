@@ -7,7 +7,6 @@ import (
 	"qq/config"
 	"qq/cronjob"
 	"qq/util"
-	"strconv"
 	"time"
 
 	"github.com/adshao/go-binance/v2"
@@ -49,11 +48,6 @@ type ContractNotifier struct {
 	currentAlert alertBody
 }
 
-func toFloat64(s string) float64 {
-	float, _ := strconv.ParseFloat(s, 64)
-	return float
-}
-
 type alertBody struct {
 	msg string
 	// 开多？
@@ -65,7 +59,7 @@ type alertBody struct {
 func (cn *ContractNotifier) Alert() (alertBody, bool) {
 	res, _ := cn.client.NewListPricesService().Symbol("BTCUSDT").Do(context.TODO())
 	if len(res) > 0 {
-		cn.prices = append(cn.prices, toFloat64(res[0].Price))
+		cn.prices = append(cn.prices, util.ToFloat64(res[0].Price))
 	}
 	return cn.alert()
 }
@@ -103,7 +97,7 @@ func (cn *ContractNotifier) alert() (alertBody, bool) {
 	}
 	maxIdx, maxPrice := max(cn.prices)
 	minIdx, minPrice := min(cn.prices)
-	if maxPrice-minPrice > toFloat64(config.BinanceDiff()) && time.Now().Sub(cn.alertAt).Seconds() > 30 {
+	if maxPrice-minPrice > util.ToFloat64(config.BinanceDiff()) && time.Now().Sub(cn.alertAt).Seconds() > 30 {
 		cn.prices = nil
 		cn.alertAt = time.Now()
 		var openPrice = minPrice - 100

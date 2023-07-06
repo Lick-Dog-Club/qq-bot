@@ -15,11 +15,14 @@ import (
 	"qq/bot"
 	"qq/config"
 	"qq/features"
+	"qq/util"
 	"regexp"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/forgoer/openssl"
 )
@@ -31,10 +34,40 @@ func init() {
 		bot.Send(Run(content))
 		return nil
 	})
+	features.AddKeyword("mt-jwd", "+<phone> +<lat,lng> 设置经纬度", func(bot bot.Bot, content string) error {
+		split := strings.Split(content, " ")
+		if len(split) == 2 {
+			phone := split[0]
+			latlng := strings.Split(split[1], ",")
+			if len(latlng) == 2 {
+				if info, ok := config.MaoTaiInfoMap()[phone]; ok {
+					info.Lat = util.ToFloat64(latlng[0])
+					info.Lng = util.ToFloat64(latlng[1])
+					config.AddMaoTaiInfo(info)
+				}
+				bot.Send(`请先登陆之后再设置经纬度：
+登陆:
+mt %s
+
+设置经纬度:
+mt-jwd %s <lat,lng>
+`)
+				return nil
+			}
+
+		}
+		bot.Send("输入不合法: " + content)
+		return nil
+	})
 	features.AddKeyword("mt-list", "当前用户以及过期时间", func(bot bot.Bot, content string) error {
 		var res string
 		for _, info := range config.MaoTaiInfoMap() {
-			res += fmt.Sprintf("手机号码：%s，过期时间：%s\n", info.Phone, info.ExpireAt.Format(time.DateTime))
+			res += fmt.Sprintf(`
+手机号码：%s
+过期时间：%s
+经纬度: %f,%f
+
+`, info.Phone, info.ExpireAt.Format(time.DateTime), info.Lat, info.Lng)
 		}
 		bot.Send(res)
 		return nil
@@ -86,7 +119,10 @@ func Run(m string) string {
 		return fmt.Sprintf("用户未登陆，短信已发送，收到后执行：\n\nmt-login %s <code>", m)
 	}
 
-	return doReservation(sessionID, info.Uid, info.Token)
+	return doReservation(sessionID, info.Uid, info.Token, LatLng{
+		lat: info.Lat,
+		lng: info.Lng,
+	})
 }
 
 type ItemShopResp struct {
@@ -123,25 +159,37 @@ var zhalongkou = LatLng{
 	lng: 120.184013,
 }
 
-func getItemShop(url string, itemID int) (shopIDs []int) {
+type shopInfo struct {
+	ID   int
+	Name string
+}
+
+func getItemShop(url string, itemID int, latLng LatLng) (shopIDs []shopInfo) {
 	resp, _ := http.Get(url)
 	defer resp.Body.Close()
 	var data ItemShopResp
 	json.NewDecoder(resp.Body).Decode(&data)
 
+	oriLatLng := zhalongkou
+	if latLng.lat != 0 && latLng.lng != 0 {
+		oriLatLng = latLng
+	}
 	for _, shop := range data.Data.Shops {
 		for _, item := range shop.Items {
 			sid, _ := strconv.Atoi(shop.ShopID)
 			if item.ItemID == fmt.Sprintf("%d", itemID) {
 				if addr, ok := allShops[int64(sid)]; ok {
-					dis := GetDistance(zhalongkou, LatLng{
+					dis := GetDistance(oriLatLng, LatLng{
 						lat: addr.Lat,
 						lng: addr.Lng,
 					})
 					//log.Printf("店铺: %s, 供应商: %s, 距离是 %v km, id: %v", addr.Name, item.OwnerName, dis, shop.ShopID)
 					if dis < 15 {
 						atoi, _ := strconv.Atoi(shop.ShopID)
-						shopIDs = append(shopIDs, atoi)
+						shopIDs = append(shopIDs, shopInfo{
+							ID:   atoi,
+							Name: addr.Name,
+						})
 						break
 					}
 				}
@@ -151,7 +199,7 @@ func getItemShop(url string, itemID int) (shopIDs []int) {
 	return shopIDs
 }
 
-func doReservation(sessionID, uid int, token string) (res string) {
+func doReservation(sessionID, uid int, token string, latLng LatLng) (res string) {
 	// 4. reservation
 	//10213 3%vol 500ml贵州茅台酒（癸卯兔年）
 	//10214 53%vol 375ml×2贵州茅台酒（癸卯兔年）
@@ -159,20 +207,21 @@ func doReservation(sessionID, uid int, token string) (res string) {
 		fmt.Sprintf(`https://static.moutai519.com.cn/mt-backend/xhr/front/mall/shop/list/slim/v3/%d/浙江省/10213/%d`, sessionID, today().UnixMilli()),
 		fmt.Sprintf(`https://static.moutai519.com.cn/mt-backend/xhr/front/mall/shop/list/slim/v3/%d/浙江省/10214/%d`, sessionID, today().UnixMilli()),
 	}
-	items := map[int][]int{
-		10213: []int{},
-		10214: []int{},
+	items := map[int][]shopInfo{
+		10213: []shopInfo{},
+		10214: []shopInfo{},
 	}
 	for _, url := range urls {
-		shop213 := getItemShop(url, 10213)
-		shop214 := getItemShop(url, 10214)
+		shop213 := getItemShop(url, 10213, latLng)
+		shop214 := getItemShop(url, 10214, latLng)
 		items[10213] = append(items[10213], shop213...)
 		items[10214] = append(items[10214], shop214...)
 	}
+	log.Fatal(items)
 	for itemID, shopIDs := range items {
 		if len(shopIDs) > 0 {
-			shopID := shopIDs[mrand.Intn(len(shopIDs))]
-			res += reservation(itemID, shopID, sessionID, uid, token) + "\n"
+			shop := shopIDs[mrand.Intn(len(shopIDs))]
+			res += reservation(itemID, shop, sessionID, uid, token) + "\n"
 		}
 	}
 	return
@@ -337,7 +386,7 @@ type ActParams struct {
 	SessionID    int    `json:"sessionId"`
 }
 
-func reservation(itemID, shopID, sessionID, userID int, token string) string {
+func reservation(itemID int, shop shopInfo, sessionID, userID int, token string) string {
 	p := &ActParams{
 		ItemInfoList: []list{
 			{
@@ -345,7 +394,7 @@ func reservation(itemID, shopID, sessionID, userID int, token string) string {
 				ItemID: itemID,
 			},
 		},
-		ShopID:    shopID,
+		ShopID:    shop.ID,
 		SessionID: sessionID,
 	}
 	marshal, _ := json.Marshal(p)
@@ -366,9 +415,9 @@ func reservation(itemID, shopID, sessionID, userID int, token string) string {
 	var data resp
 	json.NewDecoder(do.Body).Decode(&data)
 	if data.Code == 2000 {
-		return fmt.Sprintf("申购成功：%d", itemID)
+		return fmt.Sprintf("申购成功：%d, 店铺：%s", itemID, shop.Name)
 	}
-	return fmt.Sprintf("itemID: %d, %s", itemID, data.Message)
+	return fmt.Sprintf("itemID: %d, 店铺: %s, %s", itemID, shop.Name, data.Message)
 }
 
 func encrypt[T string | []byte](text T) string {
