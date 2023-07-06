@@ -105,6 +105,10 @@ func WeatherKey() string {
 	return c.Load().(KV)["weather_key"]
 }
 
+func GeoKey() string {
+	return c.Load().(KV)["weather_key"]
+}
+
 func TianApiKey() string {
 	return c.Load().(KV)["tian_api_key"]
 }

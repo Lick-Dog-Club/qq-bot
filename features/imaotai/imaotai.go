@@ -15,14 +15,13 @@ import (
 	"qq/bot"
 	"qq/config"
 	"qq/features"
+	"qq/features/geo"
 	"qq/util"
 	"regexp"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 
 	"github.com/forgoer/openssl"
 )
@@ -44,6 +43,11 @@ func init() {
 					info.Lat = util.ToFloat64(latlng[0])
 					info.Lng = util.ToFloat64(latlng[1])
 					config.AddMaoTaiInfo(info)
+					bot.Send(fmt.Sprintf(`设置成功：
+手机号：%s
+Geo：%s
+`, phone, split[1]))
+					return nil
 				}
 				bot.Send(`请先登陆之后再设置经纬度：
 登陆:
@@ -54,7 +58,37 @@ mt-jwd %s <lat,lng>
 `)
 				return nil
 			}
+		}
+		bot.Send("输入不合法: " + content)
+		return nil
+	})
+	features.AddKeyword("mt-geo", "+<phone> +<地址,高德自动查询 geo> 设置经纬度", func(bot bot.Bot, content string) error {
+		split := strings.Split(content, " ")
+		if len(split) == 2 {
+			phone := split[0]
+			geoStr := geo.Geo(config.GeoKey(), split[1])
+			latlng := strings.Split(geoStr, ",")
+			if len(latlng) == 2 {
+				if info, ok := config.MaoTaiInfoMap()[phone]; ok {
+					info.Lat = util.ToFloat64(latlng[0])
+					info.Lng = util.ToFloat64(latlng[1])
+					config.AddMaoTaiInfo(info)
+					bot.Send(fmt.Sprintf(`设置成功：
+手机号：%s
+地址：%s
+Geo：%s
+`, phone, split[1], geoStr))
+					return nil
+				}
+				bot.Send(`请先登陆之后再设置经纬度：
+登陆:
+mt %s
 
+设置经纬度:
+mt-geo %s <地址>
+`)
+				return nil
+			}
 		}
 		bot.Send("输入不合法: " + content)
 		return nil
@@ -217,7 +251,6 @@ func doReservation(sessionID, uid int, token string, latLng LatLng) (res string)
 		items[10213] = append(items[10213], shop213...)
 		items[10214] = append(items[10214], shop214...)
 	}
-	log.Fatal(items)
 	for itemID, shopIDs := range items {
 		if len(shopIDs) > 0 {
 			shop := shopIDs[mrand.Intn(len(shopIDs))]
