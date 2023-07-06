@@ -151,8 +151,10 @@ func doReservation(sessionID, uid int, token string) (res string) {
 		items[10214] = append(items[10214], shop214...)
 	}
 	for itemID, shopIDs := range items {
-		shopID := shopIDs[mrand.Intn(len(shopIDs))]
-		res += reservation(itemID, shopID, sessionID, uid, token) + "\n"
+		if len(shopIDs) > 0 {
+			shopID := shopIDs[mrand.Intn(len(shopIDs))]
+			res += reservation(itemID, shopID, sessionID, uid, token) + "\n"
+		}
 	}
 	return
 }
