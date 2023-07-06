@@ -178,6 +178,16 @@ func AddMaoTaiInfo(info MaoTaiInfo) {
 	Set(map[string]string{"maotai": string(marshal)})
 }
 
+func DelMaoTaiInfo(phone string) {
+	var infos MTInfos
+	if err := json.Unmarshal([]byte(c.Load().(KV)["maotai"]), &infos); err != nil {
+		infos = MTInfos{}
+	}
+	delete(infos, phone)
+	marshal, _ := json.Marshal(&infos)
+	Set(map[string]string{"maotai": string(marshal)})
+}
+
 type MaoTaiInfo struct {
 	Phone    string    `json:"phone"`
 	Uid      int       `json:"uid"`

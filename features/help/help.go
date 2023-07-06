@@ -9,11 +9,11 @@ func init() {
 	features.AddKeyword("help", "帮助信息", func(sender bot.Bot, content string) error {
 		showHelp(sender, true)
 		return nil
-	}, features.WithSysCmd())
+	}, features.WithSysCmd(), features.WithGroup("help"))
 	features.AddKeyword("hhelp", "帮助信息, 显示被隐藏的指令", func(sender bot.Bot, content string) error {
 		showHelp(sender, false)
 		return nil
-	}, features.WithSysCmd(), features.WithHidden())
+	}, features.WithSysCmd(), features.WithHidden(), features.WithGroup("help"))
 }
 
 func showHelp(sender bot.Bot, hidden bool) {

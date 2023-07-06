@@ -46,7 +46,7 @@ func init() {
 		config.Set(map[string]string{"pixiv_mode": "daily"})
 		bot.Send("pixiv_mode 已设置成 daily")
 		return nil
-	}, features.WithHidden())
+	}, features.WithHidden(), features.WithGroup("pixiv"))
 	features.AddKeyword("pw", "pixiv_mode 设置成 weekly", func(bot bot.Bot, content string) error {
 		config.Set(map[string]string{"pixiv_mode": "weekly"})
 		bot.Send("pixiv_mode 已设置成 weekly")
@@ -56,7 +56,7 @@ func init() {
 		config.Set(map[string]string{"pixiv_mode": "monthly"})
 		bot.Send("pixiv_mode 已设置成 monthly")
 		return nil
-	}, features.WithHidden())
+	}, features.WithHidden(), features.WithGroup("pixiv"))
 	features.AddKeyword("p", "+<n/r/rai> pixiv 热榜图片", func(bot bot.Bot, content string) error {
 		image, err := Image(content)
 		if err != nil {
@@ -80,7 +80,7 @@ func init() {
 			bot.DeleteMsg(tID)
 		}
 		return nil
-	})
+	}, features.WithGroup("pixiv"))
 
 }
 func Image(content string) (string, error) {

@@ -25,7 +25,7 @@ func init() {
 	features.AddKeyword("listtask", "任务列表", func(bot bot.Bot, content string) error {
 		bot.Send(cronjob.Manager().ListOnceCommands())
 		return nil
-	})
+	}, features.WithGroup("task"))
 	features.AddKeyword("canceltask", "取消任务", func(bot bot.Bot, content string) error {
 		atoi, err := strconv.Atoi(strings.TrimSpace(content))
 		if err != nil {
@@ -35,7 +35,7 @@ func init() {
 		cronjob.Manager().RemoveOnceCommand(int(atoi))
 		bot.Send("已取消")
 		return nil
-	})
+	}, features.WithGroup("task"))
 	features.AddKeyword("task", "添加任务", func(b bot.Bot, content string) error {
 		parse, err := w.Parse(content, time.Now())
 		if err != nil {
@@ -66,5 +66,5 @@ func init() {
 		})
 		b.Send(fmt.Sprintf("已设置:\n时间: %s, 内容: %s\n取消任务请执行: canceltask %d", parse.Time.Format(time.DateTime), content, tid))
 		return nil
-	})
+	}, features.WithGroup("task"))
 }

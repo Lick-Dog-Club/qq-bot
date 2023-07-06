@@ -22,6 +22,13 @@ func WithSysCmd() Option {
 	}
 }
 
+func WithGroup(group string) Option {
+	return func(cmd *cmd) error {
+		cmd.group = group
+		return nil
+	}
+}
+
 func WithHidden() Option {
 	return func(cmd *cmd) error {
 		cmd.hidden = true
@@ -35,6 +42,7 @@ type CommandImp interface {
 	Hidden() bool
 	IsSysCmd() bool
 	Keyword() string
+	Group() string
 	Description() string
 	Run(bot bot.Bot, content string) error
 }
@@ -122,8 +130,14 @@ func AllKeywordCommands(hidden bool) []CommandImp {
 	mu.RLock()
 	defer mu.RUnlock()
 	var cmds sortCommands
+	var groupCmds = map[string]sortCommands{}
+
 	for _, imp := range commands {
 		if hidden && imp.Hidden() {
+			continue
+		}
+		if imp.Group() != "" {
+			groupCmds[imp.Group()] = append(groupCmds[imp.Group()], imp)
 			continue
 		}
 		cmds = append(cmds, imp)
@@ -131,7 +145,13 @@ func AllKeywordCommands(hidden bool) []CommandImp {
 
 	cmds = append(cmds, defaultCommand)
 	sort.Sort(cmds)
+	for _, imps := range groupCmds {
+		sort.Sort(imps)
+	}
 
+	for _, imps := range groupCmds {
+		cmds = append(cmds, imps...)
+	}
 	return cmds
 }
 
@@ -141,6 +161,7 @@ type cmd struct {
 	fn      commandFunc
 	sysCmd  bool
 	hidden  bool
+	group   string
 }
 
 func (c cmd) IsSysCmd() bool {
@@ -153,6 +174,10 @@ func (c cmd) Hidden() bool {
 
 func (c cmd) Keyword() string {
 	return c.keyword
+}
+
+func (c cmd) Group() string {
+	return c.group
 }
 
 func (c cmd) Description() string {

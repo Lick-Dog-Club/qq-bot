@@ -25,7 +25,7 @@ func init() {
 		config.Set(conf)
 		bot.Send("已设置: " + content)
 		return nil
-	}, features.WithSysCmd(), features.WithHidden())
+	}, features.WithSysCmd(), features.WithHidden(), features.WithGroup("config"))
 	features.AddKeyword("cg", "显示环境变量", func(bot bot.Bot, content string) error {
 		if bot.UserID() == config.UserID() {
 			bot.Send(config.Configs().String())
@@ -33,5 +33,5 @@ func init() {
 		}
 		bot.Send("未授权")
 		return nil
-	}, features.WithSysCmd(), features.WithHidden())
+	}, features.WithSysCmd(), features.WithHidden(), features.WithGroup("config"))
 }

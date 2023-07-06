@@ -32,7 +32,12 @@ func init() {
 	features.AddKeyword("mt", "<+phoneNum>: 自动预约茅台", func(bot bot.Bot, content string) error {
 		bot.Send(Run(content))
 		return nil
-	})
+	}, features.WithGroup("maotai"))
+	features.AddKeyword("mt-del", "<+phoneNum>: 取消茅台自动预约", func(bot bot.Bot, content string) error {
+		config.DelMaoTaiInfo(content)
+		bot.Send("成功取消！")
+		return nil
+	}, features.WithGroup("maotai"))
 	features.AddKeyword("mt-jwd", "+<phone> +<lat,lng> 设置经纬度", func(bot bot.Bot, content string) error {
 		split := strings.Split(content, " ")
 		if len(split) == 2 {
@@ -61,7 +66,7 @@ mt-jwd %s <lat,lng>
 		}
 		bot.Send("输入不合法: " + content)
 		return nil
-	})
+	}, features.WithGroup("maotai"))
 	features.AddKeyword("mt-geo", "+<phone> +<地址,高德自动查询 geo> 设置经纬度", func(bot bot.Bot, content string) error {
 		split := strings.Split(content, " ")
 		if len(split) == 2 {
@@ -92,7 +97,7 @@ mt-geo %s <地址>
 		}
 		bot.Send("输入不合法: " + content)
 		return nil
-	})
+	}, features.WithGroup("maotai"))
 	features.AddKeyword("mt-list", "当前用户以及过期时间", func(bot bot.Bot, content string) error {
 		var res string
 		for _, info := range config.MaoTaiInfoMap() {
@@ -105,7 +110,7 @@ mt-geo %s <地址>
 		}
 		bot.Send(res)
 		return nil
-	})
+	}, features.WithGroup("maotai"))
 	features.AddKeyword("mt-login", "<+phone> <+code>: 自动预约茅台", func(bot bot.Bot, content string) error {
 		split := strings.Split(content, " ")
 		var phone, code string
@@ -136,7 +141,7 @@ mt-geo %s <地址>
 mt %s
 `, info.ExpireAt.Format(time.DateTime), info.Phone))
 		return nil
-	})
+	}, features.WithGroup("maotai"))
 }
 
 type exp struct {

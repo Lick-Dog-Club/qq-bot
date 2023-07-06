@@ -29,7 +29,7 @@ func init() {
 		config.Set(map[string]string{"ai_mode": m})
 		bot.Send("已设置 ai_mode: " + m)
 		return nil
-	}, features.WithHidden())
+	}, features.WithHidden(), features.WithGroup("ai"))
 	features.AddKeyword("ap", "ai 切换 browser 代理", func(bot bot.Bot, content string) error {
 		var p = config.AIProxyOne
 		if config.AiProxyUrl() == p {
@@ -38,7 +38,7 @@ func init() {
 		config.Set(map[string]string{"ai_browser_proxy_url": p})
 		bot.Send(fmt.Sprintf("已设置: %s", p))
 		return nil
-	}, features.WithHidden())
+	}, features.WithHidden(), features.WithGroup("ai"))
 	features.SetDefault("ai 自动回答", func(bot bot.Bot, content string) error {
 		req := api.Request
 		if config.AiMode() == "api" && config.AiToken() == "" {
