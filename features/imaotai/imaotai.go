@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math"
 	mrand "math/rand"
 	"net/http"
 	"qq/bot"
@@ -22,6 +23,8 @@ import (
 
 	"github.com/forgoer/openssl"
 )
+
+var allShops AllShopMap = getMap()
 
 func init() {
 	features.AddKeyword("mt", "<+phoneNum>: 自动预约茅台", func(bot bot.Bot, content string) error {
@@ -114,6 +117,12 @@ type ItemShopResp struct {
 	} `json:"data"`
 }
 
+// 以闸弄口为中心
+var zhalongkou = LatLng{
+	lat: 30.27844,
+	lng: 120.184013,
+}
+
 func getItemShop(url string, itemID int) (shopIDs []int) {
 	resp, _ := http.Get(url)
 	defer resp.Body.Close()
@@ -122,10 +131,20 @@ func getItemShop(url string, itemID int) (shopIDs []int) {
 
 	for _, shop := range data.Data.Shops {
 		for _, item := range shop.Items {
-			if item.ItemID == fmt.Sprintf("%d", itemID) && strings.Contains(item.OwnerName, "杭州") {
-				atoi, _ := strconv.Atoi(shop.ShopID)
-				shopIDs = append(shopIDs, atoi)
-				break
+			sid, _ := strconv.Atoi(shop.ShopID)
+			if item.ItemID == fmt.Sprintf("%d", itemID) {
+				if addr, ok := allShops[int64(sid)]; ok {
+					dis := GetDistance(zhalongkou, LatLng{
+						lat: addr.Lat,
+						lng: addr.Lng,
+					})
+					//log.Printf("店铺: %s, 供应商: %s, 距离是 %v km, id: %v", addr.Name, item.OwnerName, dis, shop.ShopID)
+					if dis < 15 {
+						atoi, _ := strconv.Atoi(shop.ShopID)
+						shopIDs = append(shopIDs, atoi)
+						break
+					}
+				}
 			}
 		}
 	}
@@ -360,4 +379,54 @@ func encrypt[T string | []byte](text T) string {
 func decrypt[T string | []byte](text T) string {
 	dst, _ := openssl.AesCBCDecrypt([]byte(text), AES_KEY, AES_IV, openssl.PKCS7_PADDING)
 	return string(dst)
+}
+
+type resourceMap struct {
+	Code int `json:"code"`
+	Data struct {
+		MtshopsPc struct {
+			Md5     string `json:"md5"`
+			Size    int    `json:"size"`
+			URL     string `json:"url"`
+			Version int    `json:"version"`
+		} `json:"mtshops_pc"`
+	} `json:"data"`
+}
+
+func getMap() AllShopMap {
+	resp, _ := http.Get("https://static.moutai519.com.cn/mt-backend/xhr/front/mall/resource/get")
+	defer resp.Body.Close()
+	var data resourceMap
+	json.NewDecoder(resp.Body).Decode(&data)
+	get, _ := http.Get(data.Data.MtshopsPc.URL)
+	defer get.Body.Close()
+	var allShops AllShopMap
+	json.NewDecoder(get.Body).Decode(&allShops)
+	return allShops
+}
+
+type ShopAddr struct {
+	Name       string  `json:"name"`
+	TenantName string  `json:"tenant_name"`
+	Lat        float64 `json:"lat"`
+	Lng        float64 `json:"lng"`
+}
+
+type AllShopMap map[int64]ShopAddr
+
+type LatLng struct {
+	lat float64
+	lng float64
+}
+
+func GetDistance(d1, d2 LatLng) float64 {
+	radius := 6371000.0
+	rad := math.Pi / 180.0
+	lat1 := d1.lat * rad
+	lng1 := d1.lng * rad
+	lat2 := d2.lat * rad
+	lng2 := d2.lng * rad
+	theta := lng2 - lng1
+	dist := math.Acos(math.Sin(lat1)*math.Sin(lat2) + math.Cos(lat1)*math.Cos(lat2)*math.Cos(theta))
+	return dist * radius / 1000
 }
