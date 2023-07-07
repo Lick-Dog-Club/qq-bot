@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"math"
 	mrand "math/rand"
 	"net/http"
@@ -235,9 +236,10 @@ func doReservation(sessionID, uid int, token string, latLng LatLng) (res string)
 	fmt.Printf("申购：\nsessionID: %v\nuid: %v\ntoken: %v\nlatlng: %#v", sessionID, uid, token, latLng)
 	items := map[int][]shopInfo{}
 	for _, id := range ItemIDs {
-		shop := getItemShop(fmt.Sprintf(fmt.Sprintf(`https://static.moutai519.com.cn/mt-backend/xhr/front/mall/shop/list/slim/v3/%d/浙江省/%%v/%d`, sessionID, today().UnixMilli()), id), id, latLng)
+		shop := getItemShop(fmt.Sprintf(`https://static.moutai519.com.cn/mt-backend/xhr/front/mall/shop/list/slim/v3/%d/浙江省/%d/%d`, sessionID, id, today().UnixMilli()), id, latLng)
 		items[id] = append(items[id], shop...)
 	}
+	log.Fatal(items)
 	for itemID, shopIDs := range items {
 		if len(shopIDs) > 0 {
 			shop := shopIDs[mrand.Intn(len(shopIDs))]
