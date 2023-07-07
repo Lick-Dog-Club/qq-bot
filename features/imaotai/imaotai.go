@@ -230,7 +230,7 @@ func getItemShop(url string, itemID int, latLng LatLng) (shopIDs []shopInfo) {
 }
 
 func doReservation(sessionID, uid int, token string, latLng LatLng) (res string) {
-	fmt.Printf("申购：\nsessionID: %v\nuid: %v\ntoken: %v\nlatlng: %v", sessionID, uid, token, latLng)
+	fmt.Printf("申购：\nsessionID: %v\nuid: %v\ntoken: %v\nlatlng: %#v", sessionID, uid, token, latLng)
 	// 4. reservation
 	//10213 3%vol 500ml贵州茅台酒（癸卯兔年）
 	//10214 53%vol 375ml×2贵州茅台酒（癸卯兔年）
