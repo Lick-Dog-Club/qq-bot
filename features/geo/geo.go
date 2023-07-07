@@ -7,11 +7,21 @@ import (
 	"qq/bot"
 	"qq/config"
 	"qq/features"
+	"strings"
 )
 
 func init() {
 	features.AddKeyword("geo", "geo 查询", func(bot bot.Bot, content string) error {
-		bot.Send(fmt.Sprintf("%s: %s", content, Geo(config.GeoKey(), content)))
+		geo := Geo(config.GeoKey(), content)
+		split := strings.Split(geo, ",")
+		if len(split) == 2 {
+			lat := split[1]
+			lng := split[0]
+			bot.Send(fmt.Sprintf(`%s:
+lat: %v
+lng: %v
+`, content, lat, lng))
+		}
 		return nil
 	})
 }
