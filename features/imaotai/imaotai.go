@@ -225,24 +225,18 @@ func getItemShop(url string, itemID int, latLng LatLng) (shopIDs []shopInfo) {
 	return shopIDs
 }
 
+// ItemIDs
+// 10213 3%vol 500ml贵州茅台酒（癸卯兔年）
+// 10214 53%vol 375ml×2贵州茅台酒（癸卯兔年）
+var ItemIDs = []int{10213, 10214}
+
+// doReservation 申购
 func doReservation(sessionID, uid int, token string, latLng LatLng) (res string) {
 	fmt.Printf("申购：\nsessionID: %v\nuid: %v\ntoken: %v\nlatlng: %#v", sessionID, uid, token, latLng)
-	// 4. reservation
-	//10213 3%vol 500ml贵州茅台酒（癸卯兔年）
-	//10214 53%vol 375ml×2贵州茅台酒（癸卯兔年）
-	var urls = []string{
-		fmt.Sprintf(`https://static.moutai519.com.cn/mt-backend/xhr/front/mall/shop/list/slim/v3/%d/浙江省/10213/%d`, sessionID, today().UnixMilli()),
-		fmt.Sprintf(`https://static.moutai519.com.cn/mt-backend/xhr/front/mall/shop/list/slim/v3/%d/浙江省/10214/%d`, sessionID, today().UnixMilli()),
-	}
-	items := map[int][]shopInfo{
-		10213: []shopInfo{},
-		10214: []shopInfo{},
-	}
-	for _, url := range urls {
-		shop213 := getItemShop(url, 10213, latLng)
-		shop214 := getItemShop(url, 10214, latLng)
-		items[10213] = append(items[10213], shop213...)
-		items[10214] = append(items[10214], shop214...)
+	items := map[int][]shopInfo{}
+	for _, id := range ItemIDs {
+		shop := getItemShop(fmt.Sprintf(fmt.Sprintf(`https://static.moutai519.com.cn/mt-backend/xhr/front/mall/shop/list/slim/v3/%d/浙江省/%%v/%d`, sessionID, today().UnixMilli()), id), id, latLng)
+		items[id] = append(items[id], shop...)
 	}
 	for itemID, shopIDs := range items {
 		if len(shopIDs) > 0 {
