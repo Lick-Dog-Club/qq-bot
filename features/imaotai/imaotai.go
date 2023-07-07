@@ -44,8 +44,8 @@ func init() {
 			latlng := strings.Split(split[1], ",")
 			if len(latlng) == 2 {
 				if info, ok := config.MaoTaiInfoMap()[phone]; ok {
-					info.Lat = util.ToFloat64(latlng[1])
-					info.Lng = util.ToFloat64(latlng[0])
+					info.Lat = util.ToFloat64(latlng[0])
+					info.Lng = util.ToFloat64(latlng[1])
 					config.AddMaoTaiInfo(info)
 					bot.Send(fmt.Sprintf(`设置成功：
 手机号：%s
@@ -74,8 +74,8 @@ mt-jwd %s <lat,lng>
 			latlng := strings.Split(geoStr, ",")
 			if len(latlng) == 2 {
 				if info, ok := config.MaoTaiInfoMap()[phone]; ok {
-					info.Lat = util.ToFloat64(latlng[0])
-					info.Lng = util.ToFloat64(latlng[1])
+					info.Lat = util.ToFloat64(latlng[1])
+					info.Lng = util.ToFloat64(latlng[0])
 					config.AddMaoTaiInfo(info)
 					bot.Send(fmt.Sprintf(`设置成功：
 手机号：%s
