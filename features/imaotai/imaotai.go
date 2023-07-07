@@ -33,6 +33,7 @@ var allShops AllShopMap = getMap()
 func init() {
 	features.AddKeyword("mt", "<+phoneNum>: 自动预约茅台", func(bot bot.Bot, content string) error {
 		res := Run(content)
+		fmt.Println(res)
 		bot.Send(res)
 		return nil
 	}, features.WithGroup("maotai"))
