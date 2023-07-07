@@ -248,6 +248,7 @@ func doReservation(sessionID, uid int, token string, latLng LatLng) (res string)
 		items[10213] = append(items[10213], shop213...)
 		items[10214] = append(items[10214], shop214...)
 	}
+	fmt.Println(items)
 	for itemID, shopIDs := range items {
 		if len(shopIDs) > 0 {
 			shop := shopIDs[mrand.Intn(len(shopIDs))]
