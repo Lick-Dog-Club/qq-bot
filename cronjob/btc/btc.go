@@ -102,11 +102,13 @@ func (cn *ContractNotifier) alert() (alertBody, bool) {
 		cn.alertAt = time.Now()
 		var openPrice = minPrice - 100
 		isMore := maxIdx < minIdx
+		text := "📉跌了"
 		if !isMore {
 			openPrice = maxPrice + 100
+			text = "📈涨了"
 		}
 		return alertBody{
-			msg:       fmt.Sprintf("BTC 出现异动，当前最低值为 %.0f, 最高为 %.0f, 涨: %t", minPrice, maxPrice, isMore),
+			msg:       fmt.Sprintf("BTC 出现异动，当前最低值为 %.0f, 最高为 %.0f, %s", minPrice, maxPrice, text),
 			isMore:    isMore,
 			openPrice: openPrice,
 			date:      time.Now(),
