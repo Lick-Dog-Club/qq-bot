@@ -76,7 +76,7 @@ func main() {
 		if (strings.Contains(message.Message, atMsg) && message.MessageType == "group") || message.MessageType == "private" {
 			msg := strings.ReplaceAll(message.Message, atMsg, "")
 			keyword, content := util.GetKeywordAndContent(msg)
-			fmt.Printf("key: %v, content: %v", keyword, content)
+			fmt.Printf("key: %v, content: %v\n", keyword, content)
 			var (
 				gid string
 				sid string
