@@ -30,6 +30,7 @@ var allShops AllShopMap = getMap()
 
 func init() {
 	features.AddKeyword("mt", "<+phoneNum>: 自动预约茅台", func(bot bot.Bot, content string) error {
+		fmt.Println("自动预约茅台: ", content)
 		bot.Send(Run(content))
 		return nil
 	}, features.WithGroup("maotai"))
@@ -492,9 +493,9 @@ func getMap() AllShopMap {
 	json.NewDecoder(resp.Body).Decode(&data)
 	get, _ := http.Get(data.Data.MtshopsPc.URL)
 	defer get.Body.Close()
-	var allShops AllShopMap
-	json.NewDecoder(get.Body).Decode(&allShops)
-	return allShops
+	var shops AllShopMap
+	json.NewDecoder(get.Body).Decode(&shops)
+	return shops
 }
 
 type ShopAddr struct {
