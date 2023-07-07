@@ -20,7 +20,6 @@ import (
 	"qq/util"
 	"regexp"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 
@@ -192,7 +191,7 @@ var zhalongkou = LatLng{
 }
 
 type shopInfo struct {
-	ID   int
+	ID   string
 	Name string
 }
 
@@ -216,9 +215,8 @@ func getItemShop(url string, itemID int, latLng LatLng) (shopIDs []shopInfo) {
 					})
 					//log.Printf("店铺: %s, 供应商: %s, 距离是 %v km, id: %v", addr.Name, item.OwnerName, dis, shop.ShopID)
 					if dis < 15 {
-						atoi, _ := strconv.Atoi(shop.ShopID)
 						shopIDs = append(shopIDs, shopInfo{
-							ID:   atoi,
+							ID:   shop.ShopID,
 							Name: addr.Name,
 						})
 						break
@@ -413,7 +411,7 @@ type list struct {
 type ActParams struct {
 	ActParam     string `json:"actParam,omitempty"`
 	ItemInfoList []list `json:"itemInfoList"`
-	ShopID       int    `json:"shopId"`
+	ShopID       string `json:"shopId"`
 	SessionID    int    `json:"sessionId"`
 }
 
