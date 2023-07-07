@@ -5,7 +5,7 @@ import (
 	"qq/config"
 	"qq/features/ai/api/client"
 	"qq/features/ai/api/types"
-	"qq/features/util/retry"
+	"qq/util/retry"
 	"strings"
 	"sync"
 	"time"

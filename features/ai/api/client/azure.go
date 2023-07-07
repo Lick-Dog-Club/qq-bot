@@ -8,7 +8,7 @@ import (
 	"log"
 	"net/http"
 	"qq/features/ai/api/types"
-	"qq/features/util/proxy"
+	"qq/util/proxy"
 
 	"github.com/sashabaranov/go-openai"
 )

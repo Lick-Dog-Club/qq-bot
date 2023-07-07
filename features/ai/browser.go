@@ -8,8 +8,8 @@ import (
 	"io"
 	"net/http"
 	"qq/config"
-	"qq/features/util/proxy"
-	"qq/features/util/retry"
+	"qq/util/proxy"
+	"qq/util/retry"
 	"strings"
 	"time"
 

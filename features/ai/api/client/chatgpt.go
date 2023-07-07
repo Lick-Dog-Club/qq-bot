@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log"
 	"qq/features/ai/api/types"
-	"qq/features/util/proxy"
+	"qq/util/proxy"
 	"time"
 
 	"github.com/sashabaranov/go-openai"

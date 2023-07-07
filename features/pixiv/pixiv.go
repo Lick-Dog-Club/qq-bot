@@ -11,8 +11,8 @@ import (
 	"qq/bot"
 	"qq/config"
 	"qq/features"
-	"qq/features/util/proxy"
-	"qq/features/util/retry"
+	"qq/util/proxy"
+	"qq/util/retry"
 	"strings"
 	"time"
 
