@@ -16,12 +16,15 @@ import (
 	"qq/config"
 	"qq/features"
 	"qq/features/geo"
+	"qq/features/util/retry"
 	"qq/util"
 	"regexp"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/forgoer/openssl"
 )
@@ -244,7 +247,7 @@ func getItemShop(url string, itemID int, latLng LatLng) (shopIDs []shopInfo) {
 }
 
 func doReservation(sessionID, uid int, token string, latLng LatLng) (res string) {
-	fmt.Sprintf("申购：\nsessionID: %v\nuid: %v\ntoken: %v\nlatlng: %v", sessionID, uid, token, latLng)
+	fmt.Printf("申购：\nsessionID: %v\nuid: %v\ntoken: %v\nlatlng: %v", sessionID, uid, token, latLng)
 	// 4. reservation
 	//10213 3%vol 500ml贵州茅台酒（癸卯兔年）
 	//10214 53%vol 375ml×2贵州茅台酒（癸卯兔年）
@@ -487,14 +490,34 @@ type resourceMap struct {
 }
 
 func getMap() AllShopMap {
-	resp, _ := http.Get("https://static.moutai519.com.cn/mt-backend/xhr/front/mall/resource/get")
-	defer resp.Body.Close()
 	var data resourceMap
-	json.NewDecoder(resp.Body).Decode(&data)
-	get, _ := http.Get(data.Data.MtshopsPc.URL)
-	defer get.Body.Close()
+
+	err := retry.Times(3, func() error {
+		resp, err := http.Get("https://static.moutai519.com.cn/mt-backend/xhr/front/mall/resource/get")
+		if err != nil {
+			return err
+		}
+		defer resp.Body.Close()
+		return json.NewDecoder(resp.Body).Decode(&data)
+	})
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
 	var shops AllShopMap
-	json.NewDecoder(get.Body).Decode(&shops)
+	err = retry.Times(3, func() error {
+		get, err := http.Get(data.Data.MtshopsPc.URL)
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+		defer get.Body.Close()
+		return json.NewDecoder(get.Body).Decode(&shops)
+	})
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
 	return shops
 }
 
