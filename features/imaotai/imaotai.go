@@ -16,14 +16,11 @@ import (
 	"qq/config"
 	"qq/features"
 	"qq/features/geo"
-	"qq/features/util/retry"
 	"qq/util"
 	"regexp"
 	"sort"
 	"strings"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 
 	"github.com/forgoer/openssl"
 )
@@ -32,9 +29,7 @@ var allShops AllShopMap = getMap()
 
 func init() {
 	features.AddKeyword("mt", "<+phoneNum>: 自动预约茅台", func(bot bot.Bot, content string) error {
-		res := Run(content)
-		fmt.Println(res)
-		bot.Send(res)
+		bot.Send(Run(content))
 		return nil
 	}, features.WithGroup("maotai"))
 	features.AddKeyword("mt-del", "<+phoneNum>: 取消茅台自动预约", func(bot bot.Bot, content string) error {
@@ -49,8 +44,8 @@ func init() {
 			latlng := strings.Split(split[1], ",")
 			if len(latlng) == 2 {
 				if info, ok := config.MaoTaiInfoMap()[phone]; ok {
-					info.Lat = util.ToFloat64(latlng[0])
-					info.Lng = util.ToFloat64(latlng[1])
+					info.Lat = util.ToFloat64(latlng[1])
+					info.Lng = util.ToFloat64(latlng[0])
 					config.AddMaoTaiInfo(info)
 					bot.Send(fmt.Sprintf(`设置成功：
 手机号：%s
@@ -248,7 +243,6 @@ func doReservation(sessionID, uid int, token string, latLng LatLng) (res string)
 		items[10213] = append(items[10213], shop213...)
 		items[10214] = append(items[10214], shop214...)
 	}
-	fmt.Println(items)
 	for itemID, shopIDs := range items {
 		if len(shopIDs) > 0 {
 			shop := shopIDs[mrand.Intn(len(shopIDs))]
@@ -472,33 +466,13 @@ type resourceMap struct {
 
 func getMap() AllShopMap {
 	var data resourceMap
-
-	err := retry.Times(3, func() error {
-		resp, err := http.Get("https://static.moutai519.com.cn/mt-backend/xhr/front/mall/resource/get")
-		if err != nil {
-			return err
-		}
-		defer resp.Body.Close()
-		return json.NewDecoder(resp.Body).Decode(&data)
-	})
-	if err != nil {
-		log.Println(err)
-		return nil
-	}
+	resp, _ := http.Get("https://static.moutai519.com.cn/mt-backend/xhr/front/mall/resource/get")
+	defer resp.Body.Close()
+	json.NewDecoder(resp.Body).Decode(&data)
 	var shops AllShopMap
-	err = retry.Times(3, func() error {
-		get, err := http.Get(data.Data.MtshopsPc.URL)
-		if err != nil {
-			log.Println(err)
-			return err
-		}
-		defer get.Body.Close()
-		return json.NewDecoder(get.Body).Decode(&shops)
-	})
-	if err != nil {
-		log.Println(err)
-		return nil
-	}
+	get, _ := http.Get(data.Data.MtshopsPc.URL)
+	defer get.Body.Close()
+	json.NewDecoder(get.Body).Decode(&shops)
 	return shops
 }
 
