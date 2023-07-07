@@ -178,25 +178,10 @@ type ItemShopResp struct {
 		Shops []struct {
 			ShopID string `json:"shopId"`
 			Items  []struct {
-				Count               int    `json:"count"`
-				MaxReserveCount     int    `json:"maxReserveCount"`
-				DefaultReserveCount int    `json:"defaultReserveCount"`
-				ItemID              string `json:"itemId"`
-				Inventory           int    `json:"inventory"`
-				OwnerName           string `json:"ownerName"`
+				ItemID    string `json:"itemId"`
+				OwnerName string `json:"ownerName"`
 			} `json:"items"`
 		} `json:"shops"`
-		ValidTime int64 `json:"validTime"`
-		Items     []struct {
-			PicURL       string `json:"picUrl"`
-			Title        string `json:"title"`
-			Price        string `json:"price"`
-			Count        int    `json:"count"`
-			ItemID       string `json:"itemId"`
-			Inventory    int    `json:"inventory"`
-			AreaLimitTag bool   `json:"areaLimitTag"`
-			AreaLimit    int    `json:"areaLimit"`
-		} `json:"items"`
 	} `json:"data"`
 }
 
@@ -223,9 +208,8 @@ func getItemShop(url string, itemID int, latLng LatLng) (shopIDs []shopInfo) {
 	}
 	for _, shop := range data.Data.Shops {
 		for _, item := range shop.Items {
-			sid, _ := strconv.Atoi(shop.ShopID)
 			if item.ItemID == fmt.Sprintf("%d", itemID) {
-				if addr, ok := allShops[int64(sid)]; ok {
+				if addr, ok := allShops[shop.ShopID]; ok {
 					dis := GetDistance(oriLatLng, LatLng{
 						lat: addr.Lat,
 						lng: addr.Lng,
@@ -478,13 +462,10 @@ func decrypt[T string | []byte](text T) string {
 }
 
 type resourceMap struct {
-	Code int `json:"code"`
 	Data struct {
 		MtshopsPc struct {
-			Md5     string `json:"md5"`
-			Size    int    `json:"size"`
-			URL     string `json:"url"`
-			Version int    `json:"version"`
+			Md5 string `json:"md5"`
+			URL string `json:"url"`
 		} `json:"mtshops_pc"`
 	} `json:"data"`
 }
@@ -528,7 +509,7 @@ type ShopAddr struct {
 	Lng        float64 `json:"lng"`
 }
 
-type AllShopMap map[int64]ShopAddr
+type AllShopMap map[string]ShopAddr
 
 type LatLng struct {
 	lat float64
