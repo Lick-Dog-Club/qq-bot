@@ -80,8 +80,9 @@ mt-jwd %s <lat,lng>
 					bot.Send(fmt.Sprintf(`设置成功：
 手机号：%s
 地址：%s
-Geo：%s
-`, phone, split[1], geoStr))
+lat: %v
+lng: %v
+`, phone, split[1], info.Lat, info.Lng))
 					return nil
 				}
 				bot.Send(`请先登陆之后再设置经纬度：
