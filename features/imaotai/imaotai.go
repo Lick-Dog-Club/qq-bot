@@ -132,6 +132,10 @@ mt-geo %s <地址>
 			json.Unmarshal([]byte(string(decodeString)+"}"), &e)
 			info.ExpireAt = time.Unix(e.Exp, 0)
 		}
+		if info.ExpireAt.IsZero() {
+			bot.Send("信息有误，添加失败")
+			return nil
+		}
 		config.AddMaoTaiInfo(info)
 		bot.Send(fmt.Sprintf(`
 用户添加成功
@@ -239,6 +243,7 @@ func getItemShop(url string, itemID int, latLng LatLng) (shopIDs []shopInfo) {
 }
 
 func doReservation(sessionID, uid int, token string, latLng LatLng) (res string) {
+	fmt.Sprintf("申购：\nsessionID: %v\nuid: %v\ntoken: %v\nlatlng: %v", sessionID, uid, token, latLng)
 	// 4. reservation
 	//10213 3%vol 500ml贵州茅台酒（癸卯兔年）
 	//10214 53%vol 375ml×2贵州茅台酒（癸卯兔年）
