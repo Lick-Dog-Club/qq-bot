@@ -26,7 +26,7 @@ func init() {
 			}
 		}
 		if scanner.Err() != nil {
-			bot.Send(fmt.Sprintf("%e", scanner.Err()))
+			bot.Send(fmt.Sprintf("%s", scanner.Err()))
 		}
 
 		config.Set(conf)
