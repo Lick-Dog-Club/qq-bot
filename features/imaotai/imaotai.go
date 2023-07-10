@@ -140,10 +140,14 @@ mt-geo %s <地址>
 		bot.Send(fmt.Sprintf(`
 用户添加成功
 过期时间是: %s
-再次执行命令来申购茅台：
+设置 geo 信息请执行:
+
+mt-geo %s <地址>
+
+申购茅台请执行:
 
 mt %s
-`, info.ExpireAt.Format(time.DateTime), info.Phone))
+`, info.ExpireAt.Format(time.DateTime), info.Phone, info.Phone))
 		return nil
 	}, features.WithGroup("maotai"))
 }
