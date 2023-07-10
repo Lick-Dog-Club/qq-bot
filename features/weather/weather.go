@@ -31,7 +31,7 @@ type input struct {
 }
 
 func init() {
-	features.AddKeyword("天气", "+<城市> 获取天气信息, 默认杭州", func(bot bot.Bot, city string) error {
+	features.AddKeyword("天气", "<+城市> 获取天气信息, 默认杭州", func(bot bot.Bot, city string) error {
 		if city == "" {
 			city = "杭州"
 		}

@@ -37,7 +37,7 @@ func init() {
 		bot.Send("成功取消！")
 		return nil
 	}, features.WithGroup("maotai"))
-	features.AddKeyword("mt-jwd", "+<phone> +<lat,lng> 设置经纬度", func(bot bot.Bot, content string) error {
+	features.AddKeyword("mt-jwd", "<+phone> <+lat,lng> 设置经纬度", func(bot bot.Bot, content string) error {
 		split := strings.Split(content, " ")
 		if len(split) == 2 {
 			phone := split[0]
@@ -66,7 +66,7 @@ mt-jwd %s <lat,lng>
 		bot.Send("输入不合法: " + content)
 		return nil
 	}, features.WithGroup("maotai"))
-	features.AddKeyword("mt-geo", "+<phone> +<地址,高德自动查询 geo> 设置经纬度", func(bot bot.Bot, content string) error {
+	features.AddKeyword("mt-geo", "<+phone> <+地址,高德自动查询 geo> 设置经纬度", func(bot bot.Bot, content string) error {
 		split := strings.Split(content, " ")
 		if len(split) == 2 {
 			phone := split[0]

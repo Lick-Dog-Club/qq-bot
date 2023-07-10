@@ -9,7 +9,7 @@ import (
 )
 
 func init() {
-	features.AddKeyword("抽奖", "+<bilibili-cookie> 自动转发up主的抽奖活动", func(bot bot.Bot, content string) error {
+	features.AddKeyword("抽奖", "<+bilibili-cookie> 自动转发up主的抽奖活动", func(bot bot.Bot, content string) error {
 		bot.Send(Run(func(s string) { bot.Send(s) }, content))
 		return nil
 	})
