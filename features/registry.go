@@ -121,9 +121,9 @@ func (s sortCommands) Swap(i, j int) {
 func BeautifulOutput(hidden bool, simple bool) string {
 	var cmds string
 	for _, imp := range AllKeywordCommands(hidden) {
-		fmtStr := "@bot\t%-16s\t%s\n"
-		if simple {
-			fmtStr = "%-16s\t%s\n"
+		fmtStr := "%-12s\t%s\n"
+		if !simple {
+			fmtStr = "@bot\t" + fmtStr
 		}
 		cmds += fmt.Sprintf(fmtStr, imp.Keyword(), imp.Description())
 	}
@@ -156,6 +156,7 @@ func AllKeywordCommands(hidden bool) []CommandImp {
 	for _, imps := range groupCmds {
 		cmds = append(cmds, imps...)
 	}
+
 	return cmds
 }
 
