@@ -47,6 +47,9 @@ var temp, _ = template.New("").Funcs(map[string]any{"datestr": dateStr}).Parse(`
 `)
 
 func (c *comic) Render() string {
+	if c == nil {
+		return "未找到"
+	}
 	bf := bytes.Buffer{}
 	temp.Execute(&bf, c)
 	return bf.String()
@@ -59,6 +62,9 @@ func scrape(comicUrl string) *comic {
 		return nil
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode > 400 {
+		return nil
+	}
 	doc, err := htmlquery.Parse(resp.Body)
 	if err != nil {
 		return nil
