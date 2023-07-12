@@ -77,6 +77,9 @@ func scrape(comicUrl string) *comic {
 	c.Name = htmlquery.Find(doc, `//div[@class="book-title"]/h1/span/text()`)[0].Data
 	nodes := htmlquery.Find(doc, `//ul[@id="chapter-list-1"]/li/a@href]`)
 	lastIndex := len(nodes) - 1
+	for !strings.Contains(htmlquery.Find(nodes[lastIndex], "//span/text()")[0].Data, "话") {
+		lastIndex -= 1
+	}
 	if len(nodes) >= 2 {
 		last := nodes[lastIndex]
 		c.LastTitle = htmlquery.Find(last, "//span/text()")[0].Data
