@@ -34,7 +34,7 @@ type comic struct {
 }
 
 func dateStr(t time.Time) string {
-	return t.Local().Format(time.DateTime)
+	return t.Local().Format("2006-01-02")
 }
 
 var temp, _ = template.New("").Funcs(map[string]any{"datestr": dateStr}).Parse(`
