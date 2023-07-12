@@ -10,12 +10,19 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mozillazg/go-pinyin"
+
 	"github.com/antchfx/htmlquery"
 	"golang.org/x/net/html"
 )
 
 func init() {
 	features.AddKeyword("comic", "<+name: haizeiwang> 搜索漫画", func(bot bot.Bot, content string) error {
+		content = strings.Join(pinyin.LazyConvert(content, &pinyin.Args{
+			Fallback: func(r rune, a pinyin.Args) []string {
+				return []string{string(r)}
+			},
+		}), "")
 		url := fmt.Sprintf("http://www.yxtun.com/manhua/%s", content)
 		if strings.HasPrefix(content, "http") {
 			url = content
