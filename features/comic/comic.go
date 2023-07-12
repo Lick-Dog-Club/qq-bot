@@ -64,26 +64,23 @@ func scrape(comicUrl string) *comic {
 		return nil
 	}
 
-	find := htmlquery.Find(doc, `//div[@class="sub_r autoHeight"]/p[@class="txtItme"]/span[@class="date"]/text()`)
+	find := htmlquery.Find(doc, `//span[@class="sj "]/text()`)
 	for _, node := range find {
-		parse, _ := time.ParseInLocation("2006-01-02 15:04", node.Data, time.Local)
+		parse, _ := time.ParseInLocation("2006-01-02", node.Data, time.Local)
 		c.UpdatedAt = parse
 	}
-	for _, attribute := range htmlquery.Find(doc, `//div[@id="Cover"]/img`)[0].Attr {
+	for _, attribute := range htmlquery.Find(doc, `//p[@class="cover"]/img`)[0].Attr {
 		if attribute.Key == "src" {
 			c.HeadImageUrl = attribute.Val
 		}
 	}
-	c.Name = htmlquery.Find(doc, `//div[@id="comicName"]/text()`)[0].Data
+	c.Name = htmlquery.Find(doc, `//div[@class="book-title"]/h1/span/text()`)[0].Data
 	nodes := htmlquery.Find(doc, `//ul[@id="chapter-list-1"]/li/a@href]`)
 	lastIndex := len(nodes) - 1
-	if !strings.HasPrefix(href(htmlquery.Find(nodes[lastIndex], "//span/text()")[0].Attr), "http") {
-		lastIndex -= 1
-	}
 	if len(nodes) >= 2 {
 		last := nodes[lastIndex]
 		c.LastTitle = htmlquery.Find(last, "//span/text()")[0].Data
-		c.LastUrl = href(last.Attr)
+		c.LastUrl = fmt.Sprintf("http://www.yxtun.com%s", href(last.Attr))
 	}
 	return c
 }
