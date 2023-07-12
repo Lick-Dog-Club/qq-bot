@@ -27,6 +27,7 @@ import (
 
 	_ "qq/features/ai"
 	_ "qq/features/bili-lottery"
+	_ "qq/features/comic"
 	_ "qq/features/config"
 	_ "qq/features/daxin"
 	_ "qq/features/ddys"

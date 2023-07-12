@@ -35,7 +35,7 @@ type movie struct {
 	HeadImageUrl string
 	Rating       string
 	Country      string
-	UpdateAt     time.Time
+	UpdatedAt    time.Time
 }
 
 func dateStr(t time.Time) string {
@@ -48,7 +48,7 @@ var temp, _ = template.New("").Funcs(map[string]any{"datestr": dateStr}).Parse(`
 评分：{{ .Rating }}
 国家：{{ .Country }}
 影片地址：{{ .Url }}
-更新时间: {{ .UpdateAt | datestr }}
+更新时间: {{ .UpdatedAt | datestr }}
 
 [CQ:image,file={{.HeadImageUrl}}]
 `)
@@ -60,7 +60,7 @@ func (m *movie) String() string {
 }
 
 func (m *movie) isNew(duration time.Duration) bool {
-	return m.UpdateAt.After(time.Now().Add(-duration))
+	return m.UpdatedAt.After(time.Now().Add(-duration))
 }
 
 func buildRequest(url string) *http.Request {
@@ -169,7 +169,7 @@ func fetchDetail(url string) (m *movie) {
 		for _, attribute := range node.Attr {
 			if attribute.Key == "datetime" {
 				t, _ := time.Parse(time.RFC3339, attribute.Val)
-				m.UpdateAt = t
+				m.UpdatedAt = t
 			}
 		}
 	}
