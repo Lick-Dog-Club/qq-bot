@@ -17,7 +17,7 @@ import (
 )
 
 func init() {
-	features.AddKeyword("Comic", "<+name: haizeiwang/海贼王> 搜索漫画", func(bot bot.Bot, content string) error {
+	features.AddKeyword("comic", "<+name: haizeiwang/海贼王> 搜索漫画", func(bot bot.Bot, content string) error {
 		bot.Send(Get(content).Render())
 		return nil
 	})
