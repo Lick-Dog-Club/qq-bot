@@ -4,11 +4,21 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
+	"image"
+	"image/draw"
+	"image/jpeg"
+	"io"
+	"math"
 	"net/http"
+	"os"
 	"qq/bot"
 	"qq/features"
+	"regexp"
 	"strings"
+	"sync"
 	"time"
+
+	"github.com/signintech/gopdf"
 
 	"github.com/mozillazg/go-pinyin"
 
@@ -18,7 +28,9 @@ import (
 
 func init() {
 	features.AddKeyword("comic", "<+name: haizeiwang/海贼王> 搜索漫画", func(bot bot.Bot, content string) error {
-		bot.Send(Get(content).Render())
+		c := Get(content)
+		bot.Send(c.Render())
+		bot.Send(fmt.Sprintf("[CQ:image,file=file://%s]", c.ToJPEG()))
 		return nil
 	})
 }
@@ -116,4 +128,153 @@ func href(attr []html.Attribute) string {
 		}
 	}
 	return ""
+}
+
+type imageByte struct {
+	index int
+	path  string
+	b     []byte
+}
+
+func (c *Comic) loadImages() [][]byte {
+	// 获取所有图片的路径
+	resp, _ := http.Get(c.LastUrl)
+	defer resp.Body.Close()
+	all, _ := io.ReadAll(resp.Body)
+	compile := regexp.MustCompile(`chapterImages = \[(.*?)];`)
+	submatch := compile.FindStringSubmatch(string(all))
+	var picPaths []string
+	for _, s := range strings.Split(submatch[1], ",") {
+		path := strings.TrimRight(strings.TrimLeft(strings.ReplaceAll(s, `\/`, `/`), `"`), `"`)
+		picPaths = append(picPaths, path)
+		fmt.Println(path)
+	}
+	ch := make(chan *imageByte, 20)
+	resultCh := make(chan *imageByte, 20)
+	wg := sync.WaitGroup{}
+	for i := 0; i < 5; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for {
+				select {
+				case s, ok := <-ch:
+					if !ok {
+						return
+					}
+					resultCh <- &imageByte{
+						index: s.index,
+						path:  s.path,
+						b:     fetchImg(s.path),
+					}
+				}
+			}
+		}()
+	}
+
+	for i, path := range picPaths {
+		ch <- &imageByte{
+			index: i,
+			path:  path,
+		}
+	}
+	close(ch)
+	go func() {
+		wg.Wait()
+		close(resultCh)
+	}()
+	var res = make([][]byte, len(picPaths))
+	for v := range resultCh {
+		res[v.index] = v.b
+	}
+
+	return res
+}
+
+func (c *Comic) ToJPEG() string {
+	images := c.loadImages()
+	var height, width int
+	for _, imagePath := range images {
+		w, y := imgWidthHeight(bytes.NewReader(imagePath))
+		height += int(y)
+		width = int(math.Max(float64(width), w))
+	}
+	// 创建新图片，大小为两张原图的宽度和高度之和
+	newImg := image.NewRGBA(image.Rect(0, 0, width, height))
+
+	var y int
+	for _, img := range images {
+		decode, _, err := image.Decode(bytes.NewReader(img))
+		if err == nil {
+			decode.Bounds()
+			// 将第一张图片绘制到新图片的顶部
+			draw.Draw(newImg, image.Rect(0, y, width, y+decode.Bounds().Dy()), decode, image.Point{0, 0}, draw.Src)
+			y += decode.Bounds().Dy()
+			fmt.Println(y)
+		}
+	}
+
+	// 将新图片保存到文件
+	name := "/tmp/" + c.LastTitle + ".jpg"
+	outFile, err := os.Create(name)
+	if err != nil {
+		panic(err)
+	}
+	defer outFile.Close()
+	jpeg.Encode(outFile, newImg, &jpeg.Options{Quality: 100})
+	return name
+}
+
+func (c *Comic) ToPDF() string {
+	images := c.loadImages()
+	var total float64
+	for _, imagePath := range images {
+		w, h := imgWidthHeight(bytes.NewReader(imagePath))
+		iy := (595 / w) * h
+		total += iy
+	}
+	fmt.Printf("total: %v", total)
+	pdf := gopdf.GoPdf{}
+	pdf.Start(gopdf.Config{PageSize: gopdf.Rect{W: 595, H: total}})
+	pdf.AddPage()
+	var y float64
+	for _, imagePath := range images {
+		decode, _, err := image.Decode(bytes.NewReader(imagePath))
+		if err == nil {
+			b := decode.Bounds()
+			w := float64(b.Dx())
+			h := float64(b.Dy())
+			iy := (595 / w) * h
+
+			reader, _ := gopdf.ImageHolderByReader(bytes.NewReader(imagePath))
+			pdf.ImageByHolder(reader, 0, y, &gopdf.Rect{
+				W: 595,
+				H: iy,
+			})
+			y += iy
+		}
+	}
+	path := "/tmp/" + c.LastTitle + ".pdf"
+	pdf.WritePdf(path)
+	return path
+}
+
+func fetchImg(path string) []byte {
+	fmt.Println("fetch: " + path)
+	os.MkdirAll("images", 0755)
+	request, _ := http.NewRequest("GET", path, nil)
+	request.Header.Add("Referer", "https://m.yxtun.com/")
+	do, _ := http.DefaultClient.Do(request)
+	defer do.Body.Close()
+	all, _ := io.ReadAll(do.Body)
+	return all
+}
+
+func imgWidthHeight(reader io.Reader) (float64, float64) {
+	decode, _, err := image.Decode(reader)
+	if err != nil {
+		return 0, 0
+	}
+	b := decode.Bounds()
+	return float64(b.Dx()), float64(b.Dy())
 }
