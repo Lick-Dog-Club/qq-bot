@@ -18,6 +18,7 @@ import (
 	_ "qq/cronjob/dx"
 	//_ "qq/cronjob/kfc"
 	_ "qq/cronjob/btc"
+	_ "qq/cronjob/comic"
 	_ "qq/cronjob/ddys"
 	_ "qq/cronjob/lottery"
 	_ "qq/cronjob/maotai"

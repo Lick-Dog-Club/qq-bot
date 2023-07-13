@@ -121,7 +121,7 @@ func (s sortCommands) Swap(i, j int) {
 func BeautifulOutput(hidden bool, simple bool) string {
 	var cmds string
 	for _, imp := range AllKeywordCommands(hidden) {
-		fmtStr := "%-12s\t%s\n"
+		fmtStr := "%-16s\t%s\n"
 		if !simple {
 			fmtStr = "@bot\t" + fmtStr
 		}

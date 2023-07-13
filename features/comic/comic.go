@@ -17,27 +17,25 @@ import (
 )
 
 func init() {
-	features.AddKeyword("comic", "<+name: haizeiwang> 搜索漫画", func(bot bot.Bot, content string) error {
-		content = strings.Join(pinyin.LazyConvert(content, &pinyin.Args{
-			Fallback: func(r rune, a pinyin.Args) []string {
-				return []string{string(r)}
-			},
-		}), "")
-		url := fmt.Sprintf("http://www.yxtun.com/manhua/%s", content)
-		if strings.HasPrefix(content, "http") {
-			url = content
-		}
-		bot.Send(scrape(url).Render())
+	features.AddKeyword("Comic", "<+name: haizeiwang/海贼王> 搜索漫画", func(bot bot.Bot, content string) error {
+		bot.Send(Get(content).Render())
 		return nil
 	})
 }
 
-type comic struct {
+type Comic struct {
 	Name         string
 	LastUrl      string
 	LastTitle    string
 	HeadImageUrl string
 	UpdatedAt    time.Time
+}
+
+func (c *Comic) TodayUpdated() bool {
+	if c == nil {
+		return false
+	}
+	return c.UpdatedAt.Format("2006-01-02") == time.Now().Format("2006-01-02")
 }
 
 func dateStr(t time.Time) string {
@@ -53,7 +51,7 @@ var temp, _ = template.New("").Funcs(map[string]any{"datestr": dateStr}).Parse(`
 [CQ:image,file={{.HeadImageUrl}}]
 `)
 
-func (c *comic) Render() string {
+func (c *Comic) Render() string {
 	if c == nil {
 		return "未找到"
 	}
@@ -62,9 +60,19 @@ func (c *comic) Render() string {
 	return bf.String()
 }
 
-func scrape(comicUrl string) *comic {
-	var c = &comic{}
-	resp, err := http.DefaultClient.Get(comicUrl)
+func Get(titleOrUrl string) *Comic {
+	titleOrUrl = strings.Join(pinyin.LazyConvert(titleOrUrl, &pinyin.Args{
+		Fallback: func(r rune, a pinyin.Args) []string {
+			return []string{string(r)}
+		},
+	}), "")
+	url := fmt.Sprintf("http://www.yxtun.com/manhua/%s", titleOrUrl)
+	if strings.HasPrefix(titleOrUrl, "http") {
+		url = titleOrUrl
+	}
+
+	var c = &Comic{}
+	resp, err := http.DefaultClient.Get(url)
 	if err != nil {
 		return nil
 	}
