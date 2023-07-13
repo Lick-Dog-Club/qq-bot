@@ -2,6 +2,7 @@ package comic
 
 import (
 	"fmt"
+	"os"
 	"qq/bot"
 	"qq/config"
 	"qq/cronjob"
@@ -16,7 +17,7 @@ func init() {
 			jpegPaths := c.ToJPEG()
 			for p := range jpegPaths {
 				bot.SendGroup(config.GroupID(), fmt.Sprintf("[CQ:image,file=file://%s]", p))
-				//os.Remove(p)
+				os.Remove(p)
 			}
 		}
 		return nil
