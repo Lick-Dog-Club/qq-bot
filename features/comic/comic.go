@@ -199,6 +199,7 @@ func (c *Comic) loadImages() [][]byte {
 	return res
 }
 
+// ToJPEG 图片太大，QQ 有限制，八张一组返回
 func (c *Comic) ToJPEG() (res []string) {
 	images := c.loadImages()
 	for i, bs := range chunk(images, 8) {
