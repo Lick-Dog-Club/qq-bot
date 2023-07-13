@@ -31,7 +31,9 @@ func init() {
 	features.AddKeyword("comic", "<+name: haizeiwang/海贼王> 搜索漫画", func(bot bot.Bot, content string) error {
 		c := Get(content)
 		bot.Send(c.Render())
-		bot.Send(fmt.Sprintf("[CQ:image,file=file://%s]", c.ToJPEG()))
+		jpegPath := c.ToJPEG()
+		bot.Send(fmt.Sprintf("[CQ:image,file=file://%s]", jpegPath))
+		os.Remove(jpegPath)
 		return nil
 	})
 }

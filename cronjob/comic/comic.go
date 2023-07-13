@@ -2,6 +2,7 @@ package comic
 
 import (
 	"fmt"
+	"os"
 	"qq/bot"
 	"qq/config"
 	"qq/cronjob"
@@ -13,7 +14,9 @@ func init() {
 		c := comic.Get("haizeiwang")
 		if c.TodayUpdated() {
 			bot.SendGroup(config.GroupID(), c.Render())
-			bot.SendGroup(config.GroupID(), fmt.Sprintf("[CQ:image,file=file://%s]", c.ToJPEG()))
+			jpegPath := c.ToJPEG()
+			bot.SendGroup(config.GroupID(), fmt.Sprintf("[CQ:image,file=file://%s]", jpegPath))
+			os.Remove(jpegPath)
 		}
 		return nil
 	}).DailyAt("12:00")
