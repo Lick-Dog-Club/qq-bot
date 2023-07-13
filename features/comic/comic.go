@@ -250,7 +250,7 @@ func toJpeg(name string, images [][]byte) string {
 
 	// 将新图片保存到文件
 	res := filepath.Join("/data", "images", name+".jpg")
-	outFile, err := os.Create(name)
+	outFile, err := os.Create(res)
 	if err != nil {
 		panic(err)
 	}

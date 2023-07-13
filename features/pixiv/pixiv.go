@@ -153,7 +153,7 @@ func Image(content string) (string, error) {
 	base := filepath.Base(a.Image.Original)
 	fpath := filepath.Join("/data", "images", base)
 
-	os.MkdirAll(filepath.Join("/data", "image"), 0755)
+	os.MkdirAll(filepath.Join("/data", "images"), 0755)
 	err = func() error {
 		file, err := os.OpenFile(fpath, os.O_TRUNC|os.O_RDWR|os.O_CREATE, 0644)
 		if err != nil {
