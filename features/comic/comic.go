@@ -261,7 +261,6 @@ func (c *Comic) ToPDF() string {
 
 func fetchImg(path string) []byte {
 	fmt.Println("fetch: " + path)
-	os.MkdirAll("images", 0755)
 	request, _ := http.NewRequest("GET", path, nil)
 	request.Header.Add("Referer", "https://m.yxtun.com/")
 	do, _ := http.DefaultClient.Do(request)
