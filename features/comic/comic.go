@@ -205,7 +205,7 @@ func (c *Comic) ToJPEG() chan string {
 	var ch = make(chan string, 10)
 	images := c.loadImages()
 	go func() {
-		for i, bs := range chunk(images, 8) {
+		for i, bs := range chunk(images, 15) {
 			ch <- toJpeg(util.MD5(fmt.Sprintf("%s-%d", c.LastTitle, i)), bs)
 		}
 		close(ch)
