@@ -31,9 +31,11 @@ func init() {
 	features.AddKeyword("comic", "<+name: haizeiwang/海贼王> 搜索漫画", func(bot bot.Bot, content string) error {
 		c := Get(content)
 		bot.Send(c.Render())
-		jpegPath := c.ToJPEG()
-		bot.Send(fmt.Sprintf("[CQ:image,file=file://%s]", jpegPath))
-		os.Remove(jpegPath)
+		jpegPaths := c.ToJPEG()
+		for _, p := range jpegPaths {
+			bot.Send(fmt.Sprintf("[CQ:image,file=file://%s]", p))
+			os.Remove(p)
+		}
 		return nil
 	})
 }
@@ -197,8 +199,28 @@ func (c *Comic) loadImages() [][]byte {
 	return res
 }
 
-func (c *Comic) ToJPEG() string {
+func (c *Comic) ToJPEG() (res []string) {
 	images := c.loadImages()
+	for i, bs := range chunk(images, 8) {
+		res = append(res, toJpeg(fmt.Sprintf("%s-%d", c.LastTitle, i), bs))
+	}
+	return res
+}
+
+func chunk(bs [][]byte, groupSize int) [][][]byte {
+	l := len(bs) / groupSize
+	if len(bs)%groupSize > 0 {
+		l += 1
+	}
+	var res = make([][][]byte, 0, l)
+	for groupSize < len(bs) {
+		bs, res = bs[groupSize:], append(res, bs[:groupSize:groupSize])
+	}
+
+	return append(res, bs)
+}
+
+func toJpeg(name string, images [][]byte) string {
 	var height, width int
 	for _, imagePath := range images {
 		w, y := imgWidthHeight(bytes.NewReader(imagePath))
@@ -221,14 +243,14 @@ func (c *Comic) ToJPEG() string {
 	}
 
 	// 将新图片保存到文件
-	name := filepath.Join("/data", "images", c.LastTitle+".jpg")
+	res := filepath.Join("/data", "images", name+".jpg")
 	outFile, err := os.Create(name)
 	if err != nil {
 		panic(err)
 	}
 	defer outFile.Close()
 	jpeg.Encode(outFile, newImg, &jpeg.Options{Quality: 100})
-	return name
+	return res
 }
 
 func (c *Comic) ToPDF() string {

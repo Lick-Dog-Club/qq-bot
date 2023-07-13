@@ -14,9 +14,11 @@ func init() {
 		c := comic.Get("haizeiwang")
 		if c.TodayUpdated() {
 			bot.SendGroup(config.GroupID(), c.Render())
-			jpegPath := c.ToJPEG()
-			bot.SendGroup(config.GroupID(), fmt.Sprintf("[CQ:image,file=file://%s]", jpegPath))
-			os.Remove(jpegPath)
+			jpegPaths := c.ToJPEG()
+			for _, p := range jpegPaths {
+				bot.SendGroup(config.GroupID(), fmt.Sprintf("[CQ:image,file=file://%s]", p))
+				os.Remove(p)
+			}
 		}
 		return nil
 	}).DailyAt("12:00")
