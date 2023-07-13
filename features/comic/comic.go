@@ -35,7 +35,7 @@ func init() {
 		jpegPaths := c.ToJPEG()
 		for p := range jpegPaths {
 			bot.Send(fmt.Sprintf("[CQ:image,file=file://%s]", p))
-			os.Remove(p)
+			//os.Remove(p)
 		}
 		return nil
 	})
