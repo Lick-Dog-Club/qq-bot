@@ -30,12 +30,25 @@ import (
 
 func init() {
 	features.AddKeyword("comic", "<+name: haizeiwang/海贼王> 搜索漫画", func(bot bot.Bot, content string) error {
-		c := Get(content)
+		c := Get(content, -1)
 		bot.Send(c.Render())
 		jpegPaths := c.ToJPEG()
 		for p := range jpegPaths {
 			bot.Send(fmt.Sprintf("[CQ:image,file=file://%s]", p))
 			os.Remove(p)
+		}
+		return nil
+	})
+	features.AddKeyword("comicn", "<+name: haizeiwang/海贼王> <+num: 话数> 搜索漫画话数", func(bot bot.Bot, content string) error {
+		split := strings.Split(content, " ")
+		if len(split) == 2 {
+			c := Get(split[0], int(util.ToFloat64(split[1])))
+			bot.Send(c.Render())
+			jpegPaths := c.ToJPEG()
+			for p := range jpegPaths {
+				bot.Send(fmt.Sprintf("[CQ:image,file=file://%s]", p))
+				os.Remove(p)
+			}
 		}
 		return nil
 	})
@@ -78,7 +91,7 @@ func (c *Comic) Render() string {
 	return bf.String()
 }
 
-func Get(titleOrUrl string) *Comic {
+func Get(titleOrUrl string, num int) *Comic {
 	titleOrUrl = strings.Join(pinyin.LazyConvert(titleOrUrl, &pinyin.Args{
 		Fallback: func(r rune, a pinyin.Args) []string {
 			return []string{string(r)}
@@ -119,6 +132,17 @@ func Get(titleOrUrl string) *Comic {
 	for !strings.Contains(htmlquery.Find(nodes[lastIndex], "//span/text()")[0].Data, "话") {
 		lastIndex -= 1
 	}
+	if num != -1 {
+		for idx, n := range nodes {
+			data := htmlquery.Find(n, "//span/text()")[0].Data
+			submatch := regexp.MustCompile(`\d+`).FindStringSubmatch(data)
+			if len(submatch) == 1 && submatch[0] == fmt.Sprintf("%d", num) {
+				lastIndex = idx
+				break
+			}
+		}
+	}
+
 	if len(nodes) >= 2 {
 		last := nodes[lastIndex]
 		c.LastTitle = htmlquery.Find(last, "//span/text()")[0].Data
