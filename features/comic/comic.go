@@ -165,10 +165,13 @@ func (c *Comic) loadImages() [][]byte {
 					if !ok {
 						return
 					}
-					resultCh <- &imageByte{
-						index: s.index,
-						path:  s.path,
-						b:     fetchImg(s.path),
+					b := fetchImg(s.path)
+					if b != nil {
+						resultCh <- &imageByte{
+							index: s.index,
+							path:  s.path,
+							b:     b,
+						}
 					}
 				}
 			}
@@ -266,7 +269,11 @@ func fetchImg(path string) []byte {
 	fmt.Println("fetch: " + path)
 	request, _ := http.NewRequest("GET", path, nil)
 	request.Header.Add("Referer", "https://m.yxtun.com/")
-	do, _ := http.DefaultClient.Do(request)
+	do, err := http.DefaultClient.Do(request)
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
 	defer do.Body.Close()
 	all, _ := io.ReadAll(do.Body)
 	return all
