@@ -38,7 +38,7 @@ func init() {
 			os.Remove(p)
 		}
 		return nil
-	})
+	}, features.WithGroup("comic"))
 	features.AddKeyword("comicn", "<+name: haizeiwang/海贼王> <+num: 话数> 搜索漫画话数", func(bot bot.Bot, content string) error {
 		split := strings.Split(content, " ")
 		if len(split) == 2 {
@@ -51,7 +51,7 @@ func init() {
 			}
 		}
 		return nil
-	})
+	}, features.WithGroup("comic"))
 }
 
 type Comic struct {
