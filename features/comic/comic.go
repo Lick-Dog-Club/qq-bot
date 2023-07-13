@@ -11,6 +11,7 @@ import (
 	"math"
 	"net/http"
 	"os"
+	"path/filepath"
 	"qq/bot"
 	"qq/features"
 	"regexp"
@@ -215,7 +216,7 @@ func (c *Comic) ToJPEG() string {
 	}
 
 	// 将新图片保存到文件
-	name := "/tmp/" + c.LastTitle + ".jpg"
+	name := filepath.Join("/data", "images", c.LastTitle+".jpg")
 	outFile, err := os.Create(name)
 	if err != nil {
 		panic(err)
@@ -254,7 +255,7 @@ func (c *Comic) ToPDF() string {
 			y += iy
 		}
 	}
-	path := "/tmp/" + c.LastTitle + ".pdf"
+	path := filepath.Join("/data", "images", c.LastTitle+".pdf")
 	pdf.WritePdf(path)
 	return path
 }
