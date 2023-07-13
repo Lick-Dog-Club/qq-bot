@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"qq/bot"
 	"qq/features"
+	"qq/util"
 	"regexp"
 	"strings"
 	"sync"
@@ -32,7 +33,7 @@ func init() {
 		c := Get(content)
 		bot.Send(c.Render())
 		jpegPaths := c.ToJPEG()
-		for _, p := range jpegPaths {
+		for p := range jpegPaths {
 			bot.Send(fmt.Sprintf("[CQ:image,file=file://%s]", p))
 			os.Remove(p)
 		}
@@ -200,12 +201,16 @@ func (c *Comic) loadImages() [][]byte {
 }
 
 // ToJPEG 图片太大，QQ 有限制，八张一组返回
-func (c *Comic) ToJPEG() (res []string) {
+func (c *Comic) ToJPEG() chan string {
+	var ch = make(chan string, 10)
 	images := c.loadImages()
-	for i, bs := range chunk(images, 8) {
-		res = append(res, toJpeg(fmt.Sprintf("%s-%d", c.LastTitle, i), bs))
-	}
-	return res
+	go func() {
+		for i, bs := range chunk(images, 8) {
+			ch <- toJpeg(util.MD5(fmt.Sprintf("%s-%d", c.LastTitle, i)), bs)
+		}
+		close(ch)
+	}()
+	return ch
 }
 
 func chunk(bs [][]byte, groupSize int) [][][]byte {

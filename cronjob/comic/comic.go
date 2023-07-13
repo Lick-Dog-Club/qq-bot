@@ -15,7 +15,7 @@ func init() {
 		if c.TodayUpdated() {
 			bot.SendGroup(config.GroupID(), c.Render())
 			jpegPaths := c.ToJPEG()
-			for _, p := range jpegPaths {
+			for p := range jpegPaths {
 				bot.SendGroup(config.GroupID(), fmt.Sprintf("[CQ:image,file=file://%s]", p))
 				os.Remove(p)
 			}

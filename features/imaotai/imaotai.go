@@ -2,9 +2,7 @@ package imaotai
 
 import (
 	"bytes"
-	"crypto/md5"
 	"encoding/base64"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -299,15 +297,7 @@ func signature(m map[string]string, t int64) string {
 		text += m[key]
 	}
 	text += fmt.Sprintf("%d", t)
-	return MD5(text)
-}
-
-// MD5 md5
-func MD5(data string) string {
-	hash := md5.New()
-	hash.Write([]byte(data))
-
-	return hex.EncodeToString(hash.Sum(nil))
+	return util.MD5(text)
 }
 
 func version() string {
