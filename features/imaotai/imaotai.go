@@ -237,7 +237,7 @@ func doReservation(sessionID, uid int, token string, latLng LatLng) (res string)
 	fmt.Printf("申购：\nsessionID: %v\nuid: %v\ntoken: %v\nlatlng: %#v", sessionID, uid, token, latLng)
 	items := map[int][]shopInfo{}
 	for _, id := range ItemIDs {
-		shop := getItemShop(fmt.Sprintf(`https://static.moutai519.com.cn/mt-backend/xhr/front/mall/shop/list/slim/v3/%d/浙江省/%d/%d`, sessionID, id, today().UnixMilli()), id, latLng)
+		shop := getItemShop(fmt.Sprintf(`https://static.moutai519.com.cn/mt-backend/xhr/front/mall/shop/list/slim/v3/%d/浙江省/%d/%d`, sessionID, id, util.Today().UnixMilli()), id, latLng)
 		items[id] = append(items[id], shop...)
 	}
 	for itemID, shopIDs := range items {
@@ -375,13 +375,8 @@ type sessionResp struct {
 	} `json:"data"`
 }
 
-func today() time.Time {
-	now := time.Now()
-	return time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
-}
-
 func GetCurrentSessionID() int {
-	resp, _ := http.Get(fmt.Sprintf("https://static.moutai519.com.cn/mt-backend/xhr/front/mall/index/session/get/%d", today().UnixMilli()))
+	resp, _ := http.Get(fmt.Sprintf("https://static.moutai519.com.cn/mt-backend/xhr/front/mall/index/session/get/%d", util.Today().UnixMilli()))
 	defer resp.Body.Close()
 	var data sessionResp
 	json.NewDecoder(resp.Body).Decode(&data)
