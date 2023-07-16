@@ -86,9 +86,11 @@ func affect(item EventItem) string {
 	if item.Actual == nil {
 		return "未公布"
 	}
-	if *item.Actual > item.Consensus {
+
+	if util.ToFloat64(*item.Actual) > util.ToFloat64(item.Consensus) {
 		return "利空"
 	}
+
 	return "利多"
 }
 
