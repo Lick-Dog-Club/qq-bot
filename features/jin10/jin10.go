@@ -59,7 +59,7 @@ var eventTemp, _ = template.New("").Funcs(map[string]any{
 		return i.AffectStr()
 	},
 	"date": func(t time.Time) string {
-		return t.Format("2006-01-02 15:04")
+		return t.Local().Format("2006-01-02 15:04")
 	},
 }).Parse(`
 日期: {{.Today}}
