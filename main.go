@@ -35,6 +35,7 @@ import (
 	_ "qq/features/geo"
 	_ "qq/features/help"
 	_ "qq/features/imaotai"
+	_ "qq/features/jin10"
 	_ "qq/features/kfc"
 	_ "qq/features/lifetip"
 	_ "qq/features/picture"
