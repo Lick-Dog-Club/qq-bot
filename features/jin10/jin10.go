@@ -42,11 +42,7 @@ type EventItem struct {
 }
 
 func (i *EventItem) IsRecentlyPub(t time.Duration) bool {
-	if time.Now().Sub(i.PubTime) > 0 && time.Now().Sub(i.PubTime) <= t {
-		return true
-	}
-
-	return false
+	return time.Now().Sub(i.PubTime) > 0 && time.Now().Sub(i.PubTime) <= t
 }
 
 type Events []EventItem
