@@ -58,7 +58,7 @@ var eventTemp, _ = template.New("").Funcs(map[string]any{
 		return t.Local().Format("2006-01-02 15:04")
 	},
 }).Parse(`
-日期: {{.Today}}
+{{if .Today}}日期: {{.Today}}{{end}}
 {{ range .Events }}
 {{.Country}}{{.Name}}
 重要程度: {{ .Star | star }}
@@ -82,17 +82,24 @@ func (i *EventItem) AffectStr() string {
 	return "利多"
 }
 
-func Get(day time.Time) string {
-	importantData := ImportantItems(day)
+func (i *EventItem) Render() string {
 	bf := bytes.Buffer{}
 	eventTemp.Execute(&bf, map[string]any{
-		"Events": importantData,
+		"Events": Events{*i},
+	})
+	return bf.String()
+}
+
+func Get(day time.Time) string {
+	bf := bytes.Buffer{}
+	eventTemp.Execute(&bf, map[string]any{
+		"Events": BigEvents(day),
 		"Today":  day.Format("2006-01-02"),
 	})
 	return bf.String()
 }
 
-func ImportantItems(day time.Time) Events {
+func BigEvents(day time.Time) Events {
 	url := fmt.Sprintf("https://cdn-rili.jin10.com/web_data/%d/daily/%02d/%d/economics.json", day.Year(), day.Month(), day.Day())
 	fmt.Println(url)
 	resp, _ := http.Get(url)
