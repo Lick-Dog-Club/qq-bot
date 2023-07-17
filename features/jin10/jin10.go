@@ -66,7 +66,7 @@ var eventTemp, _ = template.New("").Funcs(map[string]any{
 {{ range .Events }}
 {{.Country}}{{.Name}}
 重要程度: {{ .Star | star }}
-发布事件: {{.PubTime | date}}
+公布时间: {{.PubTime | date}}
 前值: {{ if .Revised }}{{.Revised}}{{else}}{{.Previous}}{{end}}
 预测值: {{.Consensus}}
 公布值: {{ if .Actual}}{{.Actual}}{{else}}未公布{{end}}
