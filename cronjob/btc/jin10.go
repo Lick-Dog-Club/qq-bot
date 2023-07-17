@@ -16,8 +16,18 @@ import (
 
 func init() {
 	cronjob.Manager().NewCommand("jin10", func(bot bot.CronBot) error {
-		bot.SendToUser(config.UserID(), "明日大事件播报")
-		bot.SendToUser(config.UserID(), Get(util.Today().Add(24*time.Hour)))
+		bot.SendToUser(config.UserID(), fmt.Sprintf(`
+今日大事件: %s
+%s
+
+明日大事件: %s
+%s
+`,
+			util.Today().Format("2006-01-02"),
+			Get(util.Today()),
+			util.Today().Add(24*time.Hour).Format("2006-01-02"),
+			Get(util.Today().Add(24*time.Hour))),
+		)
 		return nil
 	}).DailyAt("09:30")
 	cronjob.Manager().NewCommand("jin10-watch", func(bot bot.CronBot) error {
