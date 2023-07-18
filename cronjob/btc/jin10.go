@@ -28,7 +28,7 @@ func init() {
 	}).DailyAt("09:30")
 	cronjob.Manager().NewCommand("jin10-watch", func(bot bot.CronBot) error {
 		for _, item := range jin10.BigEvents(time.Now()) {
-			if item.IsRecentlyPub(time.Second*10) && item.Actual != nil {
+			if item.IsRecentlyPub(1*time.Minute) && item.Actual != nil {
 				bot.SendToUser(config.UserID(), item.Render())
 				util.Bark(
 					item.AffectStr(),
@@ -38,5 +38,5 @@ func init() {
 			}
 		}
 		return nil
-	}).EveryTenSeconds()
+	}).EveryMinute()
 }
