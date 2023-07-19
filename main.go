@@ -106,7 +106,7 @@ func main() {
 }
 
 func printREADME() {
-	fmt.Println(fmt.Sprintf(mdTemplate, features.BeautifulOutput(true, false)))
+	fmt.Printf(mdTemplate, features.BeautifulOutput(true, false))
 }
 
 var mdTemplate = `
