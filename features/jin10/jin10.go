@@ -41,12 +41,6 @@ type EventItem struct {
 	TimeStatus  interface{} `json:"time_status"`
 }
 
-func (i *EventItem) IsRecentlyPub(t time.Duration) bool {
-	sub := time.Now().Sub(i.PubTime)
-
-	return sub > 0 && sub <= t
-}
-
 type Events []EventItem
 
 var eventTemp, _ = template.New("").Funcs(map[string]any{
