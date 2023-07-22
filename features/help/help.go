@@ -25,8 +25,8 @@ func init() {
 }
 
 func showHelp(bot bot.Bot, hidden bool) {
-	fpath := filepath.Join("/data", "images", "help.png")
-	hiddenFpath := filepath.Join("/data", "images", "hhelp.png")
+	helpPpath := filepath.Join("/data", "images", "help.png")
+	hhelpPath := filepath.Join("/data", "images", "hhelp.png")
 	hideOnce.Do(func() {
 		text2png.Draw(features.BeautifulOutputLines(false, true), hiddenFpath)
 	})
@@ -34,9 +34,9 @@ func showHelp(bot bot.Bot, hidden bool) {
 		text2png.Draw(features.BeautifulOutputLines(true, true), fpath)
 	})
 
-	var p string = fpath
+	var p string = helpPpath
 	if hidden {
-		p = hiddenFpath
+		p = hhelpPath
 	}
 
 	if bot.Message().WeSendImg != nil {
