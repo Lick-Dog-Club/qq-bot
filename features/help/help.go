@@ -28,10 +28,10 @@ func showHelp(bot bot.Bot, hidden bool) {
 	fpath := filepath.Join("/data", "images", "help.png")
 	hiddenFpath := filepath.Join("/data", "images", "hidden-help.png")
 	hideOnce.Do(func() {
-		text2png.Draw(features.BeautifulOutputLines(hidden, true), hiddenFpath)
+		text2png.Draw(features.BeautifulOutputLines(false, true), hiddenFpath)
 	})
 	once.Do(func() {
-		text2png.Draw(features.BeautifulOutputLines(hidden, true), fpath)
+		text2png.Draw(features.BeautifulOutputLines(true, true), fpath)
 	})
 
 	var p string = fpath
