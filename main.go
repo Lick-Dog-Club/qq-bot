@@ -118,4 +118,4 @@ var mdTemplate = `
 
 ## 指令
 
-` + "```text\n%s```"
+` + "```text\n%s\n```"

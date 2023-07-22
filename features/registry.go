@@ -2,9 +2,12 @@ package features
 
 import (
 	"fmt"
+	"math"
 	"qq/bot"
 	"sort"
+	"strings"
 	"sync"
+	"unicode/utf8"
 )
 
 var (
@@ -103,13 +106,21 @@ func Run(bot bot.Bot, keyword string, content string) error {
 
 type sortCommands []CommandImp
 
+func (s sortCommands) MaxLen() int {
+	var m float64
+	for _, imp := range s {
+		m = math.Max(m, float64(utf8.RuneCountInString(imp.Description())))
+	}
+	return int(m)
+}
+
 func (s sortCommands) Len() int {
 	return len(s)
 }
 
 func (s sortCommands) Less(i, j int) bool {
 	if s[i].IsSysCmd() == s[j].IsSysCmd() {
-		return len([]rune(s[i].Keyword()+s[i].Description())) > len([]rune(s[j].Keyword()+s[j].Description()))
+		return utf8.RuneCountInString(s[i].Description()) > utf8.RuneCountInString(s[j].Description())
 	}
 	return !s[i].IsSysCmd() && s[j].IsSysCmd()
 }
@@ -119,15 +130,33 @@ func (s sortCommands) Swap(i, j int) {
 }
 
 func BeautifulOutput(hidden bool, simple bool) string {
-	var cmds string
+	return strings.Join(BeautifulOutputLines(hidden, simple), "\n")
+}
+
+func BeautifulOutputLines(hidden bool, simple bool) []string {
+	var cmds []string
 	for _, imp := range AllKeywordCommands(hidden) {
-		fmtStr := "%-16s\t%s\n"
+		fmtStr := "%-16s\t%s"
 		if !simple {
 			fmtStr = "@bot\t" + fmtStr
 		}
-		cmds += fmt.Sprintf(fmtStr, imp.Keyword(), imp.Description())
+		cmds = append(cmds, fmt.Sprintf(fmtStr, imp.Keyword(), imp.Description()))
 	}
 	return cmds
+}
+
+type GroupCommands []sortCommands
+
+func (g GroupCommands) Len() int {
+	return len(g)
+}
+
+func (g GroupCommands) Less(i, j int) bool {
+	return g[i].MaxLen() < g[j].MaxLen()
+}
+
+func (g GroupCommands) Swap(i, j int) {
+	g[i], g[j] = g[j], g[i]
 }
 
 func AllKeywordCommands(hidden bool) []CommandImp {
@@ -147,17 +176,19 @@ func AllKeywordCommands(hidden bool) []CommandImp {
 		cmds = append(cmds, imp)
 	}
 
-	cmds = append(cmds, defaultCommand)
 	sort.Sort(cmds)
+	var sortGcmds GroupCommands
 	for _, imps := range groupCmds {
 		sort.Sort(imps)
+		sortGcmds = append(sortGcmds, imps)
+	}
+	sort.Sort(sortGcmds)
+
+	for _, imps := range sortGcmds {
+		cmds = append(imps, cmds...)
 	}
 
-	for _, imps := range groupCmds {
-		cmds = append(cmds, imps...)
-	}
-
-	return cmds
+	return append(cmds, defaultCommand)
 }
 
 type cmd struct {

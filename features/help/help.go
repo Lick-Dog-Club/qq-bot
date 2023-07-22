@@ -1,9 +1,16 @@
 package help
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
 	"qq/bot"
 	"qq/features"
+	"qq/util/text2png"
+	"sync"
 )
+
+var once sync.Once
 
 func init() {
 	features.AddKeyword("help", "帮助信息", func(sender bot.Bot, content string) error {
@@ -16,6 +23,17 @@ func init() {
 	}, features.WithSysCmd(), features.WithHidden(), features.WithGroup("help"))
 }
 
-func showHelp(sender bot.Bot, hidden bool) {
-	sender.Send(features.BeautifulOutput(hidden, true))
+func showHelp(bot bot.Bot, hidden bool) {
+	fpath := filepath.Join("/data", "images", "help.png")
+	once.Do(func() {
+		text2png.Draw(features.BeautifulOutputLines(hidden, true), fpath)
+	})
+
+	if bot.Message().WeSendImg != nil {
+		open, _ := os.Open(fpath)
+		defer open.Close()
+		bot.Message().WeSendImg(open)
+	} else {
+		bot.Send(fmt.Sprintf("[CQ:image,file=file://%s]", fpath))
+	}
 }
