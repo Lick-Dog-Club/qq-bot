@@ -35,7 +35,7 @@ func showHelp(bot bot.Bot, hidden bool) {
 	})
 
 	var p string = helpPpath
-	if hidden {
+	if !hidden {
 		p = hhelpPath
 	}
 
