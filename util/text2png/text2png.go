@@ -2,6 +2,7 @@ package text2png
 
 import (
 	_ "embed"
+	"strings"
 
 	"github.com/fogleman/gg"
 	"github.com/golang/freetype/truetype"
@@ -10,7 +11,16 @@ import (
 //go:embed AaBuKeYan-2.ttf
 var fontBytes []byte
 
+func handleLines(lines []string) (res []string) {
+	var newLines []string
+	for _, line := range lines {
+		newLines = append(newLines, strings.Split(line, "\n")...)
+	}
+	return newLines
+}
+
 func Draw(lines []string, out string) error {
+	lines = handleLines(lines)
 	f, _ := truetype.Parse(fontBytes)
 	face := truetype.NewFace(f, &truetype.Options{
 		Size: 26,
