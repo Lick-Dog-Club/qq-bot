@@ -85,11 +85,8 @@ func UpdateVersion(bot upBotImp) {
 			return
 		}
 
-		config, err := rest.InClusterConfig()
-		clientset, err := kubernetes.NewForConfig(config)
-		if err != nil {
-			return
-		}
+		config, _ := rest.InClusterConfig()
+		clientset, _ := kubernetes.NewForConfig(config)
 		ns := cfg.Namespace()
 		pod := cfg.Pod()
 		if ns != "" && pod != "" {
