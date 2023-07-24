@@ -67,11 +67,22 @@ func UpdateVersion(bot upBotImp) {
 	defer get.Body.Close()
 	json.NewDecoder(get.Body).Decode(&data)
 	if gitCommit != "" && data[0].Sha[:7] != gitCommit {
+		resp, _ := http.Get("https://api.github.com/repos/Lick-Dog-Club/qq-bot/actions/runs?per_page=1")
+		defer resp.Body.Close()
+		var runsInfo workflowRuns
+		if !(len(runsInfo.WorkflowRuns) > 0 &&
+			data[0].Sha == runsInfo.WorkflowRuns[0].HeadBranch &&
+			runsInfo.WorkflowRuns[0].Status == "completed") {
+			bot.Send("最新版本还未构建完成，请稍后～")
+			return
+		}
+
 		config, err := rest.InClusterConfig()
 		clientset, err := kubernetes.NewForConfig(config)
 		if err != nil {
 			return
 		}
+		json.NewDecoder(resp.Body).Decode(&runsInfo)
 		ns := cfg.Namespace()
 		pod := cfg.Pod()
 		if ns != "" && pod != "" {
@@ -81,4 +92,24 @@ func UpdateVersion(bot upBotImp) {
 		return
 	}
 	bot.Send("当前已经是最新版本~")
+}
+
+type workflowRuns struct {
+	TotalCount   int `json:"total_count"`
+	WorkflowRuns []struct {
+		ID               int64     `json:"id"`
+		Name             string    `json:"name"`
+		HeadBranch       string    `json:"head_branch"`
+		HeadSha          string    `json:"head_sha"`
+		Event            string    `json:"event"`
+		Status           string    `json:"status"`
+		Conclusion       string    `json:"conclusion"`
+		WorkflowID       int       `json:"workflow_id"`
+		CheckSuiteID     int64     `json:"check_suite_id"`
+		CheckSuiteNodeID string    `json:"check_suite_node_id"`
+		URL              string    `json:"url"`
+		HTMLURL          string    `json:"html_url"`
+		CreatedAt        time.Time `json:"created_at"`
+		UpdatedAt        time.Time `json:"updated_at"`
+	} `json:"workflow_runs"`
 }
