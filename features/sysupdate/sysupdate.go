@@ -80,6 +80,7 @@ func UpdateVersion(bot upBotImp) {
 		if !(len(runsInfo.WorkflowRuns) > 0 &&
 			data[0].Sha == runsInfo.WorkflowRuns[0].HeadSha &&
 			runsInfo.WorkflowRuns[0].Status == "completed") {
+			fmt.Printf("%v\t%v\t%v\t%v\t", data[0].Sha, runsInfo.WorkflowRuns[0].HeadSha, runsInfo.WorkflowRuns[0].Status, gitCommit)
 			bot.Send("最新版本还未构建完成，请稍后～")
 			return
 		}
