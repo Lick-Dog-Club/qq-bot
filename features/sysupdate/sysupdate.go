@@ -4,10 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"qq/bot"
 	cfg "qq/config"
 	"qq/features"
+	"strings"
 	"time"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -61,6 +63,7 @@ type upBotImp interface {
 	Send(string) string
 }
 
+//json: cannot unmarshal object into Go value of type sysupdate.response
 func UpdateVersion(bot upBotImp) {
 	get, err := http.Get("https://api.github.com/repos/Lick-Dog-Club/qq-bot/commits?per_page=1")
 	if err != nil {
@@ -69,7 +72,9 @@ func UpdateVersion(bot upBotImp) {
 	}
 	var data response
 	defer get.Body.Close()
-	if err := json.NewDecoder(get.Body).Decode(&data); err != nil {
+	all, _ := io.ReadAll(get.Body)
+	if err := json.NewDecoder(strings.NewReader(string(all))).Decode(&data); err != nil {
+		bot.Send(string(all))
 		bot.Send(err.Error())
 		return
 	}
