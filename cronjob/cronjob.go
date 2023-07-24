@@ -105,7 +105,7 @@ func (m *manager) Run(ctx context.Context) error {
 	for _, cmd := range m.List() {
 		c := cmd
 		if err := m.runner.AddCommand(c.Name(), c.Expression(), func() {
-			log.Println("[RUNNING]: " + c.Name())
+			//log.Println("[RUNNING]: " + c.Name())
 			c.Func()()
 		}); err != nil {
 			return err
