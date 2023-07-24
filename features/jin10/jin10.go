@@ -97,7 +97,6 @@ func Get(day time.Time) string {
 
 func BigEvents(day time.Time) Events {
 	url := fmt.Sprintf("https://cdn-rili.jin10.com/web_data/%d/daily/%02d/%d/economics.json", day.Year(), day.Month(), day.Day())
-	fmt.Println(url)
 	resp, _ := http.Get(url)
 	defer resp.Body.Close()
 	var data Events
