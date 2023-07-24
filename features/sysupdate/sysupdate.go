@@ -97,19 +97,10 @@ func UpdateVersion(bot upBotImp) {
 type workflowRuns struct {
 	TotalCount   int `json:"total_count"`
 	WorkflowRuns []struct {
-		ID               int64     `json:"id"`
-		Name             string    `json:"name"`
-		HeadBranch       string    `json:"head_branch"`
-		HeadSha          string    `json:"head_sha"`
-		Event            string    `json:"event"`
-		Status           string    `json:"status"`
-		Conclusion       string    `json:"conclusion"`
-		WorkflowID       int       `json:"workflow_id"`
-		CheckSuiteID     int64     `json:"check_suite_id"`
-		CheckSuiteNodeID string    `json:"check_suite_node_id"`
-		URL              string    `json:"url"`
-		HTMLURL          string    `json:"html_url"`
-		CreatedAt        time.Time `json:"created_at"`
-		UpdatedAt        time.Time `json:"updated_at"`
+		ID         int64  `json:"id"`
+		HeadBranch string `json:"head_branch"`
+		HeadSha    string `json:"head_sha"`
+		Status     string `json:"status"`
+		Conclusion string `json:"conclusion"`
 	} `json:"workflow_runs"`
 }
