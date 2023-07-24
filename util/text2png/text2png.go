@@ -37,15 +37,16 @@ func CharCount(s string) int {
 func Draw(lines []string, out string) error {
 	lines = handleLines(lines)
 	var max float64
+	const fontSize = 26
 
 	for _, ll := range lines {
 		max = math.Max(max, float64(CharCount(ll)))
 	}
 	f, _ := truetype.Parse(fontBytes)
 	face := truetype.NewFace(f, &truetype.Options{
-		Size: 26,
+		Size: fontSize,
 	})
-	var W float64 = float64(max) * 26 * 0.6
+	var W float64 = float64(max) * fontSize * 0.6
 	var H = 38 * len(lines)
 	dc := gg.NewContext(int(W), H)
 	dc.SetRGB(1, 1, 1)
