@@ -90,7 +90,8 @@ func Get(param string, duration time.Duration) (res []*movie) {
 	defer do.Body.Close()
 	doc, err := htmlquery.Parse(do.Body)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return nil
 	}
 	// 获取电影详情页的 url
 	var (

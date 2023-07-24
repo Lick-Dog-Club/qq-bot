@@ -3,6 +3,7 @@ package lottery
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"html/template"
 	"io"
@@ -51,7 +52,7 @@ func (u *User) info() (userInfo, error) {
 	if info.Code == 0 {
 		log.Println(info.Data.Uname, info.Data.Mid)
 	} else {
-		log.Fatal(info.Message)
+		return userInfo{}, errors.New(info.Message)
 	}
 	u.me = info
 	return info, nil
