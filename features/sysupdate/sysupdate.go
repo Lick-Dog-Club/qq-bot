@@ -10,8 +10,6 @@ import (
 	"qq/features"
 	"time"
 
-	log "github.com/sirupsen/logrus"
-
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -21,7 +19,7 @@ var gitCommit = ""
 
 func init() {
 	features.AddKeyword("up", "更新至最新版本", func(bot bot.Bot, content string) error {
-		updateVersion(bot)
+		UpdateVersion(bot)
 		return nil
 	}, features.WithSysCmd(), features.WithHidden())
 }
@@ -59,12 +57,15 @@ func Version() string {
 	return gitCommit
 }
 
-func updateVersion(bot bot.Bot) {
+type BotImp interface {
+	Send(string) string
+}
+
+func UpdateVersion(bot BotImp) {
 	get, _ := http.Get("https://api.github.com/repos/Lick-Dog-Club/qq-bot/commits?per_page=1")
 	var data response
 	defer get.Body.Close()
 	json.NewDecoder(get.Body).Decode(&data)
-	log.Println(data[0].Sha[:7])
 	if gitCommit != "" && data[0].Sha[:7] != gitCommit {
 		config, err := rest.InClusterConfig()
 		clientset, err := kubernetes.NewForConfig(config)

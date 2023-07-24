@@ -17,6 +17,7 @@ import (
 	// _ "qq/cronjob/lifetip"
 	_ "qq/cronjob/dx"
 	//_ "qq/cronjob/kfc"
+	_ "qq/cronjob/autoupdate"
 	_ "qq/cronjob/btc"
 	_ "qq/cronjob/comic"
 
