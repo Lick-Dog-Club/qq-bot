@@ -4,20 +4,31 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 	"qq/bot"
 	"qq/features"
+	"qq/util/text2png"
 
 	log "github.com/sirupsen/logrus"
 )
 
 func init() {
-	features.AddKeyword("知乎", "获取热搜 top30", func(bot bot.Bot, s string) error {
-		bot.Send(top())
+	features.AddKeyword("知乎", "获取热搜 top50", func(bot bot.Bot, s string) error {
+		p := filepath.Join("/data", "images", "zhihu50.png")
+		text2png.Draw([]string{Top()}, p)
+		if bot.Message().WeSendImg != nil {
+			open, _ := os.Open(p)
+			defer open.Close()
+			bot.Message().WeSendImg(open)
+		} else {
+			bot.Send(fmt.Sprintf("[CQ:image,file=file://%s]", p))
+		}
 		return nil
 	})
 }
 
-func top() string {
+func Top() string {
 	request, _ := http.NewRequest("GET", "https://www.zhihu.com/api/v3/feed/topstory/hot-lists/total?limit=50", nil)
 	request.Header.Add("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36")
 	request.Header.Add("referer", "https://www.zhihu.com/hot")
@@ -29,8 +40,6 @@ func top() string {
 	var data response
 	json.NewDecoder(get.Body).Decode(&data)
 	var res string
-	// 消息太长发不出去, 取前 30 个
-	data.Data = data.Data[:30]
 	for idx, datum := range data.Data {
 		res += fmt.Sprintf("%d. %s\n", idx+1, datum.Target.Title)
 	}
