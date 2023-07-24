@@ -62,10 +62,17 @@ type upBotImp interface {
 }
 
 func UpdateVersion(bot upBotImp) {
-	get, _ := http.Get("https://api.github.com/repos/Lick-Dog-Club/qq-bot/commits?per_page=1")
+	get, err := http.Get("https://api.github.com/repos/Lick-Dog-Club/qq-bot/commits?per_page=1")
+	if err != nil {
+		bot.Send(err.Error())
+		return
+	}
 	var data response
 	defer get.Body.Close()
-	json.NewDecoder(get.Body).Decode(&data)
+	if err := json.NewDecoder(get.Body).Decode(&data); err != nil {
+		bot.Send(err.Error())
+		return
+	}
 	if gitCommit != "" && data[0].Sha[:7] != gitCommit {
 		resp, _ := http.Get("https://api.github.com/repos/Lick-Dog-Club/qq-bot/actions/runs?per_page=1")
 		defer resp.Body.Close()
