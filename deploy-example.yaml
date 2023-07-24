@@ -228,7 +228,7 @@ spec:
               name: clash-config
               subPath: config.yml
         - name: bot
-          image: silicer/go-cqhttp
+          image: silicer/go-cqhttp:v1.1.0
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - mountPath: /data
