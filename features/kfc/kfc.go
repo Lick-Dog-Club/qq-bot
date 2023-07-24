@@ -1,6 +1,7 @@
 package kfc
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"math/rand"
 	"net/http"
@@ -15,8 +16,16 @@ func init() {
 	})
 }
 
+var c = http.Client{
+	Transport: &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
+	},
+}
+
 func Get() string {
-	resp, _ := http.DefaultClient.Get("https://raw.fastgit.org/Nthily/KFC-Crazy-Thursday/main/kfc.json")
+	resp, _ := c.Get("https://raw.fastgit.org/Nthily/KFC-Crazy-Thursday/main/kfc.json")
 	defer resp.Body.Close()
 
 	var data []response

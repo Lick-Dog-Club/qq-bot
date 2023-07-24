@@ -15,13 +15,13 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	// _ "qq/cronjob/lifetip"
-	_ "qq/cronjob/dx"
 	//_ "qq/cronjob/kfc"
+	//_ "qq/cronjob/ddys"
+
 	_ "qq/cronjob/autoupdate"
 	_ "qq/cronjob/btc"
 	_ "qq/cronjob/comic"
-
-	//_ "qq/cronjob/ddys"
+	_ "qq/cronjob/dx"
 	_ "qq/cronjob/lottery"
 	_ "qq/cronjob/maotai"
 	_ "qq/cronjob/picture"
