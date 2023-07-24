@@ -82,7 +82,7 @@ func UpdateVersion(bot upBotImp) {
 		defer resp.Body.Close()
 		var runsInfo workflowRuns
 		if !(len(runsInfo.WorkflowRuns) > 0 &&
-			data[0].Sha == runsInfo.WorkflowRuns[0].HeadBranch &&
+			data[0].Sha == runsInfo.WorkflowRuns[0].HeadSha &&
 			runsInfo.WorkflowRuns[0].Status == "completed") {
 			bot.Send("最新版本还未构建完成，请稍后～")
 			return
