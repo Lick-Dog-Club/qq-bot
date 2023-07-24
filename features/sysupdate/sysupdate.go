@@ -57,11 +57,11 @@ func Version() string {
 	return gitCommit
 }
 
-type BotImp interface {
+type upBotImp interface {
 	Send(string) string
 }
 
-func UpdateVersion(bot BotImp) {
+func UpdateVersion(bot upBotImp) {
 	get, _ := http.Get("https://api.github.com/repos/Lick-Dog-Club/qq-bot/commits?per_page=1")
 	var data response
 	defer get.Body.Close()

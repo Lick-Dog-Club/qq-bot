@@ -5,6 +5,7 @@ import (
 	"qq/config"
 	"qq/cronjob"
 	"qq/features/sysupdate"
+	"strings"
 )
 
 type upBot struct {
@@ -13,7 +14,7 @@ type upBot struct {
 }
 
 func (b *upBot) Send(s string) string {
-	if b.uid != "" {
+	if b.uid != "" && strings.HasPrefix(s, "更新到最新版") {
 		return b.bot.SendToUser(b.uid, s)
 	}
 	return ""
