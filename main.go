@@ -24,7 +24,8 @@ import (
 	_ "qq/cronjob/dx"
 	_ "qq/cronjob/lottery"
 	_ "qq/cronjob/maotai"
-	_ "qq/cronjob/picture"
+
+	//_ "qq/cronjob/picture"
 	_ "qq/cronjob/tianqi"
 	_ "qq/cronjob/xiaofeiquan"
 
@@ -38,6 +39,7 @@ import (
 	_ "qq/features/geo"
 	_ "qq/features/help"
 	_ "qq/features/imaotai"
+
 	//_ "qq/features/jin10"
 	_ "qq/features/kfc"
 	_ "qq/features/lifetip"
