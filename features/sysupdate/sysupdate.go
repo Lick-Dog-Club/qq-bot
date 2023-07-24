@@ -77,10 +77,10 @@ func UpdateVersion(bot upBotImp) {
 		resp, _ := http.Get("https://api.github.com/repos/Lick-Dog-Club/qq-bot/actions/runs?per_page=1")
 		defer resp.Body.Close()
 		var runsInfo workflowRuns
+		json.NewDecoder(resp.Body).Decode(&runsInfo)
 		if !(len(runsInfo.WorkflowRuns) > 0 &&
 			data[0].Sha == runsInfo.WorkflowRuns[0].HeadSha &&
 			runsInfo.WorkflowRuns[0].Status == "completed") {
-			fmt.Printf("%v\t%v\t%v\t%v\t", data[0].Sha, runsInfo.WorkflowRuns[0].HeadSha, runsInfo.WorkflowRuns[0].Status, gitCommit)
 			bot.Send("最新版本还未构建完成，请稍后～")
 			return
 		}
@@ -90,7 +90,6 @@ func UpdateVersion(bot upBotImp) {
 		if err != nil {
 			return
 		}
-		json.NewDecoder(resp.Body).Decode(&runsInfo)
 		ns := cfg.Namespace()
 		pod := cfg.Pod()
 		if ns != "" && pod != "" {
