@@ -4,10 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"qq/bot"
 	cfg "qq/config"
 	"qq/features"
+	"strings"
 	"time"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -69,7 +71,9 @@ func UpdateVersion(bot upBotImp) {
 	}
 	var data response
 	defer get.Body.Close()
-	if err := json.NewDecoder(get.Body).Decode(&data); err != nil {
+	all, _ := io.ReadAll(get.Body)
+	fmt.Println(string(all))
+	if err := json.NewDecoder(strings.NewReader(string(all))).Decode(&data); err != nil {
 		bot.Send(err.Error())
 		return
 	}
