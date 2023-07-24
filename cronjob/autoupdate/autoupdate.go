@@ -28,5 +28,5 @@ func init() {
 	cronjob.Manager().NewCommand("auto-update", func(bot bot.CronBot) error {
 		sysupdate.UpdateVersion(newUpBot(bot, config.UserID()))
 		return nil
-	}).EveryMinute()
+	}).EveryFifteenMinutes()
 }
