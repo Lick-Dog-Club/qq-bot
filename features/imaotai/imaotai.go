@@ -33,17 +33,7 @@ func init() {
 		return nil
 	}, features.WithGroup("maotai"))
 	features.AddKeyword("mt-redo", "全部重新申购", func(bot bot.Bot, content string) error {
-		var res string
-		for _, info := range config.MaoTaiInfoMap() {
-			if info.Expired() {
-				res += fmt.Sprintf("%s: token已过期，需要重新登陆\n", util.FuzzyPhone(info.Phone))
-				continue
-			}
-			res += fmt.Sprintf("%s:\n%s\n", util.FuzzyPhone(info.Phone), Run(info.Phone))
-		}
-		out := filepath.Join("/data", "images", "imaotai-redo.png")
-		text2png.Draw([]string{res}, out)
-		bot.Send(fmt.Sprintf("[CQ:image,file=file://%s]", out))
+		bot.Send(fmt.Sprintf("[CQ:image,file=file://%s]", ReservationAll()))
 		return nil
 	}, features.WithGroup("maotai"), features.WithHidden())
 	features.AddKeyword("mt-del", "<+phoneNum>: 取消茅台自动预约", func(bot bot.Bot, content string) error {
@@ -164,6 +154,20 @@ mt %s
 `, info.ExpireAt.Format(time.DateTime), info.Phone, info.Phone))
 		return nil
 	}, features.WithGroup("maotai"))
+}
+
+func ReservationAll() string {
+	var res string
+	for _, info := range config.MaoTaiInfoMap() {
+		if info.Expired() {
+			res += fmt.Sprintf("%s: token已过期，需要重新登陆\n", util.FuzzyPhone(info.Phone))
+			continue
+		}
+		res += fmt.Sprintf("%s:\n%s\n", util.FuzzyPhone(info.Phone), Run(info.Phone))
+	}
+	out := filepath.Join("/data", "images", "imaotai-redo.png")
+	text2png.Draw([]string{res}, out)
+	return out
 }
 
 type exp struct {

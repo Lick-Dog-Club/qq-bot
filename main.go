@@ -19,7 +19,8 @@ import (
 	//_ "qq/cronjob/kfc"
 	_ "qq/cronjob/btc"
 	_ "qq/cronjob/comic"
-	_ "qq/cronjob/ddys"
+
+	//_ "qq/cronjob/ddys"
 	_ "qq/cronjob/lottery"
 	_ "qq/cronjob/maotai"
 	_ "qq/cronjob/picture"
@@ -31,7 +32,8 @@ import (
 	_ "qq/features/comic"
 	_ "qq/features/config"
 	_ "qq/features/daxin"
-	_ "qq/features/ddys"
+
+	//_ "qq/features/ddys"
 	_ "qq/features/geo"
 	_ "qq/features/help"
 	_ "qq/features/imaotai"

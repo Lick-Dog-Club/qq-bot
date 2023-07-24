@@ -18,11 +18,10 @@
 @bot	mt-list         	当前用户以及过期时间
 @bot	p               	<+n/r/rai> pixiv 热榜图片
 @bot	help            	帮助信息
-@bot	canceltask      	取消任务
-@bot	listtask        	任务列表
 @bot	task            	添加任务
+@bot	listtask        	任务列表
+@bot	canceltask      	取消任务
 @bot	抽奖              	<+bilibili-cookie> 自动转发up主的抽奖活动
-@bot	ddys            	<+dy/dm>, 获取更新的电影/动漫, 默认 +dy
 @bot	天气              	<+城市> 获取天气信息, 默认杭州
 @bot	微博              	获取热搜 top50
 @bot	知乎              	获取热搜 top30
