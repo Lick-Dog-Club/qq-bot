@@ -22,7 +22,7 @@ func RaoKouLing() string {
 	var data response
 	json.NewDecoder(get.Body).Decode(&data)
 	if data.Code == 200 {
-		return strings.ReplaceAll(data.Result.Content, `<br/>`, "")
+		return strings.ReplaceAll(data.Result.List[0].Content, `<br/>`, "")
 	}
 	return ""
 }
@@ -31,6 +31,8 @@ type response struct {
 	Code   int    `json:"code"`
 	Msg    string `json:"msg"`
 	Result struct {
-		Content string `json:"content"`
+		List []struct {
+			Content string `json:"content"`
+		} `json:"list"`
 	} `json:"result"`
 }

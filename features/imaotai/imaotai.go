@@ -180,7 +180,9 @@ func Run(m string) string {
 
 	info, ok := config.MaoTaiInfoMap()[m]
 	if (ok && info.Expired()) || !ok {
-		getCode(m)
+		if err := getCode(m); err != nil {
+			return err.Error()
+		}
 		return fmt.Sprintf("用户未登陆，短信已发送，收到后执行：\n\nmt-login %s <code>", m)
 	}
 
