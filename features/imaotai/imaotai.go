@@ -371,12 +371,12 @@ func getCode(mobile string) error {
 	do, _ := http.DefaultClient.Do(request)
 	defer do.Body.Close()
 	type resp struct {
-		Code    string `json:"code"`
+		Code    int    `json:"code"`
 		Message string `json:"message"`
 	}
 	var res resp
 	json.NewDecoder(do.Body).Decode(&res)
-	if res.Code != "2000" {
+	if res.Code != 2000 {
 		return errors.New(res.Message)
 	}
 	return nil
