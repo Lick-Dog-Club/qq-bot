@@ -25,6 +25,7 @@ func init() {
 }
 
 func showHelp(bot bot.Bot, hidden bool) {
+	os.MkdirAll("/data/images", 0755)
 	helpPpath := filepath.Join("/data", "images", "help.png")
 	hhelpPath := filepath.Join("/data", "images", "hhelp.png")
 	hideOnce.Do(func() {
