@@ -108,7 +108,7 @@ mt-geo %s <地址>
 过期时间：%s
 经纬度: %f,%f
 
-`, info.Phone, info.ExpireAt.Format(time.DateTime), info.Lat, info.Lng)
+`, util.FuzzyPhone(info.Phone), info.ExpireAt.Format(time.DateTime), info.Lat, info.Lng)
 		}
 		bot.SendTextImage(res)
 		return nil
