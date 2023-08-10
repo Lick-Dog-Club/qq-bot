@@ -64,10 +64,17 @@ jobs:
         with:
           name: app-amd64
       -
+        name: Login to ACR
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_TOKEN }}
+          registry: registry.cn-hangzhou.aliyuncs.com
+      -
         name: Build and push
         uses: docker/build-push-action@v3
         with:
           context: .
           platforms: linux/amd64
           push: true
-          tags: duccnzj/qq-bot:latest
+          tags: duccnzj/qq-bot:latest,registry.cn-hangzhou.aliyuncs.com/duc-cnzj/qq-bot:latest

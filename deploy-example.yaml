@@ -241,7 +241,7 @@ spec:
               name: http
               protocol: TCP
         - name: app
-          image: duccnzj/qq-bot
+          image: registry.cn-hangzhou.aliyuncs.com/duc-cnzj/qq-bot:latest
           imagePullPolicy: Always
           volumeMounts:
             - mountPath: /data
