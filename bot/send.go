@@ -2,12 +2,18 @@ package bot
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"os"
+	"path/filepath"
+	"qq/util/random"
+	"qq/util/text2png"
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/eatmoreapple/openwechat"
 
@@ -24,6 +30,7 @@ type Bot interface {
 	UserID() string
 	IsGroupMessage() bool
 	Send(msg string) string
+	SendTextImage(text string) (string, error)
 	Message() *Message
 }
 
@@ -61,6 +68,11 @@ func (d *dummyBot) DeleteMsg(msgID string) {
 func (d *dummyBot) Send(msg string) string {
 	fmt.Printf("Send:\n%s", msg)
 	return ""
+}
+
+func (d *dummyBot) SendTextImage(text string) (string, error) {
+	fmt.Printf("Send:\n%s", text)
+	return "", nil
 }
 
 func (d *dummyBot) SendGroup(gid string, s string) string {
@@ -104,6 +116,23 @@ func (m *qqBot) DeleteMsg(msgID string) {
 func (m *qqBot) Send(msg string) string {
 	fmt.Println("send: ", msg)
 	return send(m.msg, msg)
+}
+
+func (m *qqBot) SendTextImage(text string) (string, error) {
+	if text == "" {
+		return "", errors.New("empty text")
+	}
+	path := tmpPath()
+	if err := text2png.Draw([]string{text}, path); err != nil {
+		return "", err
+	}
+	defer os.Remove(path)
+	send(m.msg, fmt.Sprintf("[CQ:image,file=file://%s]", path))
+	return path, nil
+}
+
+func tmpPath() string {
+	return filepath.Join("/data", "images", fmt.Sprintf("tmp-%s-%s.png", time.Now().Format("2006-01-02"), random.String(10)))
 }
 
 func (m *qqBot) SendGroup(gid string, s string) string {
@@ -296,6 +325,17 @@ func (w *wechatBot) UserID() string {
 
 func (w *wechatBot) IsGroupMessage() bool {
 	return w.message.IsSendByGroup
+}
+
+func (w *wechatBot) SendTextImage(text string) (string, error) {
+	path := tmpPath()
+	if err := text2png.Draw([]string{text}, path); err != nil {
+		return "", err
+	}
+	open, _ := os.Open(path)
+	defer open.Close()
+	_, err := w.message.WeSendImg(open)
+	return path, err
 }
 
 func (w *wechatBot) Send(msg string) string {

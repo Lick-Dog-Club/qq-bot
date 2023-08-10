@@ -10,13 +10,11 @@ import (
 	"math"
 	mrand "math/rand"
 	"net/http"
-	"path/filepath"
 	"qq/bot"
 	"qq/config"
 	"qq/features"
 	"qq/features/geo"
 	"qq/util"
-	"qq/util/text2png"
 	"regexp"
 	"sort"
 	"strings"
@@ -33,7 +31,7 @@ func init() {
 		return nil
 	}, features.WithGroup("maotai"))
 	features.AddKeyword("mt-redo", "全部重新申购", func(bot bot.Bot, content string) error {
-		bot.Send(fmt.Sprintf("[CQ:image,file=file://%s]", ReservationAll()))
+		bot.SendTextImage(ReservationAll())
 		return nil
 	}, features.WithGroup("maotai"), features.WithHidden())
 	features.AddKeyword("mt-del", "<+phoneNum>: 取消茅台自动预约", func(bot bot.Bot, content string) error {
@@ -112,7 +110,7 @@ mt-geo %s <地址>
 
 `, info.Phone, info.ExpireAt.Format(time.DateTime), info.Lat, info.Lng)
 		}
-		bot.Send(res)
+		bot.SendTextImage(res)
 		return nil
 	}, features.WithGroup("maotai"))
 	features.AddKeyword("mt-login", "<+phone> <+code>: 自动预约茅台", func(bot bot.Bot, content string) error {
@@ -165,9 +163,7 @@ func ReservationAll() string {
 		}
 		res += fmt.Sprintf("%s:\n%s\n", util.FuzzyPhone(info.Phone), Run(info.Phone))
 	}
-	out := filepath.Join("/data", "images", "imaotai-redo.png")
-	text2png.Draw([]string{res}, out)
-	return out
+	return res
 }
 
 type exp struct {
