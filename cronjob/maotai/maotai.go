@@ -1,7 +1,6 @@
 package maotai
 
 import (
-	"fmt"
 	"qq/bot"
 	"qq/config"
 	"qq/cronjob"
@@ -10,7 +9,7 @@ import (
 
 func init() {
 	cronjob.Manager().NewCommand("maotai", func(robot bot.CronBot) error {
-		robot.SendGroup(config.GroupID(), fmt.Sprintf("[CQ:image,file=file://%s]", imaotai.ReservationAll()))
+		robot.SendTextImageToGroup(config.GroupID(), imaotai.ReservationAll())
 		robot.SendGroup(config.GroupID(), "茅台申购结束")
 
 		return nil

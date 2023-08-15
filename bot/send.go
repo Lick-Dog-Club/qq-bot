@@ -24,6 +24,8 @@ type botimp interface {
 	DeleteMsg(msgID string)
 	SendGroup(gid string, s string) string
 	SendToUser(uid string, s string) string
+	SendTextImageToUser(uid string, text string) (string, error)
+	SendTextImageToGroup(gid string, text string) (string, error)
 }
 type Bot interface {
 	botimp
@@ -75,6 +77,16 @@ func (d *dummyBot) SendTextImage(text string) (string, error) {
 	return "", nil
 }
 
+func (d *dummyBot) SendTextImageToUser(uid string, text string) (string, error) {
+	fmt.Printf("uid: %v, text: %v", uid, text)
+	return "", nil
+}
+
+func (d *dummyBot) SendTextImageToGroup(gid string, text string) (string, error) {
+	fmt.Printf("gid: %v, text: %v", gid, text)
+	return "", nil
+}
+
 func (d *dummyBot) SendGroup(gid string, s string) string {
 	fmt.Printf("Send:\ngid:%v\ncontent: %s", gid, s)
 	return ""
@@ -118,7 +130,19 @@ func (m *qqBot) Send(msg string) string {
 	return send(m.msg, msg)
 }
 
+func (m *qqBot) SendTextImageToUser(uid string, text string) (string, error) {
+	return m.sendImage(&Message{SenderUserID: uid}, text)
+}
+
+func (m *qqBot) SendTextImageToGroup(gid string, text string) (string, error) {
+	return m.sendImage(&Message{GroupID: gid}, text)
+}
+
 func (m *qqBot) SendTextImage(text string) (string, error) {
+	return m.sendImage(m.msg, text)
+}
+
+func (m *qqBot) sendImage(msg *Message, text string) (string, error) {
 	if text == "" {
 		return "", errors.New("empty text")
 	}
@@ -127,7 +151,7 @@ func (m *qqBot) SendTextImage(text string) (string, error) {
 		return "", err
 	}
 	defer os.Remove(path)
-	send(m.msg, fmt.Sprintf("[CQ:image,file=file://%s]", path))
+	send(msg, fmt.Sprintf("[CQ:image,file=file://%s]", path))
 	return path, nil
 }
 
@@ -336,6 +360,14 @@ func (w *wechatBot) SendTextImage(text string) (string, error) {
 	defer open.Close()
 	_, err := w.message.WeSendImg(open)
 	return path, err
+}
+
+func (w *wechatBot) SendTextImageToUser(uid string, text string) (string, error) {
+	return "", errors.New("不支持")
+}
+
+func (w *wechatBot) SendTextImageToGroup(gid string, text string) (string, error) {
+	return "", errors.New("不支持")
 }
 
 func (w *wechatBot) Send(msg string) string {
