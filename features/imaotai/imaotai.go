@@ -171,6 +171,14 @@ type exp struct {
 	Exp int64 `json:"exp"`
 }
 
+type gameFunc func(cookie string) (string, error)
+
+var games = []gameFunc{
+	getEnergyAward,
+	goTravel,
+	startMw,
+}
+
 func Run(m string) string {
 	// 1. sessionID
 	sessionID := GetCurrentSessionID()
@@ -192,11 +200,10 @@ func Run(m string) string {
 	// 领取耐力值
 	if info.Cookie != "" {
 		var otherAwards []string
-		if award, err := getEnergyAward(info.Cookie); err == nil {
-			otherAwards = append(otherAwards, award)
-		}
-		if s, err := goTravel(info.Cookie); err == nil {
-			otherAwards = append(otherAwards, s)
+		for _, game := range games {
+			if s, err := game(info.Cookie); err == nil {
+				otherAwards = append(otherAwards, s)
+			}
 		}
 		if len(otherAwards) > 0 {
 			res += strings.Join(otherAwards, ", ") + "\n"
@@ -535,6 +542,7 @@ type energyAwardResp struct {
 	} `json:"data"`
 }
 
+// getEnergyAward 领取耐力值
 func getEnergyAward(cookie string) (string, error) {
 	request, _ := http.NewRequest("POST", "https://h5.moutai519.com.cn/game/isolationPage/getUserEnergyAward", nil)
 	addHeaders(request)
@@ -554,6 +562,7 @@ func getEnergyAward(cookie string) (string, error) {
 	return "", errors.New(data.Message)
 }
 
+// goTravel 开始旅行
 func goTravel(cookie string) (string, error) {
 	request, _ := http.NewRequest("POST", "https://h5.moutai519.com.cn/game/xmTravel/startTravel", nil)
 	addHeaders(request)
@@ -567,6 +576,24 @@ func goTravel(cookie string) (string, error) {
 	json.NewDecoder(do.Body).Decode(&data)
 	if data.Code == 2000 {
 		return "旅行成功", nil
+	}
+	return data.Message, nil
+}
+
+// startMw 开始酿酒
+func startMw(cookie string) (string, error) {
+	request, _ := http.NewRequest("POST", "https://h5.moutai519.com.cn/game/xmMw/startMw", nil)
+	addHeaders(request)
+	request.Header.Add("cookie", fmt.Sprintf("MT-Token-Wap=%s;MT-Device-ID-Wap=%s;", cookie, device))
+	do, _ := http.DefaultClient.Do(request)
+	defer do.Body.Close()
+	var data = struct {
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	}{}
+	json.NewDecoder(do.Body).Decode(&data)
+	if data.Code == 2000 {
+		return "酿酒进行中", nil
 	}
 	return data.Message, nil
 }
