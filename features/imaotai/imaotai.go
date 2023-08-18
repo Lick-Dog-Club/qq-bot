@@ -120,11 +120,12 @@ mt-geo %s <地址>
 			phone = strings.TrimSpace(split[0])
 			code = strings.TrimSpace(split[1])
 		}
-		uid, token := login(phone, code)
+		uid, token, cookie := login(phone, code)
 		info := config.MaoTaiInfo{
 			Phone:    phone,
 			Uid:      uid,
 			Token:    token,
+			Cookie:   cookie,
 			ExpireAt: time.Time{},
 		}
 
@@ -182,10 +183,19 @@ func Run(m string) string {
 		return fmt.Sprintf("用户未登陆，短信已发送，收到后执行：\n\nmt-login %s <code>", m)
 	}
 
-	return doReservation(sessionID, info.Uid, info.Token, LatLng{
+	// 申购
+	res := doReservation(sessionID, info.Uid, info.Token, LatLng{
 		lat: info.Lat,
 		lng: info.Lng,
 	})
+
+	// 领取耐力值
+	if info.Cookie != "" {
+		if award, err := getEnergyAward(info.Cookie); err == nil {
+			res += award
+		}
+	}
+	return res
 }
 
 type ItemShopResp struct {
@@ -337,10 +347,11 @@ type loginResp struct {
 		Mobile   string `json:"mobile"`
 		IDCode   string `json:"idCode"`
 		Token    string `json:"token"`
+		Cookie   string `json:"cookie"`
 	} `json:"data"`
 }
 
-func login(mobile string, code string) (uid int, token string) {
+func login(mobile string, code string) (uid int, token, cookie string) {
 	currentTimestamp := time.Now().UnixMilli()
 	var params = map[string]string{
 		"mobile":  mobile,
@@ -356,7 +367,7 @@ func login(mobile string, code string) (uid int, token string) {
 	defer do.Body.Close()
 	var data loginResp
 	json.NewDecoder(do.Body).Decode(&data)
-	return data.Data.UserID, data.Data.Token
+	return data.Data.UserID, data.Data.Token, data.Data.Cookie
 }
 
 func getCode(mobile string) error {
@@ -502,4 +513,35 @@ func GetDistance(d1, d2 LatLng) float64 {
 	theta := lng2 - lng1
 	dist := math.Acos(math.Sin(lat1)*math.Sin(lat2) + math.Cos(lat1)*math.Cos(lat2)*math.Cos(theta))
 	return dist * radius / 1000
+}
+
+type energyAwardResp struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	Data    struct {
+		AwardRule []struct {
+			GoodID   int    `json:"goodId"`
+			GoodName string `json:"goodName"`
+			Count    int    `json:"count"`
+		} `json:"awardRule"`
+	} `json:"data"`
+}
+
+func getEnergyAward(cookie string) (string, error) {
+	request, _ := http.NewRequest("POST", "https://h5.moutai519.com.cn/game/isolationPage/getUserEnergyAward", nil)
+	addHeaders(request)
+	request.Header.Add("cookie", fmt.Sprintf("MT-Token-Wap=%s;MT-Device-ID-Wap=%s;", cookie, device))
+	do, _ := http.DefaultClient.Do(request)
+	defer do.Body.Close()
+	var data energyAwardResp
+	json.NewDecoder(do.Body).Decode(&data)
+	if data.Code == 200 && len(data.Data.AwardRule) > 0 {
+		var str string
+		for _, s := range data.Data.AwardRule {
+			str += fmt.Sprintf("已领取 %d %s\n", s.Count, s.GoodName)
+		}
+		return str, nil
+	}
+
+	return "", errors.New(data.Message)
 }
