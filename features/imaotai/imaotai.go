@@ -191,10 +191,18 @@ func Run(m string) string {
 
 	// 领取耐力值
 	if info.Cookie != "" {
+		var otherAwards []string
 		if award, err := getEnergyAward(info.Cookie); err == nil {
-			res += award
+			otherAwards = append(otherAwards, award)
+		}
+		if s, err := goTravel(info.Cookie); err == nil {
+			otherAwards = append(otherAwards, s)
+		}
+		if len(otherAwards) > 0 {
+			res += strings.Join(otherAwards, ", ") + "\n"
 		}
 	}
+
 	return res
 }
 
@@ -536,12 +544,29 @@ func getEnergyAward(cookie string) (string, error) {
 	var data energyAwardResp
 	json.NewDecoder(do.Body).Decode(&data)
 	if data.Code == 200 && len(data.Data.AwardRule) > 0 {
-		var str string
+		var str []string
 		for _, s := range data.Data.AwardRule {
-			str += fmt.Sprintf("已领取 %d %s\n", s.Count, s.GoodName)
+			str = append(str, fmt.Sprintf("已领取 %d %s", s.Count, s.GoodName))
 		}
-		return str, nil
+		return strings.Join(str, ", "), nil
 	}
 
 	return "", errors.New(data.Message)
+}
+
+func goTravel(cookie string) (string, error) {
+	request, _ := http.NewRequest("POST", "https://h5.moutai519.com.cn/game/xmTravel/startTravel", nil)
+	addHeaders(request)
+	request.Header.Add("cookie", fmt.Sprintf("MT-Token-Wap=%s;MT-Device-ID-Wap=%s;", cookie, device))
+	do, _ := http.DefaultClient.Do(request)
+	defer do.Body.Close()
+	var data = struct {
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	}{}
+	json.NewDecoder(do.Body).Decode(&data)
+	if data.Code == 2000 {
+		return "旅行成功", nil
+	}
+	return data.Message, nil
 }
