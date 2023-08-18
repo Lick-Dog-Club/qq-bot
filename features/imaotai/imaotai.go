@@ -559,7 +559,7 @@ func getEnergyAward(cookie string) (string, error) {
 		return strings.Join(str, ", "), nil
 	}
 
-	return "", errors.New(data.Message)
+	return "耐力值: " + data.Message, nil
 }
 
 // goTravel 开始旅行
@@ -577,7 +577,7 @@ func goTravel(cookie string) (string, error) {
 	if data.Code == 2000 {
 		return "旅行成功", nil
 	}
-	return data.Message, nil
+	return "旅行: " + data.Message, nil
 }
 
 // startMw 开始酿酒
@@ -595,5 +595,5 @@ func startMw(cookie string) (string, error) {
 	if data.Code == 2000 {
 		return "酿酒进行中", nil
 	}
-	return data.Message, nil
+	return "酿酒: " + data.Message, nil
 }
