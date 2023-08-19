@@ -167,6 +167,29 @@ func ReservationAll() string {
 	return res
 }
 
+var gameReward = []gameFunc{
+	receiveTravel,
+	receiveReWardMw,
+}
+
+// ReceiveAllReward 领取小游戏奖励
+func ReceiveAllReward() string {
+	var res string
+	for _, info := range config.MaoTaiInfoMap() {
+		if info.Cookie != "" {
+			var str = []string{fmt.Sprintf("手机: %s", util.FuzzyPhone(info.Phone))}
+			for _, fn := range gameReward {
+				if s, err := fn(info.Cookie); err == nil {
+					str = append(str, s)
+				}
+			}
+
+			res += strings.Join(str, "\n") + "\n"
+		}
+	}
+	return res
+}
+
 type exp struct {
 	Exp int64 `json:"exp"`
 }
@@ -580,6 +603,45 @@ func goTravel(cookie string) (string, error) {
 	return "旅行: " + data.Message, nil
 }
 
+// quickTravel 加速旅行
+func quickTravel(cookie string) (string, error) {
+	request, _ := http.NewRequest("POST", "https://h5.moutai519.com.cn/game/xmTravel/quickenTravel", nil)
+	addHeaders(request)
+	request.Header.Add("cookie", fmt.Sprintf("MT-Token-Wap=%s;MT-Device-ID-Wap=%s;", cookie, device))
+	do, _ := http.DefaultClient.Do(request)
+	defer do.Body.Close()
+	var data = struct {
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	}{}
+	json.NewDecoder(do.Body).Decode(&data)
+	if data.Code == 2000 {
+		return "旅行加速成功", nil
+	}
+	return "旅行加速: " + data.Message, nil
+}
+
+// {"code":2000,"message":null,"data":"领取成功","error":null}
+// receiveTravel 领取旅行奖励
+func receiveTravel(cookie string) (string, error) {
+	var title = "旅行: "
+	request, _ := http.NewRequest("POST", "https://h5.moutai519.com.cn/game/xmTravel/receiveReward", strings.NewReader(`{}`))
+	addHeaders(request)
+	request.Header.Add("cookie", fmt.Sprintf("MT-Token-Wap=%s;MT-Device-ID-Wap=%s; ", cookie, device))
+	do, _ := http.DefaultClient.Do(request)
+	defer do.Body.Close()
+	var data = struct {
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+		Data    string `json:"data"`
+	}{}
+	json.NewDecoder(do.Body).Decode(&data)
+	if data.Code == 2000 {
+		return title + data.Data, nil
+	}
+	return title + data.Message, nil
+}
+
 // startMw 开始酿酒
 func startMw(cookie string) (string, error) {
 	request, _ := http.NewRequest("POST", "https://h5.moutai519.com.cn/game/xmMw/startMw", nil)
@@ -596,4 +658,42 @@ func startMw(cookie string) (string, error) {
 		return "酿酒进行中", nil
 	}
 	return "酿酒: " + data.Message, nil
+}
+
+// quickMw 加速酿酒
+func quickMw(cookie string) (string, error) {
+	request, _ := http.NewRequest("POST", "https://h5.moutai519.com.cn/game/xmMw/quickenMw", nil)
+	addHeaders(request)
+	request.Header.Add("cookie", fmt.Sprintf("MT-Token-Wap=%s;MT-Device-ID-Wap=%s;", cookie, device))
+	do, _ := http.DefaultClient.Do(request)
+	defer do.Body.Close()
+	var data = struct {
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	}{}
+	json.NewDecoder(do.Body).Decode(&data)
+	if data.Code == 2000 {
+		return "酿酒加速成功", nil
+	}
+	return "酿酒加速: " + data.Message, nil
+}
+
+// receiveReWardMw 领取酿酒奖励
+func receiveReWardMw(cookie string) (string, error) {
+	var title = "酿酒: "
+	request, _ := http.NewRequest("POST", "https://h5.moutai519.com.cn/game/xmMw/receiveReward", strings.NewReader(`{}`))
+	addHeaders(request)
+	request.Header.Add("cookie", fmt.Sprintf("MT-Token-Wap=%s;MT-Device-ID-Wap=%s;", cookie, device))
+	do, _ := http.DefaultClient.Do(request)
+	defer do.Body.Close()
+	var data = struct {
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+		Data    string `json:"data"`
+	}{}
+	json.NewDecoder(do.Body).Decode(&data)
+	if data.Code == 2000 {
+		return title + data.Data, nil
+	}
+	return title + data.Message, nil
 }
