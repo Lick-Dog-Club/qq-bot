@@ -34,6 +34,14 @@ func init() {
 		bot.SendTextImage(ReservationAll())
 		return nil
 	}, features.WithGroup("maotai"), features.WithHidden())
+	features.AddKeyword("mt-reward", "领取小游戏奖励", func(bot bot.Bot, content string) error {
+		bot.SendTextImage(ReceiveAllReward())
+		return nil
+	}, features.WithGroup("maotai"))
+	features.AddKeyword("mt-game-up", "加速小游戏", func(bot bot.Bot, content string) error {
+		bot.SendTextImage(QuickUpGames())
+		return nil
+	}, features.WithGroup("maotai"))
 	features.AddKeyword("mt-del", "<+phoneNum>: 取消茅台自动预约", func(bot bot.Bot, content string) error {
 		config.DelMaoTaiInfo(content)
 		bot.Send("成功取消！")
@@ -179,6 +187,29 @@ func ReceiveAllReward() string {
 		if info.Cookie != "" {
 			var str = []string{fmt.Sprintf("手机: %s", util.FuzzyPhone(info.Phone))}
 			for _, fn := range gameReward {
+				if s, err := fn(info.Cookie); err == nil {
+					str = append(str, s)
+				}
+			}
+
+			res += strings.Join(str, "\n") + "\n"
+		}
+	}
+	return res
+}
+
+var gameQuickUp = []gameFunc{
+	quickMw,
+	quickTravel,
+}
+
+// QuickUpGames 加速小游戏奖励
+func QuickUpGames() string {
+	var res string
+	for _, info := range config.MaoTaiInfoMap() {
+		if info.Cookie != "" {
+			var str = []string{fmt.Sprintf("手机: %s", util.FuzzyPhone(info.Phone))}
+			for _, fn := range gameQuickUp {
 				if s, err := fn(info.Cookie); err == nil {
 					str = append(str, s)
 				}
