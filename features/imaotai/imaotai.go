@@ -39,7 +39,7 @@ func init() {
 		return nil
 	}, features.WithGroup("maotai"))
 	features.AddKeyword("mt-game-up", "加速小游戏", func(bot bot.Bot, content string) error {
-		bot.SendTextImage(QuickUpGames())
+		bot.SendTextImage(SpeedUpGames())
 		return nil
 	}, features.WithGroup("maotai"))
 	features.AddKeyword("mt-del", "<+phoneNum>: 取消茅台自动预约", func(bot bot.Bot, content string) error {
@@ -203,8 +203,8 @@ var gameQuickUp = []gameFunc{
 	quickTravel,
 }
 
-// QuickUpGames 加速小游戏奖励
-func QuickUpGames() string {
+// SpeedUpGames 加速小游戏奖励
+func SpeedUpGames() string {
 	var res string
 	for _, info := range config.MaoTaiInfoMap() {
 		if info.Cookie != "" {
