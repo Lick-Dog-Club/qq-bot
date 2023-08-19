@@ -192,7 +192,7 @@ func ReceiveAllReward() string {
 				}
 			}
 
-			res += strings.Join(str, "\n") + "\n"
+			res += strings.Join(str, "\n") + "\n\n"
 		}
 	}
 	return res
@@ -215,7 +215,7 @@ func SpeedUpGames() string {
 				}
 			}
 
-			res += strings.Join(str, "\n") + "\n"
+			res += strings.Join(str, "\n") + "\n\n"
 		}
 	}
 	return res
