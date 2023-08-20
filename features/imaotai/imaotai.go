@@ -178,6 +178,7 @@ func ReservationAll() string {
 var gameReward = []gameFunc{
 	receiveTravel,
 	receiveReWardMw,
+	getEnergyAward,
 }
 
 // ReceiveAllReward 领取小游戏奖励
