@@ -19,7 +19,7 @@ import (
 	//_ "qq/cronjob/ddys"
 
 	_ "qq/cronjob/autoupdate"
-	//_ "qq/cronjob/btc"
+	_ "qq/cronjob/btc"
 	_ "qq/cronjob/comic"
 	_ "qq/cronjob/dx"
 	_ "qq/cronjob/lottery"
@@ -40,7 +40,7 @@ import (
 	_ "qq/features/help"
 	_ "qq/features/imaotai"
 
-	//_ "qq/features/jin10"
+	_ "qq/features/jin10"
 	_ "qq/features/kfc"
 	_ "qq/features/lifetip"
 	_ "qq/features/picture"
