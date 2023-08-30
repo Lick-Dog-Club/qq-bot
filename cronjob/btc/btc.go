@@ -7,6 +7,7 @@ import (
 	"qq/config"
 	"qq/cronjob"
 	"qq/util"
+	"qq/util/proxy"
 	"time"
 
 	"github.com/adshao/go-binance/v2"
@@ -20,6 +21,7 @@ func init() {
 	cronjob.Manager().NewCommand("btc notify", func(bot bot.CronBot) error {
 		if config.BinanceKey() != "" && config.BinanceSecret() != "" {
 			cn.client = binance.NewFuturesClient(config.BinanceKey(), config.BinanceSecret())
+			cn.client.HTTPClient = proxy.NewHttpProxyClient()
 			if alert, ok := cn.Alert(); ok {
 				var t string = "空"
 				if alert.isMore {

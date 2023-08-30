@@ -8,6 +8,17 @@ import (
 	"time"
 )
 
+var proxyClient = &http.Client{
+	Timeout: 5 * time.Minute,
+	Transport: &http.Transport{
+		Proxy: proxyFunc,
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
+		MaxConnsPerHost: 1000,
+	},
+}
+
 func proxyFunc(r *http.Request) (*url.URL, error) {
 	parse, _ := url.Parse(config.HttpProxy())
 	if parse != nil && parse.Host != "" {
@@ -21,14 +32,5 @@ func proxyFunc(r *http.Request) (*url.URL, error) {
 }
 
 func NewHttpProxyClient() *http.Client {
-	return &http.Client{
-		Timeout: 5 * time.Minute,
-		Transport: &http.Transport{
-			Proxy: proxyFunc,
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
-			},
-			MaxConnsPerHost: 1000,
-		},
-	}
+	return proxyClient
 }
