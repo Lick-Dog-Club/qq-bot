@@ -23,15 +23,15 @@ func init() {
 			cn.client = binance.NewFuturesClient(config.BinanceKey(), config.BinanceSecret())
 			cn.client.HTTPClient = proxy.NewHttpProxyClient()
 			if alert, ok := cn.Alert(); ok {
-				var t string = "空"
-				if alert.isMore {
-					t = "多"
-				}
+				//var t string = "空"
+				//if alert.isMore {
+				//	t = "多"
+				//}
 				bot.SendToUser(config.UserID(), alert.msg)
 				// 5 分钟之内如果开过一次仓就不再继续开仓
 				// 因为防止误开，比如暴跌之后的回调，也可能出发报警，但不需要开仓
 				if cn.currentAlert.date.IsZero() || cn.currentAlert.date.Add(5*time.Minute).Before(alert.date) {
-					bot.SendToUser(config.UserID(), fmt.Sprintf("开%s，价格是 %v", t, alert.openPrice))
+					//bot.SendToUser(config.UserID(), fmt.Sprintf("开%s，价格是 %v", t, alert.openPrice))
 					cn.currentAlert = alert
 				}
 				util.Bark("BTC", alert.msg, config.BarkUrls()...)
@@ -56,6 +56,7 @@ type alertBody struct {
 	isMore    bool
 	openPrice float64
 	date      time.Time
+	diffPrice float64
 }
 
 func (cn *ContractNotifier) Alert() (alertBody, bool) {
@@ -109,10 +110,12 @@ func (cn *ContractNotifier) alert() (alertBody, bool) {
 			openPrice = maxPrice + 100
 			text = "📈涨了"
 		}
+		diff := maxPrice - minPrice
 		return alertBody{
-			msg:       fmt.Sprintf("BTC 出现异动，当前最低值为 %.0f, 最高为 %.0f, %s", minPrice, maxPrice, text),
+			msg:       fmt.Sprintf("BTC 出现异动，当前最低值为 %.0f, 最高为 %.0f, 差值: %.0f, %s", minPrice, maxPrice, diff, text),
 			isMore:    isMore,
 			openPrice: openPrice,
+			diffPrice: diff,
 			date:      time.Now(),
 		}, true
 	}
