@@ -136,6 +136,12 @@ mt-geo %s <地址>
 			Cookie:   cookie,
 			ExpireAt: time.Time{},
 		}
+		var geoSet bool
+		if taiInfo, ok := config.MaoTaiInfoMap()[phone]; ok {
+			info.Lat = taiInfo.Lat
+			info.Lng = taiInfo.Lng
+			geoSet = true
+		}
 
 		if token != "" {
 			decodeString, _ := base64.StdEncoding.DecodeString(strings.Split(token, ".")[1])
@@ -151,14 +157,14 @@ mt-geo %s <地址>
 		bot.Send(fmt.Sprintf(`
 用户添加成功
 过期时间是: %s
-设置 geo 信息请执行:
+设置 geo 信息请执行(当前用户是否已设置 Geo 信息：%t):
 
 mt-geo %s <地址>
 
 申购茅台请执行:
 
 mt %s
-`, info.ExpireAt.Format(time.DateTime), info.Phone, info.Phone))
+`, info.ExpireAt.Format(time.DateTime), geoSet, info.Phone, info.Phone))
 		return nil
 	}, features.WithGroup("maotai"))
 }
@@ -167,7 +173,7 @@ func ReservationAll() string {
 	var res string
 	for _, info := range config.MaoTaiInfoMap() {
 		if info.Expired() {
-			res += fmt.Sprintf("%s: token已过期，需要重新登陆\n", util.FuzzyPhone(info.Phone))
+			res += fmt.Sprintf("%s: token已过期，需要重新登陆\n\n", util.FuzzyPhone(info.Phone))
 			continue
 		}
 		res += fmt.Sprintf("%s:\n%s\n", util.FuzzyPhone(info.Phone), Run(info.Phone))
