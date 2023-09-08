@@ -29,12 +29,25 @@ func init() {
 			bot.Send(fmt.Sprintf("%s", scanner.Err()))
 		}
 
-		config.Set(conf)
-		bot.Send("已设置: \n" + config.Configs().String())
+		bot.Send("已设置: \n" + config.Set(conf).String())
 		return nil
 	}, features.WithSysCmd(), features.WithHidden(), features.WithGroup("config"))
-	features.AddKeyword("cg", "显示环境变量", func(bot bot.Bot, content string) error {
+	features.AddKeyword("cg", "<+key|[all: 全部keys]>显示环境变量", func(bot bot.Bot, content string) error {
 		if bot.UserID() == config.UserID() {
+			if content == "keys" {
+				var keys []string
+				for s, _ := range config.Configs() {
+					keys = append(keys, s)
+				}
+				bot.Send(strings.Join(keys, "\n"))
+				return nil
+			}
+
+			if content != "" {
+				bot.Send(config.Configs()[content])
+				return nil
+			}
+
 			bot.Send(config.Configs().String())
 			return nil
 		}

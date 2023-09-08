@@ -212,12 +212,14 @@ func MaoTaiInfoMap() map[string]MaoTaiInfo {
 	return infos
 }
 
-func Set(m map[string]string) {
+func Set(m map[string]string) (sets KV) {
 	var newKv = KV{}
+	sets = KV{}
 	for k, v := range c.Load().(KV) {
 		newv := v
 		if s, ok := m[k]; ok && !(k == "pod_name" || k == "namespace") {
 			newv = s
+			sets[k] = s
 		}
 		newKv[k] = newv
 	}
@@ -226,4 +228,5 @@ func Set(m map[string]string) {
 		marshal, _ := json.Marshal(newKv)
 		os.WriteFile(configFile, marshal, 0644)
 	}
+	return sets
 }
