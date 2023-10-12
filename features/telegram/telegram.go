@@ -48,8 +48,8 @@ func init() {
 		fn := func(s string) {
 			bot.SendToUser(config.UserID(), s)
 		}
-		Run(config.TgAppID(), config.TgAppHash(), proxyAddr, &mtproto.SessFileStore{FPath: "/tmp/session.json"}, fn, &BotAuthDataProvider{send: fn})
-		//Run(config.TgAppID(), config.TgAppHash(), proxyAddr, &MyStore{}, fn, &BotAuthDataProvider{send: fn})
+		//Run(config.TgAppID(), config.TgAppHash(), proxyAddr, &mtproto.SessFileStore{FPath: "/tmp/session.json"}, fn, &BotAuthDataProvider{send: fn})
+		Run(config.TgAppID(), config.TgAppHash(), proxyAddr, &MyStore{}, fn, &BotAuthDataProvider{send: fn})
 		return nil
 	}, features.WithHidden())
 }
@@ -66,7 +66,10 @@ func (m *MyStore) Save(info *mtproto.SessionInfo) error {
 
 func (m *MyStore) Load(info *mtproto.SessionInfo) error {
 	info = config.TgInfo()
-	return nil
+	if info.Addr != "" {
+		return nil
+	}
+	return mtproto.ErrNoSessionData
 }
 
 func Run(appID int32, appHash string, proxyAddr string, store mtproto.SessionStore, sendToUser func(string), authData mtproto.AuthDataProvider) {
