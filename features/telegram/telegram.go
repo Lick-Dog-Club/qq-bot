@@ -89,7 +89,7 @@ func Run(appID int32, appHash string, proxyAddr string, store mtproto.SessionSto
 		store = &MyStore{}
 	}
 
-	tg := tgclient.NewTGClientExt(cfg, store, &mtproto.NoopLogHandler{}, dialer)
+	tg := tgclient.NewTGClientExt(cfg, store, &mtproto.SimpleLogHandler{}, dialer)
 	tg.SetUpdateHandler(func(tl mtproto.TL) {
 		if channel, ok := tl.(mtproto.TL_updateNewChannelMessage); ok {
 			if message, ok := channel.Message.(mtproto.TL_message); ok {
