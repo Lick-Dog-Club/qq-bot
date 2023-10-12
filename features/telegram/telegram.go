@@ -66,7 +66,7 @@ func (m *MyStore) Save(info *mtproto.SessionInfo) error {
 
 func (m *MyStore) Load(info *mtproto.SessionInfo) error {
 	info = config.TgInfo()
-	if info.Addr != "" {
+	if info != nil && info.Addr != "" {
 		return nil
 	}
 	return mtproto.ErrNoSessionData

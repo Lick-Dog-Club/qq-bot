@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"os"
 	"strconv"
 	"strings"
@@ -101,7 +102,9 @@ func Namespace() string {
 }
 
 func TgInfo() (res *mtproto.SessionInfo) {
-	json.Unmarshal([]byte(c.Load().(KV)["tg_info"]), res)
+	if err := json.Unmarshal([]byte(c.Load().(KV)["tg_info"]), res); err != nil {
+		log.Println(err)
+	}
 	return
 }
 
