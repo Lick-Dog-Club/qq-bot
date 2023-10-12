@@ -4,9 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"sync/atomic"
 	"time"
+
+	"github.com/3bl3gamer/tgclient/mtproto"
 
 	"github.com/sashabaranov/go-openai"
 )
@@ -97,6 +100,11 @@ func Namespace() string {
 	return c.Load().(KV)["namespace"]
 }
 
+func TgInfo() (res *mtproto.SessionInfo) {
+	json.Unmarshal([]byte(c.Load().(KV)["tg_info"]), res)
+	return
+}
+
 func Pod() string {
 	return c.Load().(KV)["pod_name"]
 }
@@ -127,6 +135,23 @@ func BinanceSecret() string {
 
 func BinanceDiff() string {
 	return c.Load().(KV)["binance_diff"]
+}
+
+func TgPhone() string {
+	return c.Load().(KV)["tg_phone"]
+}
+
+func TgCode() string {
+	return c.Load().(KV)["tg_code"]
+}
+
+func TgAppHash() string {
+	return c.Load().(KV)["tg_app_hash"]
+}
+
+func TgAppID() int32 {
+	atoi, _ := strconv.Atoi(c.Load().(KV)["tg_app_id"])
+	return int32(atoi)
 }
 
 func BarkUrls() []string {
@@ -164,6 +189,11 @@ var mappingKV = KV{
 	"binance_secret":          "",
 	"binance_diff":            "100",
 	"maotai":                  "",
+	"tg_info":                 "",
+	"tg_app_id":               "",
+	"tg_app_hash":             "",
+	"tg_phone":                "",
+	"tg_code":                 "",
 }
 
 type MTInfos map[string]MaoTaiInfo
