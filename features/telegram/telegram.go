@@ -48,7 +48,7 @@ func init() {
 		fn := func(s string) {
 			bot.SendToUser(config.UserID(), s)
 		}
-		Run(config.TgAppID(), config.TgAppHash(), proxyAddr, &MyStore{}, fn, mtproto.ScanfAuthDataProvider{})
+		Run(config.TgAppID(), config.TgAppHash(), proxyAddr, &mtproto.SessFileStore{FPath: "/tmp/session.json"}, fn, &BotAuthDataProvider{send: fn})
 		//Run(config.TgAppID(), config.TgAppHash(), proxyAddr, &MyStore{}, fn, &BotAuthDataProvider{send: fn})
 		return nil
 	}, features.WithHidden())
