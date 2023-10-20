@@ -197,6 +197,22 @@ var mappingKV = KV{
 	"tg_app_hash":             "",
 	"tg_phone":                "",
 	"tg_code":                 "",
+
+	"bg_api_key":        "",
+	"bg_passphrase":     "",
+	"bg_api_secret_key": "",
+}
+
+func BgApiKey() string {
+	return c.Load().(KV)["bg_api_key"]
+}
+
+func BgPassphrase() string {
+	return c.Load().(KV)["bg_passphrase"]
+}
+
+func BgApiSecretKey() string {
+	return c.Load().(KV)["bg_api_secret_key"]
 }
 
 type MTInfos map[string]MaoTaiInfo

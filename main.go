@@ -26,6 +26,7 @@ import (
 	_ "qq/cronjob/maotai"
 
 	//_ "qq/cronjob/picture"
+	_ "qq/cronjob/bitget"
 	_ "qq/cronjob/tianqi"
 	_ "qq/cronjob/xiaofeiquan"
 
@@ -37,6 +38,7 @@ import (
 	_ "qq/features/telegram"
 
 	//_ "qq/features/ddys"
+	_ "qq/features/bitget"
 	_ "qq/features/geo"
 	_ "qq/features/help"
 	_ "qq/features/imaotai"
