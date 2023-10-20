@@ -48,8 +48,8 @@ func Get(all bool) string {
 	json.NewDecoder(strings.NewReader(resp)).Decode(&res)
 	var newList []string
 	for _, datum := range res.Data {
-		atoi, _ := strconv.Atoi(datum.Total)
-		if atoi > 0 {
+		float, _ := strconv.ParseFloat(datum.Total, 64)
+		if float > 0 {
 			newList = append(newList, datum.Symbol)
 		}
 	}
