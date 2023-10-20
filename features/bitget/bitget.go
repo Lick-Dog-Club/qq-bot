@@ -73,7 +73,7 @@ func Get(all bool) string {
 	}
 	add := CoinList{}
 	miss := CoinList{}
-	list := curr.Load().([]Coin)
+	list := curr.Load().(CoinList)
 	for _, s := range newList {
 		if !Has(list, s) {
 			add = append(add, Coin{
