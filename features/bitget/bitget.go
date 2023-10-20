@@ -18,7 +18,7 @@ import (
 var curr atomic.Value
 
 func init() {
-	curr.Store([]Coin{})
+	curr.Store(CoinList{})
 	features.AddKeyword("bitget", "获取当前开仓币", func(bot bot.Bot, content string) error {
 		bot.Send(Get(true))
 		return nil
