@@ -18,13 +18,28 @@ import (
 var curr atomic.Value
 
 func init() {
-	curr.Store([]string{})
+	curr.Store([]Coin{})
 	features.AddKeyword("bitget", "获取当前开仓币", func(bot bot.Bot, content string) error {
 		bot.Send(Get(true))
 		return nil
 	})
 }
 
+type Coin struct {
+	Name  string
+	Total float64
+}
+
+type CoinList []Coin
+
+func (l CoinList) String() (s string) {
+	var slices []string
+	for _, coin := range l {
+		slices = append(slices, coin.Name)
+	}
+
+	return strings.Join(slices, ",")
+}
 func Get(all bool) string {
 	cli := &RestClient{
 		ApiKey:       config.BgApiKey(),
@@ -46,19 +61,25 @@ func Get(all bool) string {
 	}
 	var res response
 	json.NewDecoder(strings.NewReader(resp)).Decode(&res)
-	var newList []string
+	var newList CoinList
 	for _, datum := range res.Data {
 		float, _ := strconv.ParseFloat(datum.Total, 64)
 		if float > 0 {
-			newList = append(newList, datum.Symbol)
+			newList = append(newList, Coin{
+				Name:  datum.Symbol,
+				Total: float,
+			})
 		}
 	}
-	add := []string{}
-	miss := []string{}
-	list := curr.Load().([]string)
+	add := CoinList{}
+	miss := CoinList{}
+	list := curr.Load().([]Coin)
 	for _, s := range newList {
 		if !Has(list, s) {
-			add = append(add, s)
+			add = append(add, Coin{
+				Name:  s.Name,
+				Total: s.Total,
+			})
 		}
 	}
 	for _, s := range list {
@@ -69,19 +90,19 @@ func Get(all bool) string {
 
 	result := ""
 	if len(add) > 0 {
-		result += fmt.Sprintf("新增: %s\n", strings.Join(add, ","))
+		result += fmt.Sprintf("新增: %s\n", add)
 	}
 	if len(miss) > 0 {
-		result += fmt.Sprintf("删除: %s\n", strings.Join(miss, ","))
+		result += fmt.Sprintf("删除: %s\n", miss)
 	}
 	curr.Store(newList)
 	if all {
-		return strings.Join(newList, ",")
+		return newList.String()
 	}
 	return result
 }
 
-func Has(list []string, key string) bool {
+func Has(list []Coin, key Coin) bool {
 	for _, s := range list {
 		if s == key {
 			return true
