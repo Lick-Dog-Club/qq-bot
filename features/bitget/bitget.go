@@ -91,10 +91,10 @@ func Get(all bool) string {
 
 	result := ""
 	if len(add) > 0 {
-		result += fmt.Sprintf("新增: %s\n", add)
+		result += fmt.Sprintf("新增: %s ", add)
 	}
 	if len(miss) > 0 {
-		result += fmt.Sprintf("删除: %s\n", miss)
+		result += fmt.Sprintf("删除: %s", miss)
 	}
 	curr.Store(newList)
 	if all {
