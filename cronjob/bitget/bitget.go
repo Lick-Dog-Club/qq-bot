@@ -12,6 +12,7 @@ func init() {
 	cronjob.Manager().NewCommand("bitget", func(bot bot.CronBot) error {
 		if config.BgApiSecretKey() != "" && config.BgApiKey() != "" && config.BgPassphrase() != "" {
 			if v := bitget.Get(false); v != "" {
+				bot.SendToUser(config.UserID(), v)
 				util.Bark("有变动", v, config.BarkUrls()...)
 			}
 		}

@@ -40,6 +40,7 @@ func (l CoinList) String() (s string) {
 
 	return strings.Join(slices, ",")
 }
+
 func Get(all bool) string {
 	cli := &RestClient{
 		ApiKey:       config.BgApiKey(),
