@@ -24,6 +24,7 @@ import (
 	_ "qq/cronjob/dx"
 	_ "qq/cronjob/lottery"
 	_ "qq/cronjob/maotai"
+	_ "qq/cronjob/zaoan"
 
 	//_ "qq/cronjob/picture"
 	//_ "qq/cronjob/bitget"
