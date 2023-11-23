@@ -33,7 +33,9 @@ func init() {
 				return nil
 			}
 			if math.Abs(total-money) > util.ToFloat64(config.BgMoneyDiff()) {
-				util.Bark("money", fmt.Sprintf("资产变动: %.2f u, 目前一共 %.2f u", total-money, total), config.BarkUrls()...)
+				s := fmt.Sprintf("资产变动: %.2f u, 目前一共 %.2f u", total-money, total)
+				util.Bark("money", s, config.BarkUrls()...)
+				bot.SendToUser(config.UserID(), s)
 			}
 			money = total
 		}
