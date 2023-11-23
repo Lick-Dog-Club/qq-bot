@@ -28,7 +28,7 @@ func init() {
 	cronjob.Manager().NewCommand("bitget-money-total", func(bot bot.CronBot) error {
 		if config.BgApiSecretKey() != "" && config.BgApiKey() != "" && config.BgPassphrase() != "" {
 			total := bitget.MoneyTotal()
-			if total == 0 {
+			if money == 0 {
 				money = total
 				return nil
 			}
