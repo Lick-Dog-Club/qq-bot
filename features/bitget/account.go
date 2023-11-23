@@ -2,16 +2,28 @@ package bitget
 
 import (
 	"encoding/json"
-	"fmt"
 	"qq/util"
 	"strings"
 )
 
-func MoneyTotal() float64 {
-	return AccountFuturesMoney() + AccountSpotMoney()
+func MoneyTotal() (float64, error) {
+	var (
+		total float64
+		v     float64
+		err   error
+	)
+	if v, err = AccountFuturesMoney(); err != nil {
+		return 0, err
+	}
+	total += v
+	if v, err = AccountSpotMoney(); err != nil {
+		return 0, err
+	}
+	total += v
+	return total, nil
 }
 
-func AccountFuturesMoney() (usdt float64) {
+func AccountFuturesMoney() (usdt float64, err error) {
 	cli := newClient()
 
 	params := make(map[string]string)
@@ -19,7 +31,7 @@ func AccountFuturesMoney() (usdt float64) {
 
 	resp, err := cli.DoGet("/api/mix/v1/account/accounts", params)
 	if err != nil {
-		fmt.Println(err)
+		return 0, err
 	}
 	var data AccountMoneyResp
 	var totalUsdt float64
@@ -27,16 +39,16 @@ func AccountFuturesMoney() (usdt float64) {
 	for _, item := range data.Data {
 		totalUsdt += util.ToFloat64(item.UsdtEquity)
 	}
-	return totalUsdt
+	return totalUsdt, nil
 }
 
-func AccountSpotMoney() (usdt float64) {
+func AccountSpotMoney() (usdt float64, err error) {
 	cli := newClient()
 	params := make(map[string]string)
 
 	resp, err := cli.DoGet("/api/spot/v1/account/assets-lite", params)
 	if err != nil {
-		fmt.Println(err)
+		return 0, err
 	}
 	var data AccountMoneySpotResp
 	json.NewDecoder(strings.NewReader(resp)).Decode(&data)
@@ -48,7 +60,7 @@ func AccountSpotMoney() (usdt float64) {
 		}
 		totalUsdt += (util.ToFloat64(item.Available) + util.ToFloat64(item.Frozen)) * u
 	}
-	return totalUsdt
+	return totalUsdt, nil
 }
 
 func TransUsdt(coin string) (usdt float64) {

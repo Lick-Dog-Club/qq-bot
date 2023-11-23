@@ -10,6 +10,7 @@ import (
 	"qq/config"
 	"qq/features"
 	"qq/util/proxy"
+	"qq/util/retry"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -24,7 +25,13 @@ func init() {
 		return nil
 	})
 	features.AddKeyword("bg-money", "获取当前资金", func(bot bot.Bot, content string) error {
-		bot.Send(fmt.Sprintf("money: %.2f", MoneyTotal()))
+		var total float64
+		retry.Times(3, func() error {
+			var err error
+			total, err = MoneyTotal()
+			return err
+		})
+		bot.Send(fmt.Sprintf("money: %.2f", total))
 		return nil
 	})
 }
