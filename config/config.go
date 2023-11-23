@@ -199,6 +199,7 @@ var mappingKV = KV{
 	"tg_phone":                "",
 	"tg_code":                 "",
 
+	"bg_money_diff":     "",
 	"bg_api_key":        "",
 	"bg_passphrase":     "",
 	"bg_api_secret_key": "",
@@ -206,6 +207,10 @@ var mappingKV = KV{
 
 func BgApiKey() string {
 	return c.Load().(KV)["bg_api_key"]
+}
+
+func BgMoneyDiff() string {
+	return c.Load().(KV)["bg_money_diff"]
 }
 
 func BgPassphrase() string {

@@ -31,6 +31,18 @@ func proxyFunc(r *http.Request) (*url.URL, error) {
 	return nil, nil
 }
 
+func localProxyFunc(r *http.Request) (*url.URL, error) {
+	parse, _ := url.Parse("http://localhost:7890")
+	if parse != nil && parse.Host != "" {
+		return parse, nil
+	}
+	environment, _ := http.ProxyFromEnvironment(r)
+	if environment != nil && environment.Host != "" {
+		return environment, nil
+	}
+	return nil, nil
+}
+
 func NewHttpProxyClient() *http.Client {
 	return proxyClient
 }

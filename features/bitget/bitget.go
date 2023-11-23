@@ -23,6 +23,10 @@ func init() {
 		bot.Send(Get(true))
 		return nil
 	})
+	features.AddKeyword("bg-money", "获取当前资金", func(bot bot.Bot, content string) error {
+		bot.Send(fmt.Sprintf("money: %.2f", MoneyTotal()))
+		return nil
+	})
 }
 
 type Coin struct {
@@ -42,14 +46,7 @@ func (l CoinList) String() (s string) {
 }
 
 func Get(all bool) string {
-	cli := &RestClient{
-		ApiKey:       config.BgApiKey(),
-		ApiSecretKey: config.BgApiSecretKey(),
-		Passphrase:   config.BgPassphrase(),
-		BaseUrl:      "https://api.bitget.com",
-		HttpClient:   *proxy.NewHttpProxyClient(),
-		Signer:       new(Signer).Init(config.BgApiSecretKey()),
-	}
+	cli := newClient()
 
 	params := make(map[string]string)
 	params["productType"] = "umcbl"
@@ -101,6 +98,18 @@ func Get(all bool) string {
 		return newList.String()
 	}
 	return result
+}
+
+func newClient() *RestClient {
+	cli := &RestClient{
+		ApiKey:       config.BgApiKey(),
+		ApiSecretKey: config.BgApiSecretKey(),
+		Passphrase:   config.BgPassphrase(),
+		BaseUrl:      "https://api.bitget.com",
+		HttpClient:   *proxy.NewHttpProxyClient(),
+		Signer:       new(Signer).Init(config.BgApiSecretKey()),
+	}
+	return cli
 }
 
 func Has(list []Coin, key Coin) bool {
