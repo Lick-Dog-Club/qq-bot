@@ -199,7 +199,7 @@ var mappingKV = KV{
 	"tg_phone":                "",
 	"tg_code":                 "",
 
-	"bg_money_diff":     "",
+	"bg_money_diff":     "30",
 	"bg_api_key":        "",
 	"bg_passphrase":     "",
 	"bg_api_secret_key": "",
