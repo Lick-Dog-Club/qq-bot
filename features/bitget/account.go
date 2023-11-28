@@ -56,23 +56,29 @@ func AccountSpotMoney() (usdt float64, err error) {
 	for _, item := range data.Data {
 		var u float64 = 1
 		if item.CoinName != "USDT" {
-			u = TransUsdt(item.CoinName + "USDT_SPBL")
+			u, err = TransUsdt(item.CoinName + "USDT_SPBL")
+			if err != nil {
+				return 0, err
+			}
 		}
 		totalUsdt += (util.ToFloat64(item.Available) + util.ToFloat64(item.Frozen)) * u
 	}
 	return totalUsdt, nil
 }
 
-func TransUsdt(coin string) (usdt float64) {
+func TransUsdt(coin string) (usdt float64, err error) {
 	cli := newClient()
 
 	params := make(map[string]string)
 	params["symbol"] = coin
 
-	resp, _ := cli.DoGet("/api/spot/v1/market/ticker", params)
+	resp, err := cli.DoGet("/api/spot/v1/market/ticker", params)
+	if err != nil {
+		return 0, err
+	}
 	var data TransUsdtResp
 	json.NewDecoder(strings.NewReader(resp)).Decode(&data)
-	return util.ToFloat64(data.Data.SellOne)
+	return util.ToFloat64(data.Data.SellOne), nil
 }
 
 type TransUsdtResp struct {
