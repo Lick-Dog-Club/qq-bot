@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/cenkalti/backoff/v4"
 	"log"
 	"qq/features/ai/api/tools"
 	"qq/features/ai/api/types"
@@ -62,7 +63,10 @@ func (gpt *openaiClient) GetCompletion(messages []openai.ChatCompletionMessage) 
 			ToolCallID: stream.Choices[0].Message.ToolCalls[0].ID,
 		})
 		req.Messages = messages
-		stream, _ = c.CreateChatCompletion(context.TODO(), req)
+		backoff.Retry(func() error {
+			stream, err = c.CreateChatCompletion(context.TODO(), req)
+			return err
+		}, backoff.WithMaxRetries(backoff.NewConstantBackOff(1*time.Second), 5))
 	}
 
 	return stream.Choices[0].Message.Content, nil
