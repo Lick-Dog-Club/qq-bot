@@ -132,6 +132,22 @@ func (gpt *chatGPTClient) send(msg string) string {
 	conversation = append(conversation, um)
 	prompt := gpt.BuildPrompt(conversation, um.ID)
 	//log.Printf("###########\n%s%s", gpt.uid, prompt)
+	prompt = append([]openai.ChatCompletionMessage{
+		{
+			Role: openai.ChatMessageRoleSystem,
+			Content: `
+你是一个ai机器人，能回答用户的任何问题, 你的回答必须满足下面的格式:
+1. 如果返回的是图片地址，你必须使用 "[CQ:image,file={imageURL}]" 这个格式返回
+例如:
+  imageURL=https://xxx/img.jpg
+  你需要返回: [CQ:image,file=https://xxx/img.jpg]
+2. 如果返回的是图片本地路径，你必须使用 "[CQ:image,file=file://{imagePath}]" 这个格式返回
+例如:
+  imagePath=/tmp/a.png
+  你需要返回: [CQ:image,file=file:///tmp/a.png]
+`,
+		},
+	}, prompt...)
 	var result string
 	err := retry.Times(10, func() error {
 		var err error

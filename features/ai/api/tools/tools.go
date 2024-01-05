@@ -7,10 +7,12 @@ import (
 	"qq/features/comic"
 	"qq/features/kfc"
 	"qq/features/picture"
+	"qq/features/pixiv"
 	"qq/features/sysupdate"
 	"qq/features/weather"
 	"qq/features/weibo"
 	"qq/features/zhihu"
+	"time"
 
 	"github.com/sashabaranov/go-openai"
 	"github.com/sashabaranov/go-openai/jsonschema"
@@ -31,7 +33,12 @@ func Call(funcName string, params string) (string, error) {
 	case "KFC":
 		return kfc.Get(), nil
 	case "SendPicture":
-		return picture.Url(), nil
+		var err error
+		img := ""
+		if img, err = pixiv.Image("daily"); err != nil {
+			img = picture.Url()
+		}
+		return img, nil
 	case "Comic":
 		var t = struct {
 			Title string `json:"title"`
@@ -40,6 +47,8 @@ func Call(funcName string, params string) (string, error) {
 		return comic.Get(t.Title, -1).Render(), nil
 	case "SystemVersion":
 		return sysupdate.Version(), nil
+	case "CurrentDate":
+		return time.Now().Local().Format(time.DateTime), nil
 	case "WeiBo":
 		return weibo.Top(), nil
 	default:
@@ -61,6 +70,16 @@ func List() []openai.Tool {
 							Description: "The city and state, e.g. 天津, 北京",
 						},
 					},
+				},
+			},
+		},
+		{
+			Type: openai.ToolTypeFunction,
+			Function: openai.FunctionDefinition{
+				Name: "CurrentDate",
+				Parameters: &jsonschema.Definition{
+					Type:        jsonschema.Object,
+					Description: "返回当前的时间信息",
 				},
 			},
 		},
