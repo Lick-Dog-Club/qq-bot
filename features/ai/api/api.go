@@ -4,6 +4,7 @@ import (
 	"log"
 	"qq/config"
 	"qq/features/ai/api/client"
+	"qq/features/ai/api/tools"
 	"qq/features/ai/api/types"
 	"qq/util/retry"
 	"strings"
@@ -85,6 +86,7 @@ func newChatGPTClient(uid string) *chatGPTClient {
 			Temperature:     0.8,
 			PresencePenalty: 1,
 			TopP:            1,
+			Tools:           tools.List(),
 		}),
 	}
 }
@@ -98,6 +100,7 @@ func newAzureClient(uid string) *chatGPTClient {
 			Temperature:     0.8,
 			PresencePenalty: 1,
 			TopP:            1,
+			Tools:           tools.List(),
 		}, config.AzureUrl()),
 	}
 }

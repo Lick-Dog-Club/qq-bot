@@ -17,7 +17,7 @@ require (
 	github.com/mozillazg/go-pinyin v0.20.0
 	github.com/olebedev/when v0.0.0-20221205223600-4d190b02b8d8
 	github.com/robfig/cron/v3 v3.0.1
-	github.com/sashabaranov/go-openai v1.5.6
+	github.com/sashabaranov/go-openai v1.17.10
 	github.com/signintech/gopdf v0.18.0
 	github.com/sirupsen/logrus v1.9.0
 	golang.org/x/exp v0.0.0-20230626212559-97b1e661b5df

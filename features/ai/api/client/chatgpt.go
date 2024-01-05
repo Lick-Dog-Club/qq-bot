@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"qq/features/ai/api/tools"
 	"qq/features/ai/api/types"
 	"qq/util/proxy"
 	"time"
@@ -47,5 +48,22 @@ func (gpt *openaiClient) GetCompletion(messages []openai.ChatCompletionMessage) 
 	if len(stream.Choices) < 1 {
 		return "", errors.New("data.Choices < 1")
 	}
+	for len(stream.Choices) > 0 && len(stream.Choices[0].Message.ToolCalls) > 0 {
+		var content string
+		content, err = tools.Call(stream.Choices[0].Message.ToolCalls[0].Function.Name, stream.Choices[0].Message.ToolCalls[0].Function.Arguments)
+		if err != nil {
+			break
+		}
+		messages = append(messages, stream.Choices[0].Message)
+		messages = append(messages, openai.ChatCompletionMessage{
+			Role:       openai.ChatMessageRoleTool,
+			Content:    content,
+			Name:       stream.Choices[0].Message.ToolCalls[0].Function.Name,
+			ToolCallID: stream.Choices[0].Message.ToolCalls[0].ID,
+		})
+		req.Messages = messages
+		stream, _ = c.CreateChatCompletion(context.TODO(), req)
+	}
+
 	return stream.Choices[0].Message.Content, nil
 }
