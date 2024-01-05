@@ -35,6 +35,7 @@ func CreateImage(prompt string) string {
 	if err != nil {
 		return ""
 	}
+	fmt.Println(image.Data[0].URL)
 	return image.Data[0].URL
 }
 
