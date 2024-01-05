@@ -7,12 +7,13 @@ import (
 	"qq/features/comic"
 	"qq/features/kfc"
 	"qq/features/picture"
+	"qq/features/sysupdate"
 	"qq/features/weather"
+	"qq/features/weibo"
 	"qq/features/zhihu"
 
 	"github.com/sashabaranov/go-openai"
 	"github.com/sashabaranov/go-openai/jsonschema"
-	"k8s.io/client-go/pkg/version"
 )
 
 func Call(funcName string, params string) (string, error) {
@@ -38,7 +39,9 @@ func Call(funcName string, params string) (string, error) {
 		json.Unmarshal([]byte(params), &t)
 		return comic.Get(t.Title, -1).Render(), nil
 	case "SystemVersion":
-		return version.Get().String(), nil
+		return sysupdate.Version(), nil
+	case "WeiBo":
+		return weibo.Top(), nil
 	default:
 	}
 	return "", errors.New("not support")
@@ -68,6 +71,16 @@ func List() []openai.Tool {
 				Parameters: &jsonschema.Definition{
 					Type:        jsonschema.Object,
 					Description: "获取一张图片的url地址",
+				},
+			},
+		},
+		{
+			Type: openai.ToolTypeFunction,
+			Function: openai.FunctionDefinition{
+				Name: "WeiBo",
+				Parameters: &jsonschema.Definition{
+					Type:        jsonschema.Object,
+					Description: "获取微博热搜数据",
 				},
 			},
 		},
