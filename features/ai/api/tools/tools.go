@@ -35,7 +35,7 @@ func Call(funcName string, params string) (string, error) {
 	case "SendPicture":
 		var err error
 		img := ""
-		if img, err = pixiv.Image("daily"); err != nil {
+		if img, err = pixiv.Image("n"); err != nil {
 			img = picture.Url()
 		}
 		return img, nil
