@@ -90,7 +90,7 @@ func List() []openai.Tool {
 				Name: "Comic",
 				Parameters: &jsonschema.Definition{
 					Type:        jsonschema.Object,
-					Description: "获取动漫资讯",
+					Description: "获取动漫/漫画/蕃剧的资讯信息",
 					Properties: map[string]jsonschema.Definition{
 						"title": {
 							Type:        jsonschema.String,
