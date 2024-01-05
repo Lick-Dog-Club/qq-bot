@@ -1,9 +1,11 @@
 package tools
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"qq/config"
 	"qq/features/comic"
 	"qq/features/kfc"
 	"qq/features/picture"
@@ -12,11 +14,29 @@ import (
 	"qq/features/weather"
 	"qq/features/weibo"
 	"qq/features/zhihu"
+	"qq/util/proxy"
 	"time"
 
 	"github.com/sashabaranov/go-openai"
 	"github.com/sashabaranov/go-openai/jsonschema"
 )
+
+func CreateImage(prompt string) string {
+	cfg := openai.DefaultConfig(config.AiToken())
+	cfg.HTTPClient = proxy.NewHttpProxyClient()
+	c := openai.NewClientWithConfig(cfg)
+	image, err := c.CreateImage(context.TODO(), openai.ImageRequest{
+		Prompt:  prompt,
+		Model:   openai.CreateImageModelDallE3,
+		N:       1,
+		Quality: openai.CreateImageQualityStandard,
+		Size:    openai.CreateImageSize1024x1024,
+	})
+	if err != nil {
+		return ""
+	}
+	return image.Data[0].URL
+}
 
 func Call(funcName string, params string) (string, error) {
 	fmt.Println("call: ", funcName)
@@ -30,6 +50,13 @@ func Call(funcName string, params string) (string, error) {
 		return weather.Get(city.City), nil
 	case "GetZhiHuTop50":
 		return zhihu.Top(), nil
+	case "CreateImageByPrompt":
+		var prompt = struct {
+			Prompt string `json:"prompt"`
+		}{}
+		json.Unmarshal([]byte(params), &prompt)
+
+		return CreateImage(prompt.Prompt), nil
 	case "KFC":
 		return kfc.Get(), nil
 	case "SendPicture":
@@ -68,6 +95,21 @@ func List() []openai.Tool {
 						"city": {
 							Type:        jsonschema.String,
 							Description: "The city and state, e.g. 天津, 北京",
+						},
+					},
+				},
+			},
+		},
+		{
+			Type: openai.ToolTypeFunction,
+			Function: openai.FunctionDefinition{
+				Name: "CreateImageByPrompt",
+				Parameters: &jsonschema.Definition{
+					Type: jsonschema.Object,
+					Properties: map[string]jsonschema.Definition{
+						"prompt": {
+							Type:        jsonschema.String,
+							Description: "通过提示词创建图片，并且返回图片的 url 地址",
 						},
 					},
 				},
