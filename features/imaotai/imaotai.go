@@ -331,10 +331,7 @@ func getItemShop(url string, itemID int, latLng LatLng) (shopIDs []shopInfo) {
 	return shopIDs
 }
 
-// ItemIDs
-// 10213 3%vol 500ml贵州茅台酒（癸卯兔年）
-// 10214 53%vol 375ml×2贵州茅台酒（癸卯兔年）
-var ItemIDs = []int{10213, 10214}
+var ItemIDs = []int{10941, 10942}
 
 // doReservation 申购
 func doReservation(sessionID, uid int, token string, latLng LatLng) (res string) {
