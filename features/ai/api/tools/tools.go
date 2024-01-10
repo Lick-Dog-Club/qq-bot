@@ -97,6 +97,16 @@ func List() []openai.Tool {
 		{
 			Type: openai.ToolTypeFunction,
 			Function: openai.FunctionDefinition{
+				Name: "CurrentDate",
+				Parameters: &jsonschema.Definition{
+					Type:        jsonschema.Object,
+					Description: "返回当前的时间信息",
+				},
+			},
+		},
+		{
+			Type: openai.ToolTypeFunction,
+			Function: openai.FunctionDefinition{
 				Name: "GetWeather",
 				Parameters: &jsonschema.Definition{
 					Type: jsonschema.Object,
@@ -115,7 +125,7 @@ func List() []openai.Tool {
 				Name: "Holidays",
 				Parameters: &jsonschema.Definition{
 					Type:        jsonschema.Object,
-					Description: "获取放假的日期，返回节日名称和具体的放假时间",
+					Description: "获取节假日数据, 获取法定节假日数据, 返回节日名称和具体的放假时间",
 					Properties: map[string]jsonschema.Definition{
 						"year": {
 							Type:        jsonschema.Integer,
@@ -137,16 +147,6 @@ func List() []openai.Tool {
 							Description: "通过提示词创建图片，并且返回图片的 url 地址",
 						},
 					},
-				},
-			},
-		},
-		{
-			Type: openai.ToolTypeFunction,
-			Function: openai.FunctionDefinition{
-				Name: "CurrentDate",
-				Parameters: &jsonschema.Definition{
-					Type:        jsonschema.Object,
-					Description: "返回当前的时间信息",
 				},
 			},
 		},
