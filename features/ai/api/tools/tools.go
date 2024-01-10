@@ -97,7 +97,8 @@ func List() []openai.Tool {
 		{
 			Type: openai.ToolTypeFunction,
 			Function: openai.FunctionDefinition{
-				Name: "CurrentDate",
+				Name:        "CurrentDate",
+				Description: "返回当前的时间信息",
 				Parameters: &jsonschema.Definition{
 					Type:        jsonschema.Object,
 					Description: "返回当前的时间信息",
@@ -107,7 +108,8 @@ func List() []openai.Tool {
 		{
 			Type: openai.ToolTypeFunction,
 			Function: openai.FunctionDefinition{
-				Name: "GetWeather",
+				Name:        "GetWeather",
+				Description: "获取天气、气象数据",
 				Parameters: &jsonschema.Definition{
 					Type: jsonschema.Object,
 					Properties: map[string]jsonschema.Definition{
@@ -122,10 +124,10 @@ func List() []openai.Tool {
 		{
 			Type: openai.ToolTypeFunction,
 			Function: openai.FunctionDefinition{
-				Name: "Holidays",
+				Name:        "Holidays",
+				Description: "获取节假日数据, 获取法定节假日数据, 返回节日名称和具体的放假时间",
 				Parameters: &jsonschema.Definition{
-					Type:        jsonschema.Object,
-					Description: "获取节假日数据, 获取法定节假日数据, 返回节日名称和具体的放假时间",
+					Type: jsonschema.Object,
 					Properties: map[string]jsonschema.Definition{
 						"year": {
 							Type:        jsonschema.Integer,
@@ -138,7 +140,8 @@ func List() []openai.Tool {
 		{
 			Type: openai.ToolTypeFunction,
 			Function: openai.FunctionDefinition{
-				Name: "CreateImageByPrompt",
+				Name:        "CreateImageByPrompt",
+				Description: "通过提示词创建图片，并且返回图片的 url 地址",
 				Parameters: &jsonschema.Definition{
 					Type: jsonschema.Object,
 					Properties: map[string]jsonschema.Definition{
@@ -153,7 +156,8 @@ func List() []openai.Tool {
 		{
 			Type: openai.ToolTypeFunction,
 			Function: openai.FunctionDefinition{
-				Name: "SendPicture",
+				Name:        "SendPicture",
+				Description: "获取一张随机的图片url地址",
 				Parameters: &jsonschema.Definition{
 					Type:        jsonschema.Object,
 					Description: "获取一张图片的url地址",
@@ -163,7 +167,8 @@ func List() []openai.Tool {
 		{
 			Type: openai.ToolTypeFunction,
 			Function: openai.FunctionDefinition{
-				Name: "WeiBo",
+				Name:        "WeiBo",
+				Description: "获取微博热搜数据",
 				Parameters: &jsonschema.Definition{
 					Type:        jsonschema.Object,
 					Description: "获取微博热搜数据",
@@ -173,7 +178,8 @@ func List() []openai.Tool {
 		{
 			Type: openai.ToolTypeFunction,
 			Function: openai.FunctionDefinition{
-				Name: "Comic",
+				Name:        "Comic",
+				Description: "获取动漫/漫画/蕃剧的资讯信息",
 				Parameters: &jsonschema.Definition{
 					Type:        jsonschema.Object,
 					Description: "获取动漫/漫画/蕃剧的资讯信息",
@@ -189,7 +195,8 @@ func List() []openai.Tool {
 		{
 			Type: openai.ToolTypeFunction,
 			Function: openai.FunctionDefinition{
-				Name: "SystemVersion",
+				Name:        "SystemVersion",
+				Description: "获取系统版本",
 				Parameters: &jsonschema.Definition{
 					Type:        jsonschema.Object,
 					Description: "获取系统版本",
@@ -199,7 +206,8 @@ func List() []openai.Tool {
 		{
 			Type: openai.ToolTypeFunction,
 			Function: openai.FunctionDefinition{
-				Name: "KFC",
+				Name:        "KFC",
+				Description: "获取每周四 kfc v50 骚话",
 				Parameters: &jsonschema.Definition{
 					Description: "获取每周四 kfc v50 骚话",
 					Type:        jsonschema.Object,
@@ -209,7 +217,8 @@ func List() []openai.Tool {
 		{
 			Type: openai.ToolTypeFunction,
 			Function: openai.FunctionDefinition{
-				Name: "GetZhiHuTop50",
+				Name:        "GetZhiHuTop50",
+				Description: "获取 知乎 热搜top50",
 				Parameters: &jsonschema.Definition{
 					Description: "获取 知乎 热搜top50",
 					Type:        jsonschema.Object,
