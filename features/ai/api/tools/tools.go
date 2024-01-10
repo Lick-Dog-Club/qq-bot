@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"qq/config"
 	"qq/features/comic"
+	"qq/features/holiday"
 	"qq/features/kfc"
 	"qq/features/picture"
 	"qq/features/pixiv"
@@ -42,6 +43,13 @@ func CreateImage(prompt string) string {
 func Call(funcName string, params string) (string, error) {
 	fmt.Println("call: ", funcName)
 	switch funcName {
+	case "Holidays":
+		var city = struct {
+			Year int `json:"year"`
+		}{}
+		json.Unmarshal([]byte(params), &city)
+
+		return holiday.Get(city.Year), nil
 	case "GetWeather":
 		var city = struct {
 			City string `json:"city"`
@@ -96,6 +104,22 @@ func List() []openai.Tool {
 						"city": {
 							Type:        jsonschema.String,
 							Description: "The city and state, e.g. 天津, 北京",
+						},
+					},
+				},
+			},
+		},
+		{
+			Type: openai.ToolTypeFunction,
+			Function: openai.FunctionDefinition{
+				Name: "Holidays",
+				Parameters: &jsonschema.Definition{
+					Type:        jsonschema.Object,
+					Description: "获取放假的日期，返回节日名称和具体的放假时间",
+					Properties: map[string]jsonschema.Definition{
+						"year": {
+							Type:        jsonschema.Integer,
+							Description: "年份",
 						},
 					},
 				},
