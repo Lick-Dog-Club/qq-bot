@@ -119,7 +119,7 @@ func List() []openai.Tool {
 					Properties: map[string]jsonschema.Definition{
 						"year": {
 							Type:        jsonschema.Integer,
-							Description: "年份",
+							Description: "4位数的年份, 例如 2024, 2023",
 						},
 					},
 				},
