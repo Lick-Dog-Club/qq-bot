@@ -16,7 +16,7 @@ import (
 
 	// _ "qq/cronjob/lifetip"
 	//_ "qq/cronjob/kfc"
-	//_ "qq/cronjob/ddys"
+	_ "qq/cronjob/ddys"
 
 	_ "qq/cronjob/autoupdate"
 	// _ "qq/cronjob/btc"
@@ -38,8 +38,8 @@ import (
 	_ "qq/features/daxin"
 	_ "qq/features/telegram"
 
-	//_ "qq/features/ddys"
 	_ "qq/features/bitget"
+	_ "qq/features/ddys"
 	_ "qq/features/geo"
 	_ "qq/features/help"
 	_ "qq/features/imaotai"

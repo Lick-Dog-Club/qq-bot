@@ -2,15 +2,18 @@ package ddys
 
 import (
 	"bytes"
-	"net/http"
 	"qq/bot"
+	"qq/config"
 	"qq/features"
-	"qq/util/proxy"
 	"qq/util/retry"
 	"strings"
 	"sync"
 	"text/template"
 	"time"
+
+	"github.com/wangluozhe/requests"
+	"github.com/wangluozhe/requests/models"
+	"github.com/wangluozhe/requests/url"
 
 	"github.com/antchfx/htmlquery"
 	log "github.com/sirupsen/logrus"
@@ -63,15 +66,19 @@ func (m *movie) isNew(duration time.Duration) bool {
 	return m.UpdatedAt.After(time.Now().Add(-duration))
 }
 
-func buildRequest(url string) *http.Request {
-	request, _ := http.NewRequest("GET", url, nil)
-	request.Header.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36")
-	return request
+func buildRequest() *url.Request {
+	req := url.NewRequest()
+	headers := url.NewHeaders()
+	headers.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36")
+	req.Headers = headers
+	req.Proxies = config.HttpProxy()
+	req.Ja3 = "771,4865-4866-4867-49195-49199-49196-49200-52393-52392-49171-49172-156-157-47-53,0-23-65281-10-11-35-16-5-13-18-51-45-43-27-21-65037,29-23-24,0"
+	return req
 }
 
-func doRequest(req *http.Request) (resp *http.Response, err error) {
-	retry.Times(8, func() error {
-		resp, err = proxy.NewHttpProxyClient().Do(req)
+func doRequest(req *url.Request, url string) (resp *models.Response, err error) {
+	retry.Times(10, func() error {
+		resp, err = requests.Get(url, req)
 		return err
 	})
 	return
@@ -82,7 +89,7 @@ func Get(param string, duration time.Duration) (res []*movie) {
 	if param == "dm" {
 		url = "https://ddys.art/category/anime/new-bangumi/"
 	}
-	do, err := doRequest(buildRequest(url))
+	do, err := doRequest(buildRequest(), url)
 	if err != nil {
 		log.Println(err)
 		return nil
@@ -144,7 +151,7 @@ func Get(param string, duration time.Duration) (res []*movie) {
 
 func fetchDetail(url string) (m *movie) {
 	log.Println(url)
-	do, err := doRequest(buildRequest(url))
+	do, err := doRequest(buildRequest(), url)
 	if err != nil {
 		log.Println(err)
 		return nil
