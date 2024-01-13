@@ -2,9 +2,14 @@ package ddys
 
 import (
 	"bytes"
+	"fmt"
+	"io"
+	"os"
+	"path/filepath"
 	"qq/bot"
 	"qq/config"
 	"qq/features"
+	"qq/util/random"
 	"qq/util/retry"
 	"strings"
 	"sync"
@@ -53,7 +58,7 @@ var temp, _ = template.New("").Funcs(map[string]any{"datestr": dateStr}).Parse(`
 影片地址：{{ .Url }}
 更新时间: {{ .UpdatedAt | datestr }}
 
-[CQ:image,file={{.HeadImageUrl}}]
+[CQ:image,file=file://{{.HeadImageUrl}}]
 `)
 
 func (m *movie) String() string {
@@ -70,6 +75,7 @@ func buildRequest() *url.Request {
 	req := url.NewRequest()
 	headers := url.NewHeaders()
 	headers.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36")
+	headers.Set("Referer", "https://ddys.art/")
 	req.Headers = headers
 	req.Proxies = config.HttpProxy()
 	req.Ja3 = "771,4865-4866-4867-49195-49199-49196-49200-52393-52392-49171-49172-156-157-47-53,0-23-65281-10-11-35-16-5-13-18-51-45-43-27-21-65037,29-23-24,0"
@@ -203,7 +209,21 @@ func fetchDetail(url string) (m *movie) {
 	for _, node := range image {
 		for _, attribute := range node.Attr {
 			if attribute.Key == "src" {
-				m.HeadImageUrl = attribute.Val
+				m.HeadImageUrl = func() string {
+					resp, err := doRequest(buildRequest(), attribute.Val)
+					if err != nil {
+						return ""
+					}
+					defer resp.Body.Close()
+					if resp.StatusCode != 200 {
+						return ""
+					}
+					savePath := filepath.Join("/data", "images", fmt.Sprintf("tmp-%s-%s%s", time.Now().Format("2006-01-02"), random.String(10), filepath.Ext(attribute.Val)))
+					create, err := os.Create(savePath)
+					defer create.Close()
+					io.Copy(create, resp.Body)
+					return savePath
+				}()
 			}
 		}
 	}
