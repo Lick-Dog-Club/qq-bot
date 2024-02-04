@@ -17,23 +17,10 @@ var (
 )
 
 var (
-	MethodNotSupportNow   = errors.New("method not support now")
 	ContextLengthExceeded = errors.New("context length exceeded")
-
-	// TODO 国际化
-	ResponsibleAIPolicyViolationError = errors.New("问题太过敏感，无法回答～")
-	ErrorToManyRequests               = errors.New("当前使用的人太多啦，请稍后再来～")
+	ErrorToManyRequests   = errors.New("当前使用的人太多啦，请稍后再来～")
 )
 
-func IsResponsibleAIPolicyViolationError(err error) bool {
-	return errors.Is(err, ResponsibleAIPolicyViolationError)
-}
-
-func IsContextLengthExceededError(err error) bool {
-	return errors.Is(err, ContextLengthExceeded)
-}
-
-//go:generate mockgen -destination ./mock_ai.go -self_package gitlab.f.uco.com/p/devops/nano/ai/internal/data/ai -package ai gitlab.f.uco.com/p/devops/nano/ai/internal/data/ai Chat
 type Chat interface {
 	Completion(ctx context.Context, messages []Message) (CompletionResponse, error)
 	StreamCompletion(ctx context.Context, messages []Message) (<-chan CompletionResponse, error)
