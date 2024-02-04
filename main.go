@@ -36,6 +36,7 @@ import (
 	_ "qq/features/comic"
 	_ "qq/features/config"
 	_ "qq/features/daxin"
+	_ "qq/features/stock"
 	_ "qq/features/telegram"
 
 	_ "qq/features/bitget"

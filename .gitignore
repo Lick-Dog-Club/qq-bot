@@ -1,1 +1,2 @@
 deploy.yaml
+**/*_test.go
