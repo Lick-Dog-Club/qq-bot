@@ -220,8 +220,8 @@ spec:
               protocol: TCP
           command:
             - python
-            - -m aktools
-            - --host 0.0.0.0
+            - -m
+            - aktools
         - name: clash
           image: dreamacro/clash
           ports:
