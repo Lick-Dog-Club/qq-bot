@@ -1,25 +1,129 @@
-package main
+package impl
+
+import (
+	"encoding/json"
+	"fmt"
+	"github.com/sashabaranov/go-openai"
+	"github.com/sashabaranov/go-openai/jsonschema"
+	"net/http"
+	"net/url"
+	"qq/features/stock/tools"
+	"time"
+)
+
+var (
+	ToolGetStockPrice = tools.Tool{
+		Name: "GetStockPrice",
+		Type: tools.ToolTypeBuildIn,
+		Define: openai.Tool{
+			Type: openai.ToolTypeFunction,
+			Function: openai.FunctionDefinition{
+				Name:        "GetStockPrice",
+				Description: "获取特定股票价格信息，返回了：`日期`，`开盘`，`收盘`，`最高`，`最低`，`成交量` 的信息",
+				Parameters: &jsonschema.Definition{
+					Type:     jsonschema.Object,
+					Required: []string{"adjust", "ticker", "start_date", "end_date"},
+					Properties: map[string]jsonschema.Definition{
+						"adjust": {
+							Type:        jsonschema.String,
+							Description: "前复权 (Forward Adjusted): `qfq`，后复权 (Backward Adjusted): `hfq`",
+							Enum:        []string{"qfq", "hfq"},
+						},
+						"ticker": {
+							Type:        jsonschema.String,
+							Description: "A股股票代码，例如: 000001,000002",
+						},
+						"start_date": {
+							Type:        jsonschema.String,
+							Description: "开始时间, 格式: 2024-01-02",
+						},
+						"end_date": {
+							Type:        jsonschema.String,
+							Description: "结束时间, 格式: 2024-01-02",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	ToolsGetFinancialStatements = tools.Tool{
+		Name: "GetFinancialStatements",
+		Type: tools.ToolTypeBuildIn,
+		Define: openai.Tool{
+			Type: openai.ToolTypeFunction,
+			Function: openai.FunctionDefinition{
+				Name:        "GetFinancialStatements",
+				Description: "获取公司财务报表数据，返回了：`收入`, `净利润`, `总资产`, `总负债`, `股东权益` 的信息",
+				Parameters: &jsonschema.Definition{
+					Type:     jsonschema.Object,
+					Required: []string{"ticker", "year", "quarter"},
+					Properties: map[string]jsonschema.Definition{
+						"ticker": {
+							Type:        jsonschema.String,
+							Description: "A股股票代码，例如: 000001,000002",
+						},
+						"year": {
+							Type:        jsonschema.String,
+							Description: "年份，比如: 2024",
+						},
+						"quarter": {
+							Type:        jsonschema.String,
+							Description: "季度",
+						},
+					},
+				},
+			},
+		},
+	}
+)
+
+const ApiAddrPrefix = "http://localhost:8080/api/public"
+
+func init() {
+	tools.MustRegister(
+		ToolGetStockPrice,
+		//ToolsGetFinancialStatements,
+	)
+}
 
 // GetStockPriceRequest 是获取特定股票价格信息的请求参数
 type GetStockPriceRequest struct {
-	Ticker string `json:"ticker"` // 股票代码
-	Date   string `json:"date"`   // 查询日期
+	Ticker    string `json:"ticker"` // 股票代码
+	StartDate MyTime `json:"start_date"`
+	EndDate   MyTime `json:"end_date"`
+	Adjust    string `json:"adjust"`
+}
+type MyTime string
+
+func (m MyTime) Format(s string) string {
+	parse, _ := time.Parse("2006-01-02", string(m))
+	return parse.Format(s)
 }
 
 // GetStockPriceResponse 是获取特定股票价格信息的响应数据
 type GetStockPriceResponse struct {
-	Ticker string  `json:"ticker"` // 股票代码
-	Date   string  `json:"date"`   // 日期
-	Open   float64 `json:"open"`   // 开盘价
-	Close  float64 `json:"close"`  // 收盘价
-	High   float64 `json:"high"`   // 最高价
-	Low    float64 `json:"low"`    // 最低价
-	Volume int64   `json:"volume"` // 成交量
+	Date   string  `json:"日期"`  // 日期
+	Open   float64 `json:"开盘"`  // 开盘价
+	Close  float64 `json:"收盘"`  // 收盘价
+	High   float64 `json:"最高"`  // 最高价
+	Low    float64 `json:"最低"`  // 最低价
+	Volume int64   `json:"成交量"` // 成交量
 }
 
-func GetStockPrice(GetStockPriceRequest) GetStockPriceResponse {
-	// TODO
-	return GetStockPriceResponse{}
+func GetStockPrice(req GetStockPriceRequest) []GetStockPriceResponse {
+	uv := url.Values{}
+	uv.Set("symbol", req.Ticker)
+	uv.Set("period", "daily")
+	uv.Set("start_date", req.StartDate.Format("20060102"))
+	uv.Set("end_date", req.EndDate.Format("20060102"))
+	uv.Set("adjust", req.Adjust)
+	fmt.Println(uv.Encode())
+	resp, _ := http.Get(ApiAddrPrefix + "/stock_zh_a_hist?" + uv.Encode())
+	defer resp.Body.Close()
+	var data []GetStockPriceResponse
+	json.NewDecoder(resp.Body).Decode(&data)
+	return data
 }
 
 // GetFinancialStatementsRequest 是获取公司财务报表数据的请求参数

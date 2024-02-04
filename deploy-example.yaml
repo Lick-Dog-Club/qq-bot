@@ -212,6 +212,16 @@ spec:
               wget https://ghproxy.com/https://github.com/Dreamacro/clash-dashboard/archive/gh-pages.zip &&
               unzip gh-pages.zip -d /ui/
       containers:
+        - name: aktools
+          image: registry.cn-shanghai.aliyuncs.com/akfamily/aktools:jupyter
+          ports:
+            - containerPort: 8080
+              name: aktools-http
+              protocol: TCP
+          command:
+            - python
+            - -m aktools
+            - --host 0.0.0.0
         - name: clash
           image: dreamacro/clash
           ports:
