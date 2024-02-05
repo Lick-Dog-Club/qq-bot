@@ -60,22 +60,14 @@ var (
 			Type: openai.ToolTypeFunction,
 			Function: openai.FunctionDefinition{
 				Name:        "GetFinancialStatements",
-				Description: "获取公司财务报表数据，返回了：`收入`, `净利润`, `总资产`, `总负债`, `股东权益` 的信息",
+				Description: "获取公司财务报表数据，返回了： '每股收益', '营业收入（元）', '营业收入去年同期（元）', '营业收入同比增长(%）', '营业收入季度环比增长(％）', '净利润（元）', '净利润去年同期（元）', '净利润同比增长(%）', '净利润季度环比增长(％）', '每股净资产（元）', '净资产收益率(%）' 的信息",
 				Parameters: &jsonschema.Definition{
 					Type:     jsonschema.Object,
-					Required: []string{"ticker", "year", "quarter"},
+					Required: []string{"ticker"},
 					Properties: map[string]jsonschema.Definition{
 						"ticker": {
 							Type:        jsonschema.String,
 							Description: "A股股票代码，例如: 000001,000002",
-						},
-						"year": {
-							Type:        jsonschema.String,
-							Description: "年份，比如: 2024",
-						},
-						"quarter": {
-							Type:        jsonschema.String,
-							Description: "季度",
 						},
 					},
 				},
@@ -92,6 +84,27 @@ var (
 				Description: "获取特定行业数据, 返回 行业代码,行业名称,股票数(只),市价总值(元),平均市盈率,平均价格(元)",
 				Parameters: &jsonschema.Definition{
 					Type: jsonschema.Object,
+				},
+			},
+		},
+	}
+	ToolsGetCashFlow = tools.Tool{
+		Name: "GetCashFlow",
+		Type: tools.ToolTypeBuildIn,
+		Define: openai.Tool{
+			Type: openai.ToolTypeFunction,
+			Function: openai.FunctionDefinition{
+				Name:        "GetCashFlow",
+				Description: "获取现金流数据, 返回 '净现金流（元）','净现金流同比(%）','经营性现金流量净额（元）','经营性现金流量净额占比(％)','客户及同业存款净增加额,金额（元）','客户及同业存款净增加额,占比(%）','投资性现金流量净额（元）','投资性现金流量净额净额占比(%)','贷款增加额金额（元）','贷款增加额占比(%）','取得投资收益收到的现金金额（元）','取得投资收益收到的现金占比(%）','融资性现金流量净额（元）','融资性现金流量净额占比(%）'",
+				Parameters: &jsonschema.Definition{
+					Type:     jsonschema.Object,
+					Required: []string{"ticker"},
+					Properties: map[string]jsonschema.Definition{
+						"ticker": {
+							Type:        jsonschema.String,
+							Description: "A股股票代码，例如: 000001,000002",
+						},
+					},
 				},
 			},
 		},
@@ -125,9 +138,10 @@ const ApiAddrPrefix = "http://localhost:8080/api/public"
 func init() {
 	tools.MustRegister(
 		ToolGetStockPrice,
+		ToolsGetCashFlow,
 		ToolsGetIndustryData,
 		ToolsGetMarketSentiment,
-		//ToolsGetFinancialStatements,
+		ToolsGetFinancialStatements,
 	)
 }
 
@@ -155,6 +169,7 @@ type GetStockPriceResponse struct {
 	Volume int64   `json:"成交量"` // 成交量
 }
 
+// 获取特定股票价格信息
 func GetStockPrice(req GetStockPriceRequest) []GetStockPriceResponse {
 	uv := url.Values{}
 	uv.Set("symbol", req.Ticker)
@@ -191,10 +206,95 @@ type GetFinancialStatementsResponse struct {
 	Ticker             string             `json:"ticker"`             // 股票代码
 	FinancialStatement FinancialStatement `json:"financialStatement"` // 财务报表数据
 }
+type FData struct {
+	SECURITYCODE         string  `json:"SECURITY_CODE"`
+	SECURITYNAMEABBR     string  `json:"SECURITY_NAME_ABBR"`
+	TRADEMARKET          string  `json:"TRADE_MARKET"`
+	TRADEMARKETCODE      string  `json:"TRADE_MARKET_CODE"`
+	SECURITYTYPE         string  `json:"SECURITY_TYPE"`
+	SECURITYTYPECODE     string  `json:"SECURITY_TYPE_CODE"`
+	UPDATEDATE           string  `json:"UPDATE_DATE"`
+	REPORTDATE           string  `json:"REPORT_DATE"`
+	BASICEPS             float64 `json:"BASIC_EPS"`
+	TOTALOPERATEINCOME   int64   `json:"TOTAL_OPERATE_INCOME"`
+	TOTALOPERATEINCOMESQ int64   `json:"TOTAL_OPERATE_INCOME_SQ"`
+	PARENTNETPROFIT      int64   `json:"PARENT_NETPROFIT"`
+	PARENTNETPROFITSQ    int64   `json:"PARENT_NETPROFIT_SQ"`
+	PARENTBVPS           float64 `json:"PARENT_BVPS"`
+	WEIGHTAVGROE         float64 `json:"WEIGHTAVG_ROE"`
+	YSTZ                 float64 `json:"YSTZ"`
+	JLRTBZCL             float64 `json:"JLRTBZCL"`
+	DJDYSHZ              float64 `json:"DJDYSHZ"`
+	DJDJLHZ              float64 `json:"DJDJLHZ"`
+	PUBLISHNAME          string  `json:"PUBLISHNAME"`
+	ORGCODE              string  `json:"ORG_CODE"`
+	NOTICEDATE           string  `json:"NOTICE_DATE"`
+	QDATE                string  `json:"QDATE"`
+	DATATYPE             string  `json:"DATATYPE"`
+	MARKET               string  `json:"MARKET"`
+	ISNEW                string  `json:"ISNEW"`
+	EITIME               string  `json:"EITIME"`
+	SECUCODE             string  `json:"SECUCODE"`
+}
+type FinancialResp struct {
+	Version string `json:"version"`
+	Result  struct {
+		Pages int     `json:"pages"`
+		Data  []FData `json:"data"`
+		Count int     `json:"count"`
+	} `json:"result"`
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+	Code    int    `json:"code"`
+}
 
-func GetFinancialStatements(GetFinancialStatementsRequest) GetFinancialStatementsResponse {
-	// TODO
-	return GetFinancialStatementsResponse{}
+// 获取公司财务报表数据
+func GetFinancialStatements(input GetFinancialStatementsRequest) string {
+	client := &http.Client{}
+	req, err := http.NewRequest("GET",
+		fmt.Sprintf("https://datacenter-web.eastmoney.com/api/data/v1/get?callback=jQuery112303147255267845681_1707118997064&sortColumns=REPORT_DATE&sortTypes=-1&pageSize=50&pageNumber=1&columns=ALL&filter=(SECURITY_CODE%%3D%%22%s%%22)&reportName=RPT_FCI_PERFORMANCEE", input.Ticker), nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	req.Header.Set("Accept", "*/*")
+	req.Header.Set("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8")
+	req.Header.Set("Connection", "keep-alive")
+	req.Header.Set("Cookie", "qgqp_b_id=78b7b2bfdee7c756a15fa4f64a15d88f; st_si=18517497145558; websitepoptg_api_time=1707096223192; HAList=ty-0-000001-%u5E73%u5B89%u94F6%u884C%2Cty-0-002617-%u9732%u7B11%u79D1%u6280; st_asi=delete; st_pvi=53287007095836; st_sp=2024-02-04%2016%3A50%3A49; st_inirUrl=https%3A%2F%2Fquote.eastmoney.com%2Fsz002617.html; st_sn=35; st_psi=20240205154325530-111000300841-2235918466; JSESSIONID=77377474BF25B15399769593749464A6")
+	req.Header.Set("Referer", "https://data.eastmoney.com/bbsj/yjbb/000001.html")
+	req.Header.Set("Sec-Fetch-Dest", "script")
+	req.Header.Set("Sec-Fetch-Mode", "no-cors")
+	req.Header.Set("Sec-Fetch-Site", "same-site")
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36")
+	req.Header.Set("sec-ch-ua", `"Not A(Brand";v="99", "Google Chrome";v="121", "Chromium";v="121"`)
+	req.Header.Set("sec-ch-ua-mobile", "?0")
+	req.Header.Set("sec-ch-ua-platform", `"macOS"`)
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+	bodyText, err := io.ReadAll(resp.Body)
+	index := strings.Index(string(bodyText), "{")
+	var data FinancialResp
+	json.NewDecoder(strings.NewReader(string(bodyText)[index:])).Decode(&data)
+	i := lo.Map(data.Result.Data, func(item FData, index int) map[string]any {
+		return map[string]any{
+			"截止日期":          item.REPORTDATE,
+			"每股收益":          item.BASICEPS,
+			"营业收入（元）":       item.TOTALOPERATEINCOME,
+			"营业收入去年同期（元）":   item.TOTALOPERATEINCOMESQ,
+			"营业收入同比增长(%）":   item.YSTZ,
+			"营业收入季度环比增长(％）": item.DJDYSHZ,
+			"净利润（元）":        item.PARENTNETPROFIT,
+			"净利润去年同期（元）":    item.PARENTNETPROFITSQ,
+			"净利润同比增长(%）":    item.JLRTBZCL,
+			"净利润季度环比增长(％）":  item.DJDJLHZ,
+			"每股净资产（元）":      item.PARENTBVPS,
+			"净资产收益率(%）":     item.WEIGHTAVGROE,
+		}
+	})
+	marshal, _ := json.Marshal(&i)
+	return string(marshal)
 }
 
 // GetVolumeDataRequest 是获取股票成交量数据的请求参数
@@ -210,6 +310,7 @@ type GetVolumeDataResponse struct {
 	Volume int64  `json:"volume"` // 成交量
 }
 
+// 获取股票成交量数据
 func GetVolumeData(GetVolumeDataRequest) GetVolumeDataResponse {
 	// TODO
 	return GetVolumeDataResponse{}
@@ -233,6 +334,7 @@ type GetMarketDataResponse struct {
 	Indices []IndexData `json:"indices"` // 指数数据列表
 }
 
+// 获取市场数据
 func GetMarketData(GetMarketDataRequest) GetMarketDataResponse {
 	// TODO
 	return GetMarketDataResponse{}
@@ -251,9 +353,9 @@ type GetStockFundamentalsResponse struct {
 	DividendYield float64 `json:"dividendYield"` // 股息率
 }
 
+// 股票基本面数据
 func GetStockFundamentals(GetStockFundamentalsRequest) GetStockFundamentalsResponse {
-	// TODO
-	return GetStockFundamentalsResponse{}
+	panic("")
 }
 
 // GetHistoricalDataRequest 是获取股票历史价格数据的请求参数
@@ -353,7 +455,6 @@ func GetMarketSentiment(input GetMarketSentimentRequest) string {
 	req.Header.Set("Accept", "application/json, text/plain, */*")
 	req.Header.Set("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8")
 	req.Header.Set("Connection", "keep-alive")
-	//req.Header.Set("Cookie", "inews_session_product=ruscrd71gvmdmpd5bq4ghqeaon")
 	req.Header.Set("Referer", "https://sentiment.chinascope.com/")
 	req.Header.Set("Sec-Fetch-Dest", "empty")
 	req.Header.Set("Sec-Fetch-Mode", "cors")
@@ -400,4 +501,119 @@ type GetRegulatoryAnnouncementsResponse struct {
 func GetRegulatoryAnnouncements(GetRegulatoryAnnouncementsRequest) GetRegulatoryAnnouncementsResponse {
 	// TODO
 	return GetRegulatoryAnnouncementsResponse{}
+}
+
+type GetCashFlowRequest struct {
+	Ticket string `json:"ticket"`
+}
+
+// 现金流
+func GetCashFlow(input GetCashFlowRequest) string {
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", fmt.Sprintf("https://datacenter-web.eastmoney.com/api/data/v1/get?callback=jQuery112303147255267845681_1707118997064&sortColumns=REPORT_DATE&sortTypes=-1&pageSize=50&pageNumber=1&columns=ALL&filter=(SECURITY_CODE%%3D%%22%s%%22)&reportName=RPT_DMSK_FN_CASHFLOW", input.Ticket), nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	req.Header.Set("Accept", "*/*")
+	req.Header.Set("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8")
+	req.Header.Set("Connection", "keep-alive")
+	req.Header.Set("Referer", "https://data.eastmoney.com/bbsj/yjbb/000001.html")
+	req.Header.Set("Sec-Fetch-Dest", "script")
+	req.Header.Set("Sec-Fetch-Mode", "no-cors")
+	req.Header.Set("Sec-Fetch-Site", "same-site")
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36")
+	req.Header.Set("sec-ch-ua", `"Not A(Brand";v="99", "Google Chrome";v="121", "Chromium";v="121"`)
+	req.Header.Set("sec-ch-ua-mobile", "?0")
+	req.Header.Set("sec-ch-ua-platform", `"macOS"`)
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+	bodyText, err := io.ReadAll(resp.Body)
+	index := strings.Index(string(bodyText), "{")
+	var data GetCashFlowResponse
+	json.NewDecoder(strings.NewReader(string(bodyText)[index:])).Decode(&data)
+	i := lo.Map(data.Result.Data, func(item CashFlowData, index int) map[string]any {
+		return map[string]any{
+			"净现金流（元）":           item.CCEADD,
+			"净现金流同比(%）":         item.CCEADDRATIO,
+			"经营性现金流量净额（元）":      item.NETCASHOPERATE,
+			"经营性现金流量净额占比(％)":    item.NETCASHOPERATERATIO,
+			"客户及同业存款净增加额,金额（元）": item.DEPOSITIOFIOTHER,
+			"客户及同业存款净增加额,占比(%）": item.DIORATIO,
+			"投资性现金流量净额（元）":      item.NETCASHINVEST,
+			"投资性现金流量净额净额占比(%)":  item.NETCASHFINANCERATIO,
+			"贷款增加额金额（元）":        item.LOANADVANCEADD,
+			"贷款增加额占比(%）":        item.LAARATIO,
+			"取得投资收益收到的现金金额（元）":  item.RECEIVEINVESTINCOME,
+			"取得投资收益收到的现金占比(%）":  item.RIIRATIO,
+			"融资性现金流量净额（元）":      item.NETCASHFINANCE,
+			"融资性现金流量净额占比(%）":    item.NETCASHINVESTRATIO,
+		}
+	})
+	marshal, _ := json.Marshal(&i)
+	return string(marshal)
+}
+
+type CashFlowData struct {
+	SECUCODE                  string      `json:"SECUCODE"`
+	SECURITYCODE              string      `json:"SECURITY_CODE"`
+	INDUSTRYCODE              string      `json:"INDUSTRY_CODE"`
+	ORGCODE                   string      `json:"ORG_CODE"`
+	SECURITYNAMEABBR          string      `json:"SECURITY_NAME_ABBR"`
+	INDUSTRYNAME              string      `json:"INDUSTRY_NAME"`
+	MARKET                    string      `json:"MARKET"`
+	SECURITYTYPECODE          string      `json:"SECURITY_TYPE_CODE"`
+	TRADEMARKETCODE           string      `json:"TRADE_MARKET_CODE"`
+	DATETYPECODE              string      `json:"DATE_TYPE_CODE"`
+	REPORTTYPECODE            string      `json:"REPORT_TYPE_CODE"`
+	DATASTATE                 string      `json:"DATA_STATE"`
+	NOTICEDATE                string      `json:"NOTICE_DATE"`
+	REPORTDATE                string      `json:"REPORT_DATE"`
+	NETCASHOPERATE            int64       `json:"NETCASH_OPERATE"`
+	NETCASHOPERATERATIO       float64     `json:"NETCASH_OPERATE_RATIO"`
+	SALESSERVICES             interface{} `json:"SALES_SERVICES"`
+	SALESSERVICESRATIO        interface{} `json:"SALES_SERVICES_RATIO"`
+	PAYSTAFFCASH              int64       `json:"PAY_STAFF_CASH"`
+	PSCRATIO                  float64     `json:"PSC_RATIO"`
+	NETCASHINVEST             int64       `json:"NETCASH_INVEST"`
+	NETCASHINVESTRATIO        float64     `json:"NETCASH_INVEST_RATIO"`
+	RECEIVEINVESTINCOME       int64       `json:"RECEIVE_INVEST_INCOME"`
+	RIIRATIO                  float64     `json:"RII_RATIO"`
+	CONSTRUCTLONGASSET        int64       `json:"CONSTRUCT_LONG_ASSET"`
+	CLARATIO                  float64     `json:"CLA_RATIO"`
+	NETCASHFINANCE            int64       `json:"NETCASH_FINANCE"`
+	NETCASHFINANCERATIO       float64     `json:"NETCASH_FINANCE_RATIO"`
+	CCEADD                    int64       `json:"CCE_ADD"`
+	CCEADDRATIO               float64     `json:"CCE_ADD_RATIO"`
+	CUSTOMERDEPOSITADD        *int        `json:"CUSTOMER_DEPOSIT_ADD"`
+	CDARATIO                  *int        `json:"CDA_RATIO"`
+	DEPOSITIOFIOTHER          *int64      `json:"DEPOSIT_IOFI_OTHER"`
+	DIORATIO                  *float64    `json:"DIO_RATIO"`
+	LOANADVANCEADD            int64       `json:"LOAN_ADVANCE_ADD"`
+	LAARATIO                  float64     `json:"LAA_RATIO"`
+	RECEIVEINTERESTCOMMISSION interface{} `json:"RECEIVE_INTEREST_COMMISSION"`
+	RICRATIO                  interface{} `json:"RIC_RATIO"`
+	INVESTPAYCASH             interface{} `json:"INVEST_PAY_CASH"`
+	IPCRATIO                  interface{} `json:"IPC_RATIO"`
+	BEGINCCE                  interface{} `json:"BEGIN_CCE"`
+	BEGINCCERATIO             interface{} `json:"BEGIN_CCE_RATIO"`
+	ENDCCE                    interface{} `json:"END_CCE"`
+	ENDCCERATIO               interface{} `json:"END_CCE_RATIO"`
+	RECEIVEORIGICPREMIUM      interface{} `json:"RECEIVE_ORIGIC_PREMIUM"`
+	ROPRATIO                  interface{} `json:"ROP_RATIO"`
+	PAYORIGICCOMPENSATE       interface{} `json:"PAY_ORIGIC_COMPENSATE"`
+	POCRATIO                  interface{} `json:"POC_RATIO"`
+}
+type GetCashFlowResponse struct {
+	Version string `json:"version"`
+	Result  struct {
+		Pages int            `json:"pages"`
+		Data  []CashFlowData `json:"data"`
+		Count int            `json:"count"`
+	} `json:"result"`
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+	Code    int    `json:"code"`
 }

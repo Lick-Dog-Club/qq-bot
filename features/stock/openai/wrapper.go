@@ -92,6 +92,14 @@ func CallTool(
 		var input impl.GetMarketSentimentRequest
 		json.NewDecoder(strings.NewReader(tool.Function.Arguments)).Decode(&input)
 		return &CallResult{Content: impl.GetMarketSentiment(input)}, nil
+	case "GetFinancialStatements":
+		var input impl.GetFinancialStatementsRequest
+		json.NewDecoder(strings.NewReader(tool.Function.Arguments)).Decode(&input)
+		return &CallResult{Content: impl.GetFinancialStatements(input)}, nil
+	case "GetCashFlow":
+		var input impl.GetCashFlowRequest
+		json.NewDecoder(strings.NewReader(tool.Function.Arguments)).Decode(&input)
+		return &CallResult{Content: impl.GetCashFlow(input)}, nil
 	case "GetIndustryData":
 		return &CallResult{Content: impl.GetIndustryData()}, nil
 	case "GetStockPrice":
