@@ -1,14 +1,20 @@
 package impl
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/jsonschema"
+	"io"
 	"net/http"
 	"net/url"
 	"qq/features/stock/tools"
+	"strings"
 	"time"
+
+	"github.com/samber/lo"
+	"github.com/sashabaranov/go-openai"
+	"github.com/sashabaranov/go-openai/jsonschema"
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -76,6 +82,42 @@ var (
 			},
 		},
 	}
+	ToolsGetIndustryData = tools.Tool{
+		Name: "GetIndustryData",
+		Type: tools.ToolTypeBuildIn,
+		Define: openai.Tool{
+			Type: openai.ToolTypeFunction,
+			Function: openai.FunctionDefinition{
+				Name:        "GetIndustryData",
+				Description: "获取特定行业数据, 返回 行业代码,行业名称,股票数(只),市价总值(元),平均市盈率,平均价格(元)",
+				Parameters: &jsonschema.Definition{
+					Type: jsonschema.Object,
+				},
+			},
+		},
+	}
+	ToolsGetMarketSentiment = tools.Tool{
+		Name: "GetMarketSentiment",
+		Type: tools.ToolTypeBuildIn,
+		Define: openai.Tool{
+			Type: openai.ToolTypeFunction,
+			Function: openai.FunctionDefinition{
+				Name:        "GetMarketSentiment",
+				Description: "获取市场信心指数，返回近一周/一个月/一年的指数",
+				Parameters: &jsonschema.Definition{
+					Type:     jsonschema.Object,
+					Required: []string{"period"},
+					Properties: map[string]jsonschema.Definition{
+						"period": {
+							Type:        jsonschema.String,
+							Description: "周期, 'WEEK' 'MONTH' 'YEAR'",
+							Enum:        []string{"WEEK", "MONTH", "YEAR"},
+						},
+					},
+				},
+			},
+		},
+	}
 )
 
 const ApiAddrPrefix = "http://localhost:8080/api/public"
@@ -83,6 +125,8 @@ const ApiAddrPrefix = "http://localhost:8080/api/public"
 func init() {
 	tools.MustRegister(
 		ToolGetStockPrice,
+		ToolsGetIndustryData,
+		ToolsGetMarketSentiment,
 		//ToolsGetFinancialStatements,
 	)
 }
@@ -236,41 +280,103 @@ func GetHistoricalData(GetHistoricalDataRequest) GetHistoricalDataResponse {
 	return GetHistoricalDataResponse{}
 }
 
-// GetIndustryDataRequest 是获取特定行业数据的请求参数
-type GetIndustryDataRequest struct {
-	IndustryName string `json:"industryName"` // 行业名称
-}
-
-// IndustryData 描述了一个特定行业的数据
 type IndustryData struct {
-	IndustryName string  `json:"industryName"` // 行业名称
-	PE           float64 `json:"pe"`           // 行业平均市盈率
-	PB           float64 `json:"pb"`           // 行业平均市净率
+	CSRCCODE   string `json:"CSRC_CODE"`
+	TOTALVALUE string `json:"TOTAL_VALUE"`
+	CSRCNAME   string `json:"CSRC_NAME"`
+	AVGPERATE  string `json:"AVG_PE_RATE"`
+	AVGPRICE   string `json:"AVG_PRICE"`
+	TRADENUM   string `json:"TRADE_NUM"`
+	TRADEDATE  string `json:"TRADE_DATE"`
+	LISTNUM    string `json:"LIST_NUM"`
 }
 
-// GetIndustryDataResponse 是行业数据的响应结构
-type GetIndustryDataResponse struct {
-	Industries []IndustryData `json:"industries"` // 行业数据列表
+type SseResp struct {
+	QueryDate string         `json:"queryDate"`
+	Result    []IndustryData `json:"result"`
 }
 
-func GetIndustryData(GetIndustryDataRequest) GetIndustryDataResponse {
-	// TODO
-	return GetIndustryDataResponse{}
+func GetIndustryData() string {
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
+	req, err := http.NewRequest("GET", fmt.Sprintf("http://query.sse.com.cn/commonQuery.do?&jsonCallBack=jsonpCallback56970893&isPagination=false&sqlId=COMMON_SSE_CP_GPJCTPZ_DQHYFL_HYFL_L&_=%d", time.Now().UnixMilli()), nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	req.Header.Set("Accept", "*/*")
+	req.Header.Set("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8")
+	req.Header.Set("Proxy-Connection", "keep-alive")
+	req.Header.Set("Referer", "http://www.sse.com.cn/")
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36")
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+	bodyText, _ := io.ReadAll(resp.Body)
+	index := strings.Index(string(bodyText), "{")
+	var data SseResp
+	json.NewDecoder(strings.NewReader(string(bodyText)[index:])).Decode(&data)
+	i := lo.Map(data.Result, func(item IndustryData, index int) map[string]any {
+		return map[string]any{
+			"行业代码":    item.CSRCCODE,
+			"行业名称":    item.CSRCNAME,
+			"股票数(只)":  item.TRADENUM,
+			"市价总值(元)": item.TOTALVALUE,
+			"平均市盈率":   item.AVGPERATE,
+			"平均价格(元)": item.AVGPRICE,
+		}
+	})
+	marshal, _ := json.Marshal(&i)
+	return string(marshal)
 }
 
 // GetMarketSentimentRequest 是获取市场情绪数据的请求参数
 type GetMarketSentimentRequest struct {
-	Date string `json:"date"` // 查询日期
+	// YEAR WEEK MONTH
+	Period string `json:"period"`
 }
 
-// GetMarketSentimentResponse 是市场情绪数据的响应结构
-type GetMarketSentimentResponse struct {
-	SentimentIndex float64 `json:"sentimentIndex"` // 市场情绪指数
+type GetMarketSentimentData struct {
+	Date           string  `json:"tradeDate"`
+	SentimentIndex float64 `json:"maIndex1"` // 市场情绪指数
 }
 
-func GetMarketSentiment(GetMarketSentimentRequest) GetMarketSentimentResponse {
-	// TODO
-	return GetMarketSentimentResponse{}
+func GetMarketSentiment(input GetMarketSentimentRequest) string {
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", fmt.Sprintf("https://sentiment.chinascope.com/inews/senti/index?period=%s&contentType=0&_v=%d", input.Period, time.Now().UnixMilli()), nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	req.Header.Set("Accept", "application/json, text/plain, */*")
+	req.Header.Set("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8")
+	req.Header.Set("Connection", "keep-alive")
+	//req.Header.Set("Cookie", "inews_session_product=ruscrd71gvmdmpd5bq4ghqeaon")
+	req.Header.Set("Referer", "https://sentiment.chinascope.com/")
+	req.Header.Set("Sec-Fetch-Dest", "empty")
+	req.Header.Set("Sec-Fetch-Mode", "cors")
+	req.Header.Set("Sec-Fetch-Site", "same-origin")
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36")
+	req.Header.Set("sec-ch-ua", `"Not A(Brand";v="99", "Google Chrome";v="121", "Chromium";v="121"`)
+	req.Header.Set("sec-ch-ua-mobile", "?0")
+	req.Header.Set("sec-ch-ua-platform", `"macOS"`)
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+	var data []GetMarketSentimentData
+	json.NewDecoder(resp.Body).Decode(&data)
+	i := lo.Map(data, func(item GetMarketSentimentData, index int) map[string]any {
+		return map[string]any{
+			"信心指数": item.SentimentIndex,
+			"日期":   item.Date,
+		}
+	})
+	marshal, _ := json.Marshal(&i)
+	return string(marshal)
 }
 
 // GetRegulatoryAnnouncementsRequest 是获取监管公告的请求参数

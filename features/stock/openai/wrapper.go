@@ -4,12 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/sashabaranov/go-openai"
 	"qq/features/stock/ai"
 	"qq/features/stock/impl"
 	"qq/features/stock/tools"
 	"strings"
 	"time"
+
+	"github.com/sashabaranov/go-openai"
 )
 
 type ToolCallChatWrapper struct {
@@ -87,6 +88,12 @@ func CallTool(
 	}
 	fmt.Println(plugin.Name, tool.Function.Arguments)
 	switch plugin.Name {
+	case "GetMarketSentiment":
+		var input impl.GetMarketSentimentRequest
+		json.NewDecoder(strings.NewReader(tool.Function.Arguments)).Decode(&input)
+		return &CallResult{Content: impl.GetMarketSentiment(input)}, nil
+	case "GetIndustryData":
+		return &CallResult{Content: impl.GetIndustryData()}, nil
 	case "GetStockPrice":
 		var input impl.GetStockPriceRequest
 		json.NewDecoder(strings.NewReader(tool.Function.Arguments)).Decode(&input)
