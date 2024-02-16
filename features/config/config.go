@@ -3,11 +3,12 @@ package config
 import (
 	"bufio"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"qq/bot"
 	"qq/config"
 	"qq/features"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func init() {

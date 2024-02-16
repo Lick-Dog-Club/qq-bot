@@ -236,8 +236,8 @@ func Search(input SearchInput) SearchResult {
 		m2["seat_discount_info"] = split[46]
 		m2["sale_time"] = split[47]
 		m["queryLeftNewDTO"] = m2
-		m2["from_station_name"] = data.Data.Map.FES
-		m2["to_station_name"] = data.Data.Map.XHH
+		m2["from_station_name"] = data.Data.Map[split[6]]
+		m2["to_station_name"] = data.Data.Map[split[7]]
 		da = append(da, m2)
 	}
 	var res = SearchResult{}
@@ -280,15 +280,10 @@ var temp, _ = template.New("").Parse(`
 type response struct {
 	Httpstatus int `json:"httpstatus"`
 	Data       struct {
-		Result []string `json:"result"`
-		Flag   string   `json:"flag"`
-		Level  string   `json:"level"`
-		Map    struct {
-			FES string `json:"FES"`
-			HGH string `json:"HGH"`
-			XHH string `json:"XHH"`
-			TLS string `json:"TLS"`
-		} `json:"map"`
+		Result []string          `json:"result"`
+		Flag   string            `json:"flag"`
+		Level  string            `json:"level"`
+		Map    map[string]string `json:"map"`
 	} `json:"data"`
 	Messages string `json:"messages"`
 	Status   bool   `json:"status"`
