@@ -116,10 +116,10 @@ func List() []openai.Tool {
 			Type: openai.ToolTypeFunction,
 			Function: openai.FunctionDefinition{
 				Name:        "StationNames",
-				Description: "返回高铁/火车车站名称和code的对应关系表",
+				Description: "返回高铁/火车车站名称和 code 的对应关系表",
 				Parameters: &jsonschema.Definition{
 					Type:        jsonschema.Object,
-					Description: "返回高铁/火车车站名称和code的对应关系表",
+					Description: "返回高铁/火车车站名称和 code 的对应关系表",
 				},
 			},
 		},

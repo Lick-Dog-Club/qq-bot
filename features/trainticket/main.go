@@ -90,7 +90,11 @@ func GetStationCode(name string) string {
 
 func StationNamesJson() string {
 	stationNames()
-	marshal, _ := json.Marshal(stations)
+	var res []Station
+	for _, a := range stations {
+		res = append(res, a)
+	}
+	marshal, _ := json.Marshal(res)
 	return string(marshal)
 }
 
