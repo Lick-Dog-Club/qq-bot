@@ -51,6 +51,7 @@ func (gpt *openaiClient) GetCompletion(messages []openai.ChatCompletionMessage) 
 		return "", errors.New("data.Choices < 1")
 	}
 	for len(stream.Choices) > 0 && len(stream.Choices[0].Message.ToolCalls) > 0 {
+		messages = append(messages, stream.Choices[0].Message)
 		for idx := range stream.Choices[0].Message.ToolCalls {
 			cc := stream.Choices[0].Message.ToolCalls[idx]
 			var content string
@@ -59,7 +60,6 @@ func (gpt *openaiClient) GetCompletion(messages []openai.ChatCompletionMessage) 
 			if err != nil {
 				break
 			}
-			messages = append(messages, stream.Choices[0].Message)
 			messages = append(messages, openai.ChatCompletionMessage{
 				Role:       openai.ChatMessageRoleTool,
 				Content:    content,
