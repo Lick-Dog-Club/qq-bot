@@ -25,6 +25,7 @@ func init() {
 			})
 			if len(search) > 0 {
 				util.Bark("有车票", search.String(), config.BarkUrls()...)
+				bot.SendToUser(config.UserID(), search.String())
 			}
 		}
 		return nil
