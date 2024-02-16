@@ -3,6 +3,7 @@ package config
 import (
 	"bufio"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"qq/bot"
 	"qq/config"
 	"qq/features"
@@ -48,7 +49,9 @@ func init() {
 				return nil
 			}
 
-			bot.SendTextImage(config.Configs().String())
+			if _, err := bot.SendTextImage(config.Configs().String()); err != nil {
+				log.Println(err)
+			}
 			return nil
 		}
 		bot.Send("未授权")
