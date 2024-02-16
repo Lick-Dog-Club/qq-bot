@@ -48,7 +48,7 @@ func init() {
 				return nil
 			}
 
-			bot.Send(config.Configs().String())
+			bot.SendTextImage(config.Configs().String())
 			return nil
 		}
 		bot.Send("未授权")
