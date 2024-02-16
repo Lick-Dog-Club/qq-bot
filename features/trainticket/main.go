@@ -30,13 +30,18 @@ func init() {
 			bot.Send("目的地不正确")
 			return nil
 		}
-		date, _ := time.Parse("20060102", split[2])
-		bot.Send(Search(SearchInput{
+		date := time.Now()
+		if len(from) > 2 {
+			date, _ = time.Parse("20060102", split[2])
+		}
+		if _, err := bot.SendTextImage(Search(SearchInput{
 			From:           from,
 			To:             to,
 			Date:           date.Format("2006-01-02"),
 			OnlyShowTicket: false,
-		}).String())
+		}).String()); err != nil {
+			log.Println(err)
+		}
 		return nil
 	})
 }
