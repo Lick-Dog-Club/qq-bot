@@ -29,6 +29,7 @@ import (
 	//_ "qq/cronjob/picture"
 	_ "qq/cronjob/bitget"
 	_ "qq/cronjob/tianqi"
+	_ "qq/cronjob/trainticketleft"
 	_ "qq/cronjob/xiaofeiquan"
 
 	_ "qq/features/ai"
