@@ -150,7 +150,11 @@ func (gpt *chatGPTClient) send(msg string) string {
   imagePath=/tmp/a.png
   你需要返回: [CQ:image,file=file:///tmp/a.png]
 
-3. 如果用户查询高铁火车票信息，需要先用 GetStationCodeByName 查询对应的车站 code，再调用 Search12306 查询班次信息，没告诉你时间就那么默认是今天, 一等座、二等座和无座已售罄的车次无需告诉用户，重点关注二等座，二等座优先级最高
+3. 如果用户查询高铁火车票信息, 按照以下步骤处理
+    - 需要 GetStationCodeByName 查询对应的车站 code，
+    - 再调用 Search12306 查询班次信息
+    - 没告诉你时间就那么默认是今天
+    - 一等座、二等座和无座已售罄的车次无需告诉用户，重点关注二等座，二等座优先级最高
 `, time.Now().Format(time.DateTime)),
 		},
 	}, prompt...)
@@ -158,6 +162,9 @@ func (gpt *chatGPTClient) send(msg string) string {
 	err := retry.Times(10, func() error {
 		var err error
 		result, err = gpt.client.GetCompletion(prompt)
+		if err != nil {
+			fmt.Println(err)
+		}
 		return err
 	})
 	for strings.HasPrefix(result, "\n") {

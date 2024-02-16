@@ -46,7 +46,7 @@ func (t *ToolCallChatWrapper) StreamCompletion(ctx context.Context, messages []a
 				},
 			)
 			for _, call := range toolCalls {
-				tool, err := CallTool(ctx, t.Client, call)
+				tool, err := CallTool(call)
 				if err != nil {
 					resCh <- &ai.CompletionResponseImpl{Error: err}
 					return
@@ -78,8 +78,6 @@ type CallResult struct {
 // CallTool
 // TODO 重构下
 func CallTool(
-	ctx context.Context,
-	chat ai.Chat,
 	tool openai.ToolCall,
 ) (*CallResult, error) {
 	plugin, err := tools.GetPluginNameByFunctionName(tool.Function.Name)
