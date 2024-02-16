@@ -88,8 +88,12 @@ func Call(funcName string, params string) (string, error) {
 		return time.Now().Local().Format(time.DateTime), nil
 	case "WeiBo":
 		return weibo.Top(), nil
-	case "StationNames":
-		return trainticket.StationNamesJson(), nil
+	case "GetStationCodeByName":
+		var a = struct {
+			Name string `json:"name"`
+		}{}
+		json.Unmarshal([]byte(params), &a)
+		return trainticket.GetStationCode(a.Name), nil
 	case "Search12306":
 		var input trainticket.SearchInput
 		json.Unmarshal([]byte(params), &input)
@@ -115,11 +119,17 @@ func List() []openai.Tool {
 		{
 			Type: openai.ToolTypeFunction,
 			Function: openai.FunctionDefinition{
-				Name:        "StationNames",
+				Name:        "GetStationCodeByName",
 				Description: "返回高铁/火车车站名称和 code 的对应关系表",
 				Parameters: &jsonschema.Definition{
 					Type:        jsonschema.Object,
 					Description: "返回高铁/火车车站名称和 code 的对应关系表",
+					Properties: map[string]jsonschema.Definition{
+						"name": {
+							Type:        jsonschema.String,
+							Description: "地点，例如 '杭州东' '绍兴北' 等",
+						},
+					},
 				},
 			},
 		},
@@ -134,11 +144,11 @@ func List() []openai.Tool {
 					Properties: map[string]jsonschema.Definition{
 						"from": {
 							Type:        jsonschema.String,
-							Description: "出发地, 需要通过 StationNames 函数获取 code 值, 例如: 出发去杭州东, 需要根据 StationNames 函数, 然后查到对应 from='HGH'",
+							Description: "出发地, 需要通过 GetStationCodeByName 函数获取 code 值, 例如: 出发去杭州东, 需要根据 GetStationCodeByName 函数, 然后查到对应 from='HGH'",
 						},
 						"to": {
 							Type:        jsonschema.String,
-							Description: "目的地, 需要通过 StationNames 函数获取 code 值, 例如: 出发去杭州东, 需要根据 StationNames 函数, 然后查到对应 to='HGH'",
+							Description: "目的地, 需要通过 GetStationCodeByName 函数获取 code 值, 例如: 出发去杭州东, 需要根据 GetStationCodeByName 函数, 然后查到对应 to='HGH'",
 						},
 						"date": {
 							Type:        jsonschema.String,
