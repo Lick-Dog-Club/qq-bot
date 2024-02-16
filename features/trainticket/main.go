@@ -183,7 +183,6 @@ func Search(input SearchInput) SearchResult {
 	var da = make([]map[string]string, 0)
 	var data response
 	json.NewDecoder(resp.Body).Decode(&data)
-	fmt.Println(data)
 	for _, item := range data.Data.Result {
 		split := strings.Split(item, "|")
 		var m = make(map[string]any)
