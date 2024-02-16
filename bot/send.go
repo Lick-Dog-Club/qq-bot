@@ -144,6 +144,7 @@ func (m *qqBot) SendTextImage(text string) (string, error) {
 
 func (m *qqBot) sendImage(msg *Message, text string) (string, error) {
 	if text == "" {
+		m.Send("无数据: " + text)
 		fmt.Println(text, errors.New("empty text"))
 		return "", errors.New("empty text")
 	}
