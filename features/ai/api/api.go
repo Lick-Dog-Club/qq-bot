@@ -151,7 +151,6 @@ func (gpt *chatGPTClient) send(msg string) string {
   你需要返回: [CQ:image,file=file:///tmp/a.png]
 
 3. 如果用户查询高铁火车票信息，需要先用 StationNames 查询对应的车站 code，再调用 Search12306 查询班次信息，没告诉你时间就那么默认是今天
-- 如果没有找到对应的车站，那么取相近的车站，比如去 “杭州”，车站里没有 “杭州” 只有 “杭州东” 那么就使用 “杭州东”
 `, time.Now().Format(time.DateTime)),
 		},
 	}, prompt...)
