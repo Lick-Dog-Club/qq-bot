@@ -31,7 +31,7 @@ func init() {
 			return nil
 		}
 		date := time.Now()
-		if len(from) > 2 {
+		if len(split) > 2 {
 			date, _ = time.Parse("20060102", split[2])
 		}
 		if _, err := bot.SendTextImage(Search(SearchInput{
@@ -39,6 +39,32 @@ func init() {
 			To:             to,
 			Date:           date.Format("2006-01-02"),
 			OnlyShowTicket: false,
+		}).String()); err != nil {
+			log.Println(err)
+		}
+		return nil
+	})
+	features.AddKeyword("to", "查询车票信息, 例如: 't 杭州东 绍兴北 20240216'", func(bot bot.Bot, content string) error {
+		split := strings.Split(content, " ")
+		from := GetStationCode(split[0])
+		to := GetStationCode(split[1])
+		if from == "" {
+			bot.Send("出发地不正确")
+			return nil
+		}
+		if to == "" {
+			bot.Send("目的地不正确")
+			return nil
+		}
+		date := time.Now()
+		if len(split) > 2 {
+			date, _ = time.Parse("20060102", split[2])
+		}
+		if _, err := bot.SendTextImage(Search(SearchInput{
+			From:           from,
+			To:             to,
+			Date:           date.Format("2006-01-02"),
+			OnlyShowTicket: true,
 		}).String()); err != nil {
 			log.Println(err)
 		}
