@@ -39,7 +39,7 @@ func init() {
 			To:             to,
 			Date:           date.Format("2006-01-02"),
 			OnlyShowTicket: false,
-		}).String()); err != nil {
+		}).FilterICanBuy().String()); err != nil {
 			log.Println(err)
 		}
 		return nil
@@ -65,7 +65,7 @@ func init() {
 			To:             to,
 			Date:           date.Format("2006-01-02"),
 			OnlyShowTicket: true,
-		}).String()); err != nil {
+		}).FilterICanBuy().String()); err != nil {
 			log.Println(err)
 		}
 		return nil
@@ -147,6 +147,16 @@ func (r SearchResult) String() string {
 		"Data": r,
 	})
 	return bf.String()
+}
+func (r SearchResult) FilterICanBuy() SearchResult {
+	var res SearchResult
+	for _, item := range r {
+		parse, _ := time.ParseInLocation("2006-01-02 15:04", time.Now().Format("2006-01-02")+" "+item["start_time"], time.Local)
+		if time.Now().Before(parse) {
+			res = append(res, item)
+		}
+	}
+	return res
 }
 
 type SearchInput struct {
