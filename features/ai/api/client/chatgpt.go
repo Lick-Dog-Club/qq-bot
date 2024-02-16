@@ -69,6 +69,7 @@ func (gpt *openaiClient) GetCompletion(messages []openai.ChatCompletionMessage) 
 		req.Messages = messages
 		backoff.Retry(func() error {
 			stream, err = c.CreateChatCompletion(context.TODO(), req)
+			fmt.Println(err)
 			return err
 		}, backoff.WithMaxRetries(backoff.NewConstantBackOff(1*time.Second), 5))
 	}
