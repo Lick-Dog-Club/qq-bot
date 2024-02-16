@@ -151,7 +151,7 @@ func (r SearchResult) String() string {
 func (r SearchResult) FilterICanBuy() SearchResult {
 	var res SearchResult
 	for _, item := range r {
-		parse, _ := time.ParseInLocation("2006-01-02 15:04", item["start_train_date"]+" "+item["start_time"], time.Local)
+		parse, _ := time.ParseInLocation("20060102 15:04", item["start_train_date"]+" "+item["start_time"], time.Local)
 		if time.Now().Before(parse) {
 			res = append(res, item)
 		}
