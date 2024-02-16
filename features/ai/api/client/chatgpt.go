@@ -70,5 +70,8 @@ func (gpt *openaiClient) GetCompletion(messages []openai.ChatCompletionMessage) 
 		}, backoff.WithMaxRetries(backoff.NewConstantBackOff(1*time.Second), 5))
 	}
 
-	return stream.Choices[0].Message.Content, nil
+	if len(stream.Choices) > 0 {
+		return stream.Choices[0].Message.Content, nil
+	}
+	return "", errors.New("no choice")
 }
