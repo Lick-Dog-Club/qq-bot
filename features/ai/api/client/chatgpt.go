@@ -53,6 +53,7 @@ func (gpt *openaiClient) GetCompletion(messages []openai.ChatCompletionMessage) 
 	for len(stream.Choices) > 0 && len(stream.Choices[0].Message.ToolCalls) > 0 {
 		var content string
 		content, err = tools.Call(stream.Choices[0].Message.ToolCalls[0].Function.Name, stream.Choices[0].Message.ToolCalls[0].Function.Arguments)
+		fmt.Println(content, err)
 		if err != nil {
 			break
 		}
