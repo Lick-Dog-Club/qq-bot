@@ -50,9 +50,11 @@ func init() {
 				return nil
 			}
 
-			if _, err := bot.SendTextImage(config.Configs().String()); err != nil {
+			path, err := bot.SendTextImage(config.Configs().String())
+			if err != nil {
 				log.Println(err)
 			}
+			fmt.Println(path)
 			return nil
 		}
 		bot.Send("未授权")
