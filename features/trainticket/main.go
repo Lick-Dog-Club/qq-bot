@@ -246,8 +246,10 @@ func Search(input SearchInput) SearchResult {
 	}
 	var res = SearchResult{}
 	for idx, i := range da {
-		if onlyShowTicket && hasTicket(i) {
-			res = append(res, da[idx])
+		if onlyShowTicket {
+			if hasTicket(i) {
+				res = append(res, da[idx])
+			}
 			continue
 		}
 		res = append(res, da[idx])
