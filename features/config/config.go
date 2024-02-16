@@ -34,7 +34,7 @@ func init() {
 		bot.Send("已设置: \n" + config.Set(conf).String())
 		return nil
 	}, features.WithSysCmd(), features.WithHidden(), features.WithGroup("config"))
-	features.AddKeyword("cg", "<+key|[all: 全部keys]>显示环境变量", func(bot bot.Bot, content string) error {
+	features.AddKeyword("cg", "<+key|[keys: 全部keys]>显示环境变量", func(bot bot.Bot, content string) error {
 		if bot.UserID() == config.UserID() {
 			if content == "keys" {
 				var keys []string
@@ -50,6 +50,16 @@ func init() {
 				return nil
 			}
 
+			if _, err := bot.SendTextImage(config.Configs().String()); err != nil {
+				log.Println(err)
+			}
+			return nil
+		}
+		bot.Send("未授权")
+		return nil
+	}, features.WithSysCmd(), features.WithHidden(), features.WithGroup("config"))
+	features.AddKeyword("cgall", "显示环境变量", func(bot bot.Bot, content string) error {
+		if bot.UserID() == config.UserID() {
 			if _, err := bot.SendTextImage(config.Configs().String()); err != nil {
 				log.Println(err)
 			}
