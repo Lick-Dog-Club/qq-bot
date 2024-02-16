@@ -51,19 +51,21 @@ func (gpt *openaiClient) GetCompletion(messages []openai.ChatCompletionMessage) 
 		return "", errors.New("data.Choices < 1")
 	}
 	for len(stream.Choices) > 0 && len(stream.Choices[0].Message.ToolCalls) > 0 {
-		var content string
-		content, err = tools.Call(stream.Choices[0].Message.ToolCalls[0].Function.Name, stream.Choices[0].Message.ToolCalls[0].Function.Arguments)
-		fmt.Println(content, err)
-		if err != nil {
-			break
+		for _, c := range stream.Choices[0].Message.ToolCalls {
+			var content string
+			content, err = tools.Call(c.Function.Name, c.Function.Arguments)
+			fmt.Println(content, err)
+			if err != nil {
+				break
+			}
+			messages = append(messages, stream.Choices[0].Message)
+			messages = append(messages, openai.ChatCompletionMessage{
+				Role:       openai.ChatMessageRoleTool,
+				Content:    content,
+				Name:       c.Function.Name,
+				ToolCallID: c.ID,
+			})
 		}
-		messages = append(messages, stream.Choices[0].Message)
-		messages = append(messages, openai.ChatCompletionMessage{
-			Role:       openai.ChatMessageRoleTool,
-			Content:    content,
-			Name:       stream.Choices[0].Message.ToolCalls[0].Function.Name,
-			ToolCallID: stream.Choices[0].Message.ToolCalls[0].ID,
-		})
 		req.Messages = messages
 		backoff.Retry(func() error {
 			stream, err = c.CreateChatCompletion(context.TODO(), req)
