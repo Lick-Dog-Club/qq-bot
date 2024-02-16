@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"log"
 	"qq/config"
 	"qq/features/ai/api/client"
@@ -135,7 +136,7 @@ func (gpt *chatGPTClient) send(msg string) string {
 	prompt = append([]openai.ChatCompletionMessage{
 		{
 			Role: openai.ChatMessageRoleSystem,
-			Content: `
+			Content: fmt.Sprintf(`今天是：%s
 你是一个ai机器人，能回答用户的任何问题, 你的回答必须满足下面的格式:
 1. 如果返回的是图片地址，你必须使用 "[CQ:image,file={imageURL}]" 这个格式返回, query 的参数也要完整的返回
 例如:
@@ -151,7 +152,7 @@ func (gpt *chatGPTClient) send(msg string) string {
 
 3. 如果用户查询高铁火车票信息，需要先用 StationNames 查询对应的车站 code，再调用 Search12306 查询班次信息，没告诉你时间就那么默认是今天
 - 如果没有找到对应的车站，那么取相近的车站，比如去 “杭州”，车站里没有 “杭州” 只有 “杭州东” 那么就使用 “杭州东”
-`,
+`, time.Now().Format(time.DateTime)),
 		},
 	}, prompt...)
 	var result string
