@@ -39,7 +39,7 @@ func (gpt *openaiClient) GetCompletion(messages []openai.ChatCompletionMessage) 
 	cfg.HTTPClient = proxy.NewHttpProxyClient()
 	c := openai.NewClientWithConfig(cfg)
 	log.Println("send request")
-	timeout, cancelFunc := context.WithTimeout(context.TODO(), time.Second*15)
+	timeout, cancelFunc := context.WithTimeout(context.TODO(), time.Second*150)
 	defer cancelFunc()
 	stream, err := c.CreateChatCompletion(timeout, req)
 
