@@ -83,9 +83,10 @@ type Station struct {
 
 func GetStationCode(name string) string {
 	if station, ok := stationNames()[name]; ok {
+		fmt.Println(station.Code)
 		return station.Code
 	}
-	return ""
+	return "未找到"
 }
 
 func StationNamesJson() string {
