@@ -148,6 +148,8 @@ func (gpt *chatGPTClient) send(msg string) string {
 例如:
   imagePath=/tmp/a.png
   你需要返回: [CQ:image,file=file:///tmp/a.png]
+
+3. 如果用户查询高铁火车票信息，需要先用 StationNames 查询对应的车站 code，再调用 Search12306 查询班次信息，没告诉你时间就那么默认是今天
 `,
 		},
 	}, prompt...)
