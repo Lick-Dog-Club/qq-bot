@@ -144,6 +144,10 @@ func List() []openai.Tool {
 							Type:        jsonschema.String,
 							Description: "查询日期, 默认今天，日期格式: '2006-01-02', 例如: '2024-02-19'",
 						},
+						"only_show_ticket": {
+							Type:        jsonschema.Boolean,
+							Description: "是否只显示有票的班次",
+						},
 					},
 				},
 			},

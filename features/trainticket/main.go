@@ -119,10 +119,10 @@ func (r SearchResult) String() string {
 }
 
 type SearchInput struct {
-	From           string
-	To             string
-	Date           string
-	OnlyShowTicket bool
+	From           string `json:"from"`
+	To             string `json:"to"`
+	Date           string `json:"date"`
+	OnlyShowTicket bool   `json:"only_show_ticket"`
 }
 
 func Search(input SearchInput) SearchResult {
