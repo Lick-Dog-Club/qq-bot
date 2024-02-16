@@ -38,6 +38,7 @@ import (
 	_ "qq/features/daxin"
 	_ "qq/features/stock"
 	_ "qq/features/telegram"
+	_ "qq/features/trainticket"
 
 	_ "qq/features/bitget"
 	_ "qq/features/ddys"

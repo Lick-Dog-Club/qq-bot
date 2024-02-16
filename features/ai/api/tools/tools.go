@@ -12,6 +12,7 @@ import (
 	"qq/features/picture"
 	"qq/features/pixiv"
 	"qq/features/sysupdate"
+	"qq/features/trainticket"
 	"qq/features/weather"
 	"qq/features/weibo"
 	"qq/features/zhihu"
@@ -87,6 +88,12 @@ func Call(funcName string, params string) (string, error) {
 		return time.Now().Local().Format(time.DateTime), nil
 	case "WeiBo":
 		return weibo.Top(), nil
+	case "StationNames":
+		return trainticket.StationNamesJson(), nil
+	case "Search12306":
+		var input trainticket.SearchInput
+		json.Unmarshal([]byte(params), &input)
+		return trainticket.Search(input).String(), nil
 	default:
 	}
 	return "", errors.New("not support")
@@ -102,6 +109,42 @@ func List() []openai.Tool {
 				Parameters: &jsonschema.Definition{
 					Type:        jsonschema.Object,
 					Description: "返回当前的时间信息",
+				},
+			},
+		},
+		{
+			Type: openai.ToolTypeFunction,
+			Function: openai.FunctionDefinition{
+				Name:        "StationNames",
+				Description: "返回高铁/火车车站名称和code的对应关系表",
+				Parameters: &jsonschema.Definition{
+					Type:        jsonschema.Object,
+					Description: "返回高铁/火车车站名称和code的对应关系表",
+				},
+			},
+		},
+		{
+			Type: openai.ToolTypeFunction,
+			Function: openai.FunctionDefinition{
+				Name:        "Search12306",
+				Description: "高铁/火车票查询，返回高铁班次信息，以及余票数量",
+				Parameters: &jsonschema.Definition{
+					Type:        jsonschema.Object,
+					Description: "高铁/火车票查询，返回高铁班次信息，以及余票数量",
+					Properties: map[string]jsonschema.Definition{
+						"from": {
+							Type:        jsonschema.String,
+							Description: "出发地, 需要通过 StationNames 函数获取 code 值, 例如: 出发去杭州东, 需要根据 StationNames 函数, 然后查到对应 from='HGH'",
+						},
+						"to": {
+							Type:        jsonschema.String,
+							Description: "目的地, 需要通过 StationNames 函数获取 code 值, 例如: 出发去杭州东, 需要根据 StationNames 函数, 然后查到对应 to='HGH'",
+						},
+						"date": {
+							Type:        jsonschema.String,
+							Description: "查询日期, 默认今天，日期格式: '2006-01-02', 例如: '2024-02-19'",
+						},
+					},
 				},
 			},
 		},

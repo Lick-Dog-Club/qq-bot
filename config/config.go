@@ -203,6 +203,12 @@ var mappingKV = KV{
 	"bg_api_key":        "",
 	"bg_passphrase":     "",
 	"bg_api_secret_key": "",
+
+	"12306_JSESSIONID": "",
+}
+
+func T12306JSESSIONID() string {
+	return c.Load().(KV)["12306_JSESSIONID"]
 }
 
 func BgApiKey() string {
