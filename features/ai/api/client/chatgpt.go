@@ -32,7 +32,7 @@ func (gpt *openaiClient) Platform() string {
 func (gpt *openaiClient) GetCompletion(messages []openai.ChatCompletionMessage) (string, error) {
 	req := gpt.opt
 	req.Model = gpt.model
-	req.MaxTokens = 800
+	req.MaxTokens = 2048
 	req.Stream = false
 	req.Messages = messages
 	cfg := openai.DefaultConfig(gpt.apikey)
