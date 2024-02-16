@@ -144,10 +144,12 @@ func (m *qqBot) SendTextImage(text string) (string, error) {
 
 func (m *qqBot) sendImage(msg *Message, text string) (string, error) {
 	if text == "" {
+		fmt.Println(text, errors.New("empty text"))
 		return "", errors.New("empty text")
 	}
 	path := tmpPath()
 	if err := text2png.Draw([]string{text}, path); err != nil {
+		fmt.Println(err)
 		return "", err
 	}
 	defer os.Remove(path)
