@@ -29,5 +29,5 @@ func init() {
 			}
 		}
 		return nil
-	}).EveryFiveSeconds()
+	}).EveryFifteenSeconds()
 }
