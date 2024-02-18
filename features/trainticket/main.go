@@ -174,6 +174,7 @@ func AiSearch(content string) string {
 			},
 		},
 		ToolCall: func(name string, args string) (string, error) {
+			log.Println(name, args)
 			switch name {
 			case "StationNamesJson":
 				return StationNamesJson(), nil
