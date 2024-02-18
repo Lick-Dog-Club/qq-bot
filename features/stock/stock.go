@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/sashabaranov/go-openai/jsonschema"
 	"qq/bot"
 	config2 "qq/config"
 	"qq/features"
@@ -15,6 +14,8 @@ import (
 	"qq/features/stock/types"
 	"qq/util/proxy"
 	"time"
+
+	"github.com/sashabaranov/go-openai/jsonschema"
 )
 
 func init() {

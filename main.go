@@ -18,15 +18,18 @@ import (
 	//_ "qq/cronjob/kfc"
 	_ "qq/cronjob/autoupdate"
 	_ "qq/cronjob/ddys"
+
 	// _ "qq/cronjob/btc"
 	_ "qq/cronjob/comic"
 	_ "qq/cronjob/dx"
 	_ "qq/cronjob/lottery"
 	_ "qq/cronjob/maotai"
 	_ "qq/cronjob/zaoan"
+
 	//_ "qq/cronjob/picture"
 	_ "qq/cronjob/bitget"
 	_ "qq/cronjob/tianqi"
+
 	//_ "qq/cronjob/trainticketleft"
 	_ "qq/cronjob/xiaofeiquan"
 

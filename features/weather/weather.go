@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/sashabaranov/go-openai/jsonschema"
 	"html/template"
 	"io"
 	"net/http"
 	"qq/bot"
 	"qq/config"
 	"qq/features"
+
+	"github.com/sashabaranov/go-openai/jsonschema"
 )
 
 const weatherURL = "https://restapi.amap.com/v3/weather/weatherInfo?key=%s&city=%s&extensions=all&output=json"

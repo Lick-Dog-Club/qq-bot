@@ -2,9 +2,10 @@ package openai
 
 import (
 	"context"
-	"github.com/sashabaranov/go-openai"
 	"qq/features"
 	"qq/features/stock/ai"
+
+	"github.com/sashabaranov/go-openai"
 )
 
 type streamChat interface {
@@ -56,7 +57,7 @@ func (t *toolCallChatWrapper) StreamCompletion(ctx context.Context, messages []a
 					ToolCallID: call.ID,
 				})
 			}
-			streamCompletion, err := t.StreamCompletion(ctx, messages)
+			streamCompletion, err := t.stream.streamCompletion(ctx, messages)
 			if err != nil {
 				resCh <- &ai.CompletionResponseImpl{Error: err}
 				return

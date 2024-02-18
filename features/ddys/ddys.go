@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/sashabaranov/go-openai/jsonschema"
 	"io"
 	"os"
 	"path/filepath"
@@ -17,6 +16,8 @@ import (
 	"sync"
 	"text/template"
 	"time"
+
+	"github.com/sashabaranov/go-openai/jsonschema"
 
 	"github.com/wangluozhe/requests"
 	"github.com/wangluozhe/requests/models"

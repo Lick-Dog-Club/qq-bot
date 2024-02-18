@@ -2,7 +2,6 @@ package client
 
 import (
 	"context"
-	"github.com/sashabaranov/go-openai"
 	"qq/features"
 	"qq/features/ai/api/types"
 	"qq/features/stock/ai"
@@ -10,6 +9,8 @@ import (
 	types2 "qq/features/stock/types"
 	"qq/util/proxy"
 	"time"
+
+	"github.com/sashabaranov/go-openai"
 )
 
 type openaiClientV2 struct {

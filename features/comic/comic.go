@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/sashabaranov/go-openai/jsonschema"
 	"html/template"
 	"image"
 	"image/draw"
@@ -21,6 +20,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/sashabaranov/go-openai/jsonschema"
 
 	"github.com/signintech/gopdf"
 

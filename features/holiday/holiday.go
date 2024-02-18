@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/sashabaranov/go-openai/jsonschema"
 	"html/template"
 	"qq/bot"
 	"qq/features"
 	"qq/util/proxy"
 	"time"
+
+	"github.com/sashabaranov/go-openai/jsonschema"
 
 	"github.com/samber/lo"
 )

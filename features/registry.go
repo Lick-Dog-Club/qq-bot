@@ -2,9 +2,6 @@ package features
 
 import (
 	"fmt"
-	"github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/jsonschema"
-	log "github.com/sirupsen/logrus"
 	"math"
 	"qq/bot"
 	"qq/config"
@@ -13,6 +10,10 @@ import (
 	"strings"
 	"sync"
 	"unicode/utf8"
+
+	"github.com/sashabaranov/go-openai"
+	"github.com/sashabaranov/go-openai/jsonschema"
+	log "github.com/sirupsen/logrus"
 )
 
 var (

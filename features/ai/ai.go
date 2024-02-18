@@ -4,13 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/sashabaranov/go-openai/jsonschema"
 	"qq/bot"
 	config2 "qq/config"
 	"qq/features"
 	"qq/features/ai/api"
 	openai2 "qq/features/stock/openai"
 	"qq/util/proxy"
+
+	"github.com/sashabaranov/go-openai/jsonschema"
 
 	log "github.com/sirupsen/logrus"
 )

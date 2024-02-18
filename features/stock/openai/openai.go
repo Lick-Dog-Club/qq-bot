@@ -39,7 +39,7 @@ type NewClientOption struct {
 	// required
 	Temperature float64
 	// optional
-	Tools []tools.Tool
+	Tools    []tools.Tool
 	ToolCall func(name string, args string) (string, error)
 }
 

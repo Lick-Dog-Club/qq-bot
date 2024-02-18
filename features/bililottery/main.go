@@ -2,10 +2,11 @@ package lottery
 
 import (
 	"encoding/json"
-	"github.com/sashabaranov/go-openai/jsonschema"
 	"qq/bot"
 	"qq/features"
 	"strings"
+
+	"github.com/sashabaranov/go-openai/jsonschema"
 
 	log "github.com/sirupsen/logrus"
 )
