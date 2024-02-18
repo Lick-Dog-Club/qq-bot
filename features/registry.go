@@ -24,7 +24,7 @@ func AllFuncCalls() (res []tools.Tool) {
 	mu.RLock()
 	defer mu.RUnlock()
 	for _, imp := range commands {
-		if imp.Enabled() {
+		if imp.Enabled() && imp.AiDefine() != nil {
 			res = append(res, tools.Tool{
 				Name: imp.Keyword(),
 				Define: openai.Tool{
@@ -197,7 +197,7 @@ func BeautifulOutputLines(hidden bool, simple bool) []string {
 	for _, imp := range AllKeywordCommands(hidden) {
 		var aiEnabled = "x"
 		if imp.AiDefine() != nil {
-			aiEnabled = "✓"
+			aiEnabled = "y"
 		}
 		fmtStr := "%-16s\t%s"
 		if !simple {
