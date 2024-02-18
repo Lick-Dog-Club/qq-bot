@@ -87,7 +87,9 @@ func init() {
 			var a = struct {
 				Name string `json:"name"`
 			}{}
-			json.Unmarshal([]byte(args), &a)
+			if err := json.Unmarshal([]byte(args), &a); err != nil {
+				log.Println(err)
+			}
 			return GetStationCode(a.Name), nil
 		},
 	}), features.WithGroup("train"))
@@ -115,7 +117,9 @@ func init() {
 		},
 		Call: func(args string) (string, error) {
 			var input SearchInput
-			json.Unmarshal([]byte(args), &input)
+			if err := json.Unmarshal([]byte(args), &input); err != nil {
+				log.Println(err)
+			}
 			return Search(input).String(), nil
 		},
 	}), features.WithGroup("train"))
