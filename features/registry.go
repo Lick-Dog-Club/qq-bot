@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/sashabaranov/go-openai"
 	"github.com/sashabaranov/go-openai/jsonschema"
+	log "github.com/sirupsen/logrus"
 	"math"
 	"qq/bot"
 	"qq/config"
@@ -45,6 +46,7 @@ func AllFuncCalls() (res []tools.Tool) {
 }
 
 func CallFunc(keyword string, args string) (string, error) {
+	log.Printf("call '%s', args '%s'\n", keyword, args)
 	mu.RLock()
 	defer mu.RUnlock()
 	if imp, ok := commands[keyword]; ok {
