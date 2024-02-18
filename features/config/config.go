@@ -62,9 +62,11 @@ func init() {
 	}, features.WithSysCmd(), features.WithHidden(), features.WithGroup("config"))
 	features.AddKeyword("cgall", "显示环境变量", func(bot bot.Bot, content string) error {
 		if bot.IsFromAdmin() {
-			if _, err := bot.SendTextImage(config.Configs().String()); err != nil {
+			path, err := bot.SendTextImage(config.Configs().String())
+			if err != nil {
 				log.Println(err)
 			}
+			log.Println("cgall: " + path)
 			return nil
 		}
 		bot.Send("未授权")
