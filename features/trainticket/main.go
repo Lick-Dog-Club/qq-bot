@@ -212,6 +212,9 @@ func AiSearch(content string) string {
 	str := ""
 	for resp := range completion {
 		if resp.IsEnd() {
+			if resp.GetError() != nil {
+				log.Println(resp.GetError())
+			}
 			break
 		}
 		if len(resp.GetChoices()) > 0 {

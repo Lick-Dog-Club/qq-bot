@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	log "github.com/sirupsen/logrus"
 	"qq/features"
 	"qq/features/ai/api/types"
 	"qq/features/stock/ai"
@@ -60,6 +61,9 @@ func (gpt *openaiClientV2) GetCompletion(messages []openai.ChatCompletionMessage
 	str := ""
 	for resp := range completion {
 		if resp.IsEnd() {
+			if resp.GetError() != nil {
+				log.Println(resp.GetError())
+			}
 			break
 		}
 		str += resp.GetChoices()[0].Message.Content
