@@ -3,6 +3,7 @@ package openai
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"qq/features/stock/ai"
 	"qq/features/stock/tools"
@@ -126,6 +127,7 @@ func (o *openaiClient) CreateEmbeddings(ctx context.Context, texts []string) (ai
 }
 
 func (o *openaiClient) StreamCompletion(ctx context.Context, messages []ai.Message) (<-chan ai.CompletionResponse, error) {
+	fmt.Println(messages)
 	return (&toolCallChatWrapper{stream: o}).StreamCompletion(ctx, messages)
 }
 
