@@ -2,7 +2,6 @@ package openai
 
 import (
 	"context"
-	"qq/features"
 	"qq/features/stock/ai"
 
 	"github.com/sashabaranov/go-openai"
@@ -13,7 +12,7 @@ type streamChat interface {
 }
 
 type toolCallChatWrapper struct {
-	stream streamChat
+	stream *openaiClient
 }
 
 func (t *toolCallChatWrapper) StreamCompletion(ctx context.Context, messages []ai.Message) (<-chan ai.CompletionResponse, error) {
@@ -45,7 +44,7 @@ func (t *toolCallChatWrapper) StreamCompletion(ctx context.Context, messages []a
 				},
 			)
 			for _, call := range toolCalls {
-				callResult, err := features.CallFunc(call.Function.Name, call.Function.Arguments)
+				callResult, err := t.stream.toolCall(call.Function.Name, call.Function.Arguments)
 				if err != nil {
 					resCh <- &ai.CompletionResponseImpl{Error: err}
 					return

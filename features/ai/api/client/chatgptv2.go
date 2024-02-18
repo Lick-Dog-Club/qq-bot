@@ -2,7 +2,6 @@ package client
 
 import (
 	"context"
-	log "github.com/sirupsen/logrus"
 	"qq/features"
 	"qq/features/ai/api/types"
 	"qq/features/stock/ai"
@@ -10,6 +9,8 @@ import (
 	types2 "qq/features/stock/types"
 	"qq/util/proxy"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/sashabaranov/go-openai"
 )

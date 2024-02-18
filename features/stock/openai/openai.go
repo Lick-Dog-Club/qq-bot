@@ -3,7 +3,6 @@ package openai
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"qq/features/stock/ai"
 	"qq/features/stock/tools"
@@ -24,6 +23,7 @@ type openaiClient struct {
 	maxToken    int
 	httpClient  *http.Client
 	tools       []tools.Tool
+	toolCall    func(name string, args string) (string, error)
 
 	client *openai.Client
 }
@@ -59,6 +59,7 @@ func NewOpenaiClient(opt NewClientOption) ai.Chat {
 		temperature: opt.Temperature,
 		httpClient:  opt.HttpClient,
 		tools:       opt.Tools,
+		toolCall:    opt.ToolCall,
 		client:      openai.NewClientWithConfig(config),
 	}
 }
@@ -131,7 +132,6 @@ func (o *openaiClient) StreamCompletion(ctx context.Context, messages []ai.Messa
 }
 
 func (o *openaiClient) streamCompletion(ctx context.Context, messages []ai.Message) (<-chan ai.CompletionResponse, error) {
-	fmt.Println(messages)
 	ch := make(chan ai.CompletionResponse, 100)
 	stream, err := o.client.CreateChatCompletionStream(
 		ctx,
