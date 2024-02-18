@@ -15,7 +15,7 @@ import (
 	"github.com/sashabaranov/go-openai"
 )
 
-const systemPrompt = `你是一个ai机器人，能回答用户的任何问题, 你的回答必须满足下面的格式:
+const systemPrompt = `你是一个ai机器人，能回答用户的任何问题, 你的回答必须满足下面的格式, 不要使用markdown格式返回:
 1. 如果返回的是图片地址，你必须使用 "[CQ:image,file={imageURL}]" 这个格式返回, query 的参数也要完整的返回
 例如:
   imageURL=https://xxx/img.jpg

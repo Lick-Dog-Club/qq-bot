@@ -91,7 +91,7 @@ func init() {
 			return GetStationCode(a.Name), nil
 		},
 	}), features.WithGroup("train"))
-	features.AddKeyword("Search12306", "", func(bot bot.Bot, content string) error {
+	features.AddKeyword("Search12306", "查询高铁/火车票信息", func(bot bot.Bot, content string) error {
 		bot.Send("未实现该方法～")
 		return nil
 	}, features.WithHidden(), features.WithAIFunc(features.AIFuncDef{
