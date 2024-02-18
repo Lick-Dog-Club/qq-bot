@@ -84,11 +84,11 @@ func init() {
 		Properties: map[string]jsonschema.Definition{
 			"from": {
 				Type:        jsonschema.String,
-				Description: "出发地, 需要通过 GetStationCodeByName 函数获取 code 值, 例如: 出发去杭州东, 需要根据 GetStationCodeByName 函数, 然后查到对应 from='HGH'",
+				Description: "出发地, 例如: 杭州东",
 			},
 			"to": {
 				Type:        jsonschema.String,
-				Description: "目的地, 需要通过 GetStationCodeByName 函数获取 code 值, 例如: 出发去杭州东, 需要根据 GetStationCodeByName 函数, 然后查到对应 to='HGH'",
+				Description: "目的地, 例如: 杭州东",
 			},
 			"date": {
 				Type:        jsonschema.String,
