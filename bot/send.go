@@ -164,7 +164,7 @@ func (m *qqBot) sendImage(msg *Message, text string) (string, error) {
 		return "", err
 	}
 	defer func() {
-		time.Sleep(5 * time.Second)
+		time.Sleep(60 * time.Second)
 		os.Remove(path)
 	}()
 	send(msg, fmt.Sprintf("[CQ:image,file=file://%s]", path))
