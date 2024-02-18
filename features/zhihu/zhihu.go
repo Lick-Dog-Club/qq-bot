@@ -25,7 +25,11 @@ func init() {
 			bot.Send(fmt.Sprintf("[CQ:image,file=file://%s]", p))
 		}
 		return nil
-	})
+	}, features.WithAIFunc(features.AIFuncDef{
+		Call: func(args string) (string, error) {
+			return Top(), nil
+		},
+	}))
 }
 
 func Top() string {

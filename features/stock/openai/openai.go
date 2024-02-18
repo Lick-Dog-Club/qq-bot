@@ -40,6 +40,7 @@ type NewClientOption struct {
 	Temperature float64
 	// optional
 	Tools []tools.Tool
+	ToolCall func(name string, args string) (string, error)
 }
 
 // NewOpenaiClient
@@ -125,6 +126,10 @@ func (o *openaiClient) CreateEmbeddings(ctx context.Context, texts []string) (ai
 }
 
 func (o *openaiClient) StreamCompletion(ctx context.Context, messages []ai.Message) (<-chan ai.CompletionResponse, error) {
+	return (&toolCallChatWrapper{stream: o}).StreamCompletion(ctx, messages)
+}
+
+func (o *openaiClient) streamCompletion(ctx context.Context, messages []ai.Message) (<-chan ai.CompletionResponse, error) {
 	ch := make(chan ai.CompletionResponse, 100)
 	stream, err := o.client.CreateChatCompletionStream(
 		ctx,

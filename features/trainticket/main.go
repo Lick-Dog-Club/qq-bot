@@ -44,7 +44,7 @@ func init() {
 		}
 		return nil
 	})
-	features.AddKeyword("to", "查询车票信息, 例如: 't 杭州东 绍兴北 20240216'", func(bot bot.Bot, content string) error {
+	features.AddKeyword("to", "查询车票信息, 只显示有票的班次, 例如: 'to 杭州东 绍兴北 20240216'", func(bot bot.Bot, content string) error {
 		split := strings.Split(content, " ")
 		from := GetStationCode(split[0])
 		to := GetStationCode(split[1])

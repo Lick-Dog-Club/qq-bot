@@ -2,8 +2,12 @@ package features
 
 import (
 	"fmt"
+	"github.com/sashabaranov/go-openai"
+	"github.com/sashabaranov/go-openai/jsonschema"
 	"math"
 	"qq/bot"
+	"qq/config"
+	"qq/features/stock/tools"
 	"sort"
 	"strings"
 	"sync"
@@ -15,6 +19,41 @@ var (
 	commands       = make(map[string]CommandImp)
 	mu             sync.RWMutex
 )
+
+func AllFuncCalls() (res []tools.Tool) {
+	mu.RLock()
+	defer mu.RUnlock()
+	for _, imp := range commands {
+		if imp.Enabled() {
+			res = append(res, tools.Tool{
+				Name: imp.Keyword(),
+				Define: openai.Tool{
+					Type: openai.ToolTypeFunction,
+					Function: openai.FunctionDefinition{
+						Name:        imp.Keyword(),
+						Description: imp.Description(),
+						Parameters: &jsonschema.Definition{
+							Type:       jsonschema.Object,
+							Properties: imp.AiDefine().Properties,
+						},
+					},
+				},
+			})
+		}
+	}
+	return
+}
+
+func CallFunc(keyword string, args string) (string, error) {
+	mu.RLock()
+	defer mu.RUnlock()
+	if imp, ok := commands[keyword]; ok {
+		if imp.Enabled() {
+			return imp.AiDefine().Call(args)
+		}
+	}
+	return fmt.Sprintf("func '%s' 已禁用，无法调用该方法", keyword), nil
+}
 
 type Option func(cmd *cmd) error
 
@@ -39,15 +78,29 @@ func WithHidden() Option {
 	}
 }
 
+type AIFuncDef struct {
+	Properties map[string]jsonschema.Definition
+	Call       func(args string) (string, error)
+}
+
+func WithAIFunc(define AIFuncDef) Option {
+	return func(cmd *cmd) error {
+		cmd.aiDefine = &define
+		return nil
+	}
+}
+
 type commandFunc func(bot bot.Bot, content string) error
 
 type CommandImp interface {
+	Enabled() bool
 	Hidden() bool
 	IsSysCmd() bool
 	Keyword() string
 	Group() string
 	Description() string
 	Run(bot bot.Bot, content string) error
+	AiDefine() *AIFuncDef
 }
 
 func AddKeyword(keyword, desc string, fn commandFunc, opts ...Option) {
@@ -95,11 +148,17 @@ func Run(bot bot.Bot, keyword string, content string) error {
 		defer mu.RUnlock()
 		var ok bool
 		command, ok = commands[keyword]
-		if !ok {
-			command = defaultCommand
-			content = keyword + " " + content
+		if ok {
+			return
 		}
+		command = defaultCommand
+		content = keyword + " " + content
 	}()
+
+	if !command.Enabled() {
+		bot.Send(fmt.Sprintf("指令 '%s' 未开启", command.Keyword()))
+		return nil
+	}
 
 	return command.Run(bot, content)
 }
@@ -136,11 +195,15 @@ func BeautifulOutput(hidden bool, simple bool) string {
 func BeautifulOutputLines(hidden bool, simple bool) []string {
 	var cmds []string
 	for _, imp := range AllKeywordCommands(hidden) {
+		var aiEnabled = "x"
+		if imp.AiDefine() != nil {
+			aiEnabled = "✓"
+		}
 		fmtStr := "%-16s\t%s"
 		if !simple {
 			fmtStr = "@bot\t" + fmtStr
 		}
-		cmds = append(cmds, fmt.Sprintf(fmtStr, imp.Keyword(), imp.Description()))
+		cmds = append(cmds, fmt.Sprintf(fmtStr, fmt.Sprintf("(%s)%s", aiEnabled, imp.Keyword()), imp.Description()))
 	}
 	return cmds
 }
@@ -192,12 +255,14 @@ func AllKeywordCommands(hidden bool) []CommandImp {
 }
 
 type cmd struct {
-	keyword string
-	desc    string
-	fn      commandFunc
-	sysCmd  bool
-	hidden  bool
-	group   string
+	keyword  string
+	desc     string
+	fn       commandFunc
+	sysCmd   bool
+	hidden   bool
+	group    string
+	disabled bool
+	aiDefine *AIFuncDef
 }
 
 func (c cmd) IsSysCmd() bool {
@@ -206,6 +271,10 @@ func (c cmd) IsSysCmd() bool {
 
 func (c cmd) Hidden() bool {
 	return c.hidden
+}
+
+func (c cmd) Enabled() bool {
+	return !config.DisabledCmds().Contains(c.keyword)
 }
 
 func (c cmd) Keyword() string {
@@ -218,6 +287,10 @@ func (c cmd) Group() string {
 
 func (c cmd) Description() string {
 	return c.desc
+}
+
+func (c cmd) AiDefine() *AIFuncDef {
+	return c.aiDefine
 }
 
 func (c cmd) Run(bot bot.Bot, content string) error {

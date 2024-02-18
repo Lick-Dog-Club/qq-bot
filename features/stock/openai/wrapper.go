@@ -2,23 +2,21 @@ package openai
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
-	"qq/features/stock/ai"
-	"qq/features/stock/impl"
-	"qq/features/stock/tools"
-	"strings"
-	"time"
-
 	"github.com/sashabaranov/go-openai"
+	"qq/features"
+	"qq/features/stock/ai"
 )
 
-type ToolCallChatWrapper struct {
-	Client ai.Chat
+type streamChat interface {
+	streamCompletion(ctx context.Context, messages []ai.Message) (<-chan ai.CompletionResponse, error)
 }
 
-func (t *ToolCallChatWrapper) StreamCompletion(ctx context.Context, messages []ai.Message) (<-chan ai.CompletionResponse, error) {
-	completion, err := t.Client.StreamCompletion(ctx, messages)
+type toolCallChatWrapper struct {
+	stream streamChat
+}
+
+func (t *toolCallChatWrapper) StreamCompletion(ctx context.Context, messages []ai.Message) (<-chan ai.CompletionResponse, error) {
+	completion, err := t.stream.streamCompletion(ctx, messages)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +44,7 @@ func (t *ToolCallChatWrapper) StreamCompletion(ctx context.Context, messages []a
 				},
 			)
 			for _, call := range toolCalls {
-				tool, err := CallTool(call)
+				callResult, err := features.CallFunc(call.Function.Name, call.Function.Arguments)
 				if err != nil {
 					resCh <- &ai.CompletionResponseImpl{Error: err}
 					return
@@ -54,7 +52,7 @@ func (t *ToolCallChatWrapper) StreamCompletion(ctx context.Context, messages []a
 
 				messages = append(messages, ai.Message{
 					Role:       openai.ChatMessageRoleTool,
-					Content:    tool.Content,
+					Content:    callResult,
 					ToolCallID: call.ID,
 				})
 			}
@@ -69,49 +67,4 @@ func (t *ToolCallChatWrapper) StreamCompletion(ctx context.Context, messages []a
 		}
 	}()
 	return resCh, nil
-}
-
-type CallResult struct {
-	Content string
-}
-
-// CallTool
-// TODO 重构下
-func CallTool(
-	tool openai.ToolCall,
-) (*CallResult, error) {
-	plugin, err := tools.GetPluginNameByFunctionName(tool.Function.Name)
-	if err != nil {
-		return nil, err
-	}
-	fmt.Println(plugin.Name, tool.Function.Arguments)
-	switch plugin.Name {
-	case "GetMarketSentiment":
-		var input impl.GetMarketSentimentRequest
-		json.NewDecoder(strings.NewReader(tool.Function.Arguments)).Decode(&input)
-		return &CallResult{Content: impl.GetMarketSentiment(input)}, nil
-	case "GetFinancialStatements":
-		var input impl.GetFinancialStatementsRequest
-		json.NewDecoder(strings.NewReader(tool.Function.Arguments)).Decode(&input)
-		return &CallResult{Content: impl.GetFinancialStatements(input)}, nil
-	case "GetCashFlow":
-		var input impl.GetCashFlowRequest
-		json.NewDecoder(strings.NewReader(tool.Function.Arguments)).Decode(&input)
-		return &CallResult{Content: impl.GetCashFlow(input)}, nil
-	case "GetIndustryData":
-		return &CallResult{Content: impl.GetIndustryData()}, nil
-	case "GetStockPrice":
-		var input impl.GetStockPriceRequest
-		json.NewDecoder(strings.NewReader(tool.Function.Arguments)).Decode(&input)
-		price := impl.GetStockPrice(input)
-		marshal, _ := json.Marshal(price)
-		return &CallResult{
-			Content: string(marshal),
-		}, nil
-	case tools.BuildInPluginCurrentDatetime.Name:
-		return &CallResult{
-			Content: time.Now().Format(time.DateTime),
-		}, nil
-	}
-	return nil, fmt.Errorf("plugin call '%s' not impl", plugin.Name)
 }

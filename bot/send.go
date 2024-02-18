@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"qq/config"
 	"qq/util/random"
 	"qq/util/text2png"
 	"strconv"
@@ -30,6 +31,7 @@ type botimp interface {
 type Bot interface {
 	botimp
 	UserID() string
+	IsFromAdmin() bool
 	IsGroupMessage() bool
 	Send(msg string) string
 	SendTextImage(text string) (string, error)
@@ -61,6 +63,10 @@ func (d *dummyBot) Message() *Message {
 
 func (d *dummyBot) UserID() string {
 	return ""
+}
+
+func (d *dummyBot) IsFromAdmin() bool {
+	return true
 }
 
 func (d *dummyBot) DeleteMsg(msgID string) {
@@ -119,6 +125,10 @@ func (m *qqBot) UserID() string {
 
 func (m *qqBot) IsGroupMessage() bool {
 	return m.msg.IsSendByGroup
+}
+
+func (m *qqBot) IsFromAdmin() bool {
+	return config.AdminIDs().Contains(m.UserID())
 }
 
 func (m *qqBot) DeleteMsg(msgID string) {
@@ -348,6 +358,10 @@ func (w *wechatBot) SendToUser(uid string, s string) string {
 
 func (w *wechatBot) UserID() string {
 	return w.message.SenderUserID
+}
+
+func (w *wechatBot) IsFromAdmin() bool {
+	return config.AdminIDs().Contains(w.UserID())
 }
 
 func (w *wechatBot) IsGroupMessage() bool {

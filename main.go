@@ -16,45 +16,41 @@ import (
 
 	// _ "qq/cronjob/lifetip"
 	//_ "qq/cronjob/kfc"
-	_ "qq/cronjob/ddys"
-
 	_ "qq/cronjob/autoupdate"
+	_ "qq/cronjob/ddys"
 	// _ "qq/cronjob/btc"
 	_ "qq/cronjob/comic"
 	_ "qq/cronjob/dx"
 	_ "qq/cronjob/lottery"
 	_ "qq/cronjob/maotai"
 	_ "qq/cronjob/zaoan"
-
 	//_ "qq/cronjob/picture"
 	_ "qq/cronjob/bitget"
 	_ "qq/cronjob/tianqi"
-	_ "qq/cronjob/trainticketleft"
+	//_ "qq/cronjob/trainticketleft"
 	_ "qq/cronjob/xiaofeiquan"
 
 	_ "qq/features/ai"
-	_ "qq/features/bili-lottery"
+	_ "qq/features/bililottery"
+	_ "qq/features/bitget"
 	_ "qq/features/comic"
 	_ "qq/features/config"
 	_ "qq/features/daxin"
-	_ "qq/features/stock"
-	_ "qq/features/telegram"
-	_ "qq/features/trainticket"
-
-	_ "qq/features/bitget"
 	_ "qq/features/ddys"
 	_ "qq/features/geo"
 	_ "qq/features/help"
 	_ "qq/features/imaotai"
-
 	_ "qq/features/jin10"
 	_ "qq/features/kfc"
 	_ "qq/features/lifetip"
 	_ "qq/features/picture"
 	_ "qq/features/pixiv"
 	_ "qq/features/raokouling"
+	_ "qq/features/stock"
 	_ "qq/features/sysupdate"
 	_ "qq/features/task"
+	_ "qq/features/telegram"
+	_ "qq/features/trainticket"
 	_ "qq/features/version"
 	_ "qq/features/weather"
 	_ "qq/features/webot"
@@ -128,6 +124,6 @@ var mdTemplate = `
 
 > qq 机器人
 
-## 指令
+## 指令 (✓代表可ai交互的指令)
 
 ` + "```text\n%s\n```"

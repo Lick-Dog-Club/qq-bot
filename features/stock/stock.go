@@ -2,11 +2,14 @@ package stock
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"github.com/sashabaranov/go-openai/jsonschema"
 	"qq/bot"
 	config2 "qq/config"
 	"qq/features"
 	"qq/features/stock/ai"
+	"qq/features/stock/impl"
 	openai2 "qq/features/stock/openai"
 	"qq/features/stock/tools"
 	"qq/features/stock/types"
@@ -15,21 +18,46 @@ import (
 )
 
 func init() {
-	features.AddKeyword("stock", "股票分析", func(bot bot.Bot, content string) error {
-		client := openai2.NewOpenaiClient(openai2.NewClientOption{
-			HttpClient:  proxy.NewHttpProxyClient(),
-			Token:       config2.AiToken(),
-			Model:       "gpt-4-0125-preview",
-			MaxToken:    4096,
-			Temperature: 0.2,
-			Tools:       tools.GetByNames(true),
-		})
-		completion, _ := (&openai2.ToolCallChatWrapper{
-			Client: client,
-		}).StreamCompletion(context.TODO(), []ai.Message{
-			{
-				Role: types.RoleSystem,
-				Content: fmt.Sprintf(`当前时间: %s.
+	features.AddKeyword("stock", "分析股票", func(bot bot.Bot, content string) error {
+		bot.Send(Analyze(content))
+		return nil
+	}, features.WithAIFunc(features.AIFuncDef{
+		Properties: map[string]jsonschema.Definition{
+			"ticker": {
+				Type:        jsonschema.String,
+				Description: "股票代码, 例如 000001, 000002",
+			},
+		},
+		Call: func(args string) (string, error) {
+			var input = struct {
+				Ticker string `json:"ticker"`
+			}{}
+			json.Unmarshal([]byte(args), &input)
+			return Analyze(input.Ticker), nil
+		},
+	}))
+}
+
+func Analyze(content string) string {
+	client := openai2.NewOpenaiClient(openai2.NewClientOption{
+		HttpClient:  proxy.NewHttpProxyClient(),
+		Token:       config2.AiToken(),
+		Model:       "gpt-4-0125-preview",
+		MaxToken:    4096,
+		Temperature: 0.2,
+		Tools: []tools.Tool{
+			impl.ToolGetStockPrice,
+			impl.ToolsGetCashFlow,
+			impl.ToolsGetIndustryData,
+			impl.ToolsGetMarketSentiment,
+			impl.ToolsGetFinancialStatements,
+		},
+		ToolCall: impl.CallTool,
+	})
+	completion, _ := client.StreamCompletion(context.TODO(), []ai.Message{
+		{
+			Role: types.RoleSystem,
+			Content: fmt.Sprintf(`当前时间: %s.
 你是短线炒股专家，拥有丰富的炒股经验，请你从多个方面分析股票适不适合短线投资, 时间范围是距今(包括今天)近一个月或三个月的数据
 
 ## 你需要从以下角度逐个分析
@@ -48,20 +76,18 @@ func init() {
 监管公告或新闻：没有重大负面新闻或公告影响股票基本面，短期内的价格下跌可能仅仅是市场情绪的反应。
 给出止盈止损的点位, 并且说出你分析的思路，并且做一个总结。
 `, time.Now().Format(time.DateTime)),
-			},
-			{
-				Role:    types.RoleUser,
-				Content: content,
-			},
-		})
-		str := ""
-		for resp := range completion {
-			if resp.IsEnd() {
-				break
-			}
-			str += resp.GetChoices()[0].Message.Content
-		}
-		bot.Send(str)
-		return nil
+		},
+		{
+			Role:    types.RoleUser,
+			Content: content,
+		},
 	})
+	str := ""
+	for resp := range completion {
+		if resp.IsEnd() {
+			break
+		}
+		str += resp.GetChoices()[0].Message.Content
+	}
+	return str
 }

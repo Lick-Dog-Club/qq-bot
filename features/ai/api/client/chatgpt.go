@@ -4,15 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/cenkalti/backoff/v4"
+	"github.com/sashabaranov/go-openai"
 	"log"
 	"qq/features/ai/api/tools"
 	"qq/features/ai/api/types"
 	"qq/util/proxy"
 	"time"
-
-	"github.com/cenkalti/backoff/v4"
-
-	"github.com/sashabaranov/go-openai"
 )
 
 type openaiClient struct {

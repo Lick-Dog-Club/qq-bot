@@ -1,6 +1,8 @@
 package lottery
 
 import (
+	"encoding/json"
+	"github.com/sashabaranov/go-openai/jsonschema"
 	"qq/bot"
 	"qq/features"
 	"strings"
@@ -9,10 +11,28 @@ import (
 )
 
 func init() {
-	features.AddKeyword("抽奖", "<+bilibili-cookie> 自动转发up主的抽奖活动", func(bot bot.Bot, content string) error {
+	features.AddKeyword("抽奖", "<+bilibili-cookie> bilibili 抽奖, 自动转发up主的抽奖活动", func(bot bot.Bot, content string) error {
 		bot.Send(Run(func(s string) { bot.Send(s) }, content))
 		return nil
-	})
+	}, features.WithAIFunc(features.AIFuncDef{
+		Properties: map[string]jsonschema.Definition{
+			"cookie": {
+				Type:        jsonschema.String,
+				Description: "用户的 cookie 值",
+			},
+		},
+		Call: func(args string) (string, error) {
+			var input = struct {
+				Cookie string `json:"cookie"`
+			}{}
+			json.Unmarshal([]byte(args), &input)
+			str := ""
+			Run(func(s string) {
+				str += s
+			}, input.Cookie)
+			return str, nil
+		},
+	}))
 }
 
 func Run(send func(string), cookie string) string {

@@ -49,37 +49,13 @@ func (k KV) String() string {
 func PixivSession() string {
 	return c.Load().(KV)["pixiv_session"]
 }
-func AiBrowserModel() string {
-	return c.Load().(KV)["ai_browser_model"]
-}
-
-func AiProxyUrl() string {
-	return c.Load().(KV)["ai_browser_proxy_url"]
-}
 
 func AiToken() string {
 	return c.Load().(KV)["ai_token"]
 }
 
-func AiMode() string {
-	return c.Load().(KV)["ai_mode"]
-}
-
 func ChatGPTApiModel() string {
 	return c.Load().(KV)["chatgpt_model"]
-}
-func AzureToken() string {
-	return c.Load().(KV)["azure_token"]
-}
-func AzureModel() string {
-	return c.Load().(KV)["azure_model"]
-}
-func AzureUrl() string {
-	return c.Load().(KV)["azure_url"]
-}
-
-func AiAccessToken() string {
-	return c.Load().(KV)["ai_browser_access_token"]
 }
 
 func PixivMode() string {
@@ -90,8 +66,25 @@ func GroupID() string {
 	return c.Load().(KV)["group_id"]
 }
 
+type UID string
+
+func (u UID) Contains(id string) bool {
+	split := strings.Split(string(u), ",")
+	for _, uid := range split {
+		if uid == id {
+			return true
+		}
+	}
+
+	return false
+}
+
 func UserID() string {
 	return c.Load().(KV)["user_id"]
+}
+
+func AdminIDs() UID {
+	return UID(c.Load().(KV)["admin_id"])
 }
 
 func BiliCookie() string {
@@ -162,42 +155,32 @@ func BarkUrls() []string {
 	return strings.Split(c.Load().(KV)["bark_url"], ",")
 }
 
-const (
-	AIProxyOne = "https://gpt.pawan.krd/backend-api/conversation"
-	AIProxyTwo = "https://chatgpt.duti.tech/api/conversation"
-)
-
 var mappingKV = KV{
 	// https://api.day.app/xxxxxx/标题/内容
-	"bark_url":                "",
-	"bili_cookie":             "",
-	"azure_token":             "",
-	"azure_model":             "",
-	"azure_url":               "",
-	"chatgpt_model":           openai.GPT3Dot5Turbo,
-	"ai_mode":                 "api",
-	"ai_browser_access_token": "",
-	"ai_browser_proxy_url":    AIProxyOne,
-	"ai_browser_model":        "text-davinci-002-render-sha",
-	"user_id":                 "",
-	"pixiv_mode":              "daily",
-	"pixiv_session":           os.Getenv("PIXIV_SESSION"),
-	"ai_token":                os.Getenv("AI_TOKEN"),
-	"group_id":                os.Getenv("GROUP_ID"),
-	"namespace":               os.Getenv("APP_NAMESPACE"),
-	"pod_name":                os.Getenv("POD_NAME"),
-	"weather_key":             os.Getenv("WEATHER_KEY"),
-	"tian_api_key":            os.Getenv("TIAN_API_KEY"),
-	"http_proxy":              os.Getenv("HTTP_PROXY"),
-	"binance_key":             "",
-	"binance_secret":          "",
-	"binance_diff":            "100",
-	"maotai":                  "",
-	"tg_info":                 "",
-	"tg_app_id":               "",
-	"tg_app_hash":             "",
-	"tg_phone":                "",
-	"tg_code":                 "",
+	"bark_url":    "",
+	"bili_cookie": "",
+	"user_id":     "",
+	// QQ 号码，"," 分隔，无法使用 config 设置
+	"admin_id":       os.Getenv("admin_user_id"),
+	"ai_token":       "",
+	"chatgpt_model":  openai.GPT3Dot5Turbo16K0613,
+	"pixiv_mode":     "daily",
+	"pixiv_session":  "",
+	"group_id":       os.Getenv("GROUP_ID"),
+	"namespace":      os.Getenv("APP_NAMESPACE"),
+	"pod_name":       os.Getenv("POD_NAME"),
+	"weather_key":    os.Getenv("WEATHER_KEY"),
+	"tian_api_key":   os.Getenv("TIAN_API_KEY"),
+	"http_proxy":     os.Getenv("HTTP_PROXY"),
+	"binance_key":    "",
+	"binance_secret": "",
+	"binance_diff":   "100",
+	"maotai":         "",
+	"tg_info":        "",
+	"tg_app_id":      "",
+	"tg_app_hash":    "",
+	"tg_phone":       "",
+	"tg_code":        "",
 
 	"bg_money_diff":     "30",
 	"bg_api_key":        "",
@@ -205,6 +188,25 @@ var mappingKV = KV{
 	"bg_api_secret_key": "",
 
 	"12306_JSESSIONID": "",
+
+	"disabled_cmds": "",
+}
+
+type Cmd string
+
+func (c Cmd) Contains(keyword string) bool {
+	split := strings.Split(string(c), ",")
+	for _, cmd := range split {
+		if cmd == keyword {
+			return true
+		}
+	}
+
+	return false
+}
+
+func DisabledCmds() Cmd {
+	return Cmd(c.Load().(KV)["disabled_cmds"])
 }
 
 func T12306JSESSIONID() string {
@@ -278,7 +280,7 @@ func Set(m map[string]string) (sets KV) {
 	sets = KV{}
 	for k, v := range c.Load().(KV) {
 		newv := v
-		if s, ok := m[k]; ok && !(k == "pod_name" || k == "namespace") {
+		if s, ok := m[k]; ok && !(k == "pod_name" || k == "namespace" || k == "admin_id") {
 			newv = s
 			sets[k] = s
 		}

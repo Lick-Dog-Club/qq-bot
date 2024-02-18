@@ -57,7 +57,7 @@ func init() {
 		bot.Send("pixiv_mode 已设置成 monthly")
 		return nil
 	}, features.WithHidden(), features.WithGroup("pixiv"))
-	features.AddKeyword("p", "<+n/r/rai> pixiv 热榜图片", func(bot bot.Bot, content string) error {
+	features.AddKeyword("p", "<+n/r/rai> 返回 pixiv 热门图片", func(bot bot.Bot, content string) error {
 		image, err := Image(content)
 		if err != nil {
 			bot.Send(err.Error())
@@ -80,7 +80,11 @@ func init() {
 			bot.DeleteMsg(tID)
 		}
 		return nil
-	}, features.WithGroup("pixiv"))
+	}, features.WithGroup("pixiv"), features.WithAIFunc(features.AIFuncDef{
+		Call: func(args string) (string, error) {
+			return Image("n")
+		},
+	}))
 
 }
 func Image(content string) (string, error) {

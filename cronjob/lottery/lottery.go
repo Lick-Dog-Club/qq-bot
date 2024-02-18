@@ -4,7 +4,7 @@ import (
 	"qq/bot"
 	"qq/config"
 	"qq/cronjob"
-	lottery "qq/features/bili-lottery"
+	lottery "qq/features/bililottery"
 
 	log "github.com/sirupsen/logrus"
 )

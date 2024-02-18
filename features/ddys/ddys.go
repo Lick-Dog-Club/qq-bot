@@ -2,7 +2,9 @@ package ddys
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
+	"github.com/sashabaranov/go-openai/jsonschema"
 	"io"
 	"os"
 	"path/filepath"
@@ -25,13 +27,32 @@ import (
 )
 
 func init() {
-	features.AddKeyword("ddys", "<+dy/dm>, 获取更新的电影/动漫, 默认 +dy", func(bot bot.Bot, content string) error {
+	features.AddKeyword("ddys", "<+dy/dm>, 获取最新的电影、动漫资讯, 默认 +dy", func(bot bot.Bot, content string) error {
 		for _, m := range Get(content, 3*24*time.Hour) {
 			bot.Send("正在获取数据中。。。")
 			bot.Send(m.String())
 		}
 		return nil
-	})
+	}, features.WithAIFunc(features.AIFuncDef{
+		Properties: map[string]jsonschema.Definition{
+			"param": {
+				Type:        jsonschema.String,
+				Description: "电影(dy) or 动漫(dm)",
+				Enum:        []string{"dy", "dm"},
+			},
+		},
+		Call: func(args string) (string, error) {
+			var input = struct {
+				Param string `json:"param"`
+			}{}
+			json.Unmarshal([]byte(args), &input)
+			str := ""
+			for _, m := range Get(input.Param, 3*24*time.Hour) {
+				str += m.String()
+			}
+			return str, nil
+		},
+	}))
 }
 
 type movie struct {

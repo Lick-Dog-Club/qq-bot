@@ -2,7 +2,9 @@ package comic
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
+	"github.com/sashabaranov/go-openai/jsonschema"
 	"html/template"
 	"image"
 	"image/draw"
@@ -38,7 +40,26 @@ func init() {
 			os.Remove(p)
 		}
 		return nil
-	}, features.WithGroup("comic"))
+	}, features.WithGroup("comic"), features.WithAIFunc(features.AIFuncDef{
+		Properties: map[string]jsonschema.Definition{
+			"title": {
+				Type:        jsonschema.String,
+				Description: "动漫的名字, 中文或者拼音",
+			},
+			"num": {
+				Type:        jsonschema.Integer,
+				Description: "动漫的话数，例如 第 5 话, 传入 -1 表示获取最新话，默认为 -1",
+			},
+		},
+		Call: func(args string) (string, error) {
+			var input = struct {
+				Title string `json:"title"`
+				Num   int    `json:"num"`
+			}{}
+			json.Unmarshal([]byte(args), &input)
+			return Get(input.Title, input.Num).Render(), nil
+		},
+	}))
 	features.AddKeyword("comicn", "<+name: haizeiwang/海贼王> <+num: 话数> 搜索漫画话数", func(bot bot.Bot, content string) error {
 		split := strings.Split(content, " ")
 		if len(split) == 2 {

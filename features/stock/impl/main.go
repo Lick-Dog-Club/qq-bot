@@ -20,7 +20,6 @@ import (
 var (
 	ToolGetStockPrice = tools.Tool{
 		Name: "GetStockPrice",
-		Type: tools.ToolTypeBuildIn,
 		Define: openai.Tool{
 			Type: openai.ToolTypeFunction,
 			Function: openai.FunctionDefinition{
@@ -55,7 +54,6 @@ var (
 
 	ToolsGetFinancialStatements = tools.Tool{
 		Name: "GetFinancialStatements",
-		Type: tools.ToolTypeBuildIn,
 		Define: openai.Tool{
 			Type: openai.ToolTypeFunction,
 			Function: openai.FunctionDefinition{
@@ -76,7 +74,6 @@ var (
 	}
 	ToolsGetIndustryData = tools.Tool{
 		Name: "GetIndustryData",
-		Type: tools.ToolTypeBuildIn,
 		Define: openai.Tool{
 			Type: openai.ToolTypeFunction,
 			Function: openai.FunctionDefinition{
@@ -90,7 +87,6 @@ var (
 	}
 	ToolsGetCashFlow = tools.Tool{
 		Name: "GetCashFlow",
-		Type: tools.ToolTypeBuildIn,
 		Define: openai.Tool{
 			Type: openai.ToolTypeFunction,
 			Function: openai.FunctionDefinition{
@@ -111,7 +107,6 @@ var (
 	}
 	ToolsGetMarketSentiment = tools.Tool{
 		Name: "GetMarketSentiment",
-		Type: tools.ToolTypeBuildIn,
 		Define: openai.Tool{
 			Type: openai.ToolTypeFunction,
 			Function: openai.FunctionDefinition{
@@ -135,14 +130,32 @@ var (
 
 const ApiAddrPrefix = "http://localhost:8080/api/public"
 
-func init() {
-	tools.MustRegister(
-		ToolGetStockPrice,
-		ToolsGetCashFlow,
-		ToolsGetIndustryData,
-		ToolsGetMarketSentiment,
-		ToolsGetFinancialStatements,
-	)
+func CallTool(name string, args string) (string, error) {
+	switch name {
+	case "GetMarketSentiment":
+		var input GetMarketSentimentRequest
+		json.NewDecoder(strings.NewReader(args)).Decode(&input)
+		return GetMarketSentiment(input), nil
+	case "GetFinancialStatements":
+		var input GetFinancialStatementsRequest
+		json.NewDecoder(strings.NewReader(args)).Decode(&input)
+		return GetFinancialStatements(input), nil
+	case "GetCashFlow":
+		var input GetCashFlowRequest
+		json.NewDecoder(strings.NewReader(args)).Decode(&input)
+		return GetCashFlow(input), nil
+	case "GetIndustryData":
+		return GetIndustryData(), nil
+	case "GetStockPrice":
+		var input GetStockPriceRequest
+		json.NewDecoder(strings.NewReader(args)).Decode(&input)
+		price := GetStockPrice(input)
+		marshal, _ := json.Marshal(price)
+		return string(marshal), nil
+	case tools.BuildInPluginCurrentDatetime.Name:
+		return time.Now().Format(time.DateTime), nil
+	}
+	return "", fmt.Errorf("plugin call '%s' not impl", name)
 }
 
 // GetStockPriceRequest 是获取特定股票价格信息的请求参数

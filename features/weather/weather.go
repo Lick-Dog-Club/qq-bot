@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/sashabaranov/go-openai/jsonschema"
 	"html/template"
 	"io"
 	"net/http"
@@ -37,7 +38,21 @@ func init() {
 		}
 		bot.Send(Get(city))
 		return nil
-	})
+	}, features.WithAIFunc(features.AIFuncDef{
+		Properties: map[string]jsonschema.Definition{
+			"city": {
+				Type:        jsonschema.String,
+				Description: "The city and state, e.g. 天津, 北京",
+			},
+		},
+		Call: func(args string) (string, error) {
+			var city = struct {
+				City string `json:"city"`
+			}{}
+			json.Unmarshal([]byte(args), &city)
+			return Get(city.City), nil
+		},
+	}))
 }
 
 func Get(city string) string {

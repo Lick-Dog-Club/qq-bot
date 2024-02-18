@@ -35,7 +35,7 @@ func init() {
 		return nil
 	}, features.WithSysCmd(), features.WithHidden(), features.WithGroup("config"))
 	features.AddKeyword("cg", "<+key|[keys: 全部keys]>显示环境变量", func(bot bot.Bot, content string) error {
-		if bot.UserID() == config.UserID() {
+		if bot.IsFromAdmin() {
 			if content == "keys" {
 				var keys []string
 				for s, _ := range config.Configs() {
@@ -61,7 +61,7 @@ func init() {
 		return nil
 	}, features.WithSysCmd(), features.WithHidden(), features.WithGroup("config"))
 	features.AddKeyword("cgall", "显示环境变量", func(bot bot.Bot, content string) error {
-		if bot.UserID() == config.UserID() {
+		if bot.IsFromAdmin() {
 			if _, err := bot.SendTextImage(config.Configs().String()); err != nil {
 				log.Println(err)
 			}

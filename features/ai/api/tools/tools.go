@@ -5,22 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"qq/config"
-	"qq/features/comic"
-	"qq/features/holiday"
-	"qq/features/kfc"
-	"qq/features/picture"
-	"qq/features/pixiv"
-	"qq/features/sysupdate"
-	"qq/features/trainticket"
-	"qq/features/weather"
-	"qq/features/weibo"
-	"qq/features/zhihu"
-	"qq/util/proxy"
-	"time"
-
 	"github.com/sashabaranov/go-openai"
 	"github.com/sashabaranov/go-openai/jsonschema"
+	"qq/config"
+	"qq/features/kfc"
+	"qq/features/trainticket"
+	"qq/util/proxy"
 )
 
 func CreateImage(prompt string) string {
@@ -44,22 +34,22 @@ func CreateImage(prompt string) string {
 func Call(funcName string, params string) (string, error) {
 	fmt.Println("call: ", funcName)
 	switch funcName {
-	case "Holidays":
-		var city = struct {
-			Year int `json:"year"`
-		}{}
-		json.Unmarshal([]byte(params), &city)
-
-		return holiday.Get(city.Year), nil
-	case "GetWeather":
-		var city = struct {
-			City string `json:"city"`
-		}{}
-		json.Unmarshal([]byte(params), &city)
-
-		return weather.Get(city.City), nil
-	case "GetZhiHuTop50":
-		return zhihu.Top(), nil
+	//case "Holidays":
+	//	var city = struct {
+	//		Year int `json:"year"`
+	//	}{}
+	//	json.Unmarshal([]byte(params), &city)
+	//
+	//	return holiday.Get(city.Year), nil
+	//case "GetWeather":
+	//	var city = struct {
+	//		City string `json:"city"`
+	//	}{}
+	//	json.Unmarshal([]byte(params), &city)
+	//
+	//	return weather.Get(city.City), nil
+	//case "GetZhiHuTop50":
+	//	return zhihu.Top(), nil
 	case "CreateImageByPrompt":
 		var prompt = struct {
 			Prompt string `json:"prompt"`
@@ -69,25 +59,25 @@ func Call(funcName string, params string) (string, error) {
 		return CreateImage(prompt.Prompt), nil
 	case "KFC":
 		return kfc.Get(), nil
-	case "SendPicture":
-		var err error
-		img := ""
-		if img, err = pixiv.Image("n"); err != nil {
-			img = picture.Url()
-		}
-		return img, nil
-	case "Comic":
-		var t = struct {
-			Title string `json:"title"`
-		}{}
-		json.Unmarshal([]byte(params), &t)
-		return comic.Get(t.Title, -1).Render(), nil
-	case "SystemVersion":
-		return sysupdate.Version(), nil
-	case "CurrentDate":
-		return time.Now().Local().Format(time.DateTime), nil
-	case "WeiBo":
-		return weibo.Top(), nil
+	//case "SendPicture":
+	//	var err error
+	//	img := ""
+	//	if img, err = pixiv.Image("n"); err != nil {
+	//		img = picture.Url()
+	//	}
+	//	return img, nil
+	//case "Comic":
+	//	var t = struct {
+	//		Title string `json:"title"`
+	//	}{}
+	//	json.Unmarshal([]byte(params), &t)
+	//	return comic.Get(t.Title, -1).Render(), nil
+	//case "SystemVersion":
+	//	return sysupdate.Version(), nil
+	//case "CurrentDate":
+	//	return time.Now().Local().Format(time.DateTime), nil
+	//case "WeiBo":
+	//	return weibo.Top(), nil
 	case "GetStationCodeByName":
 		var a = struct {
 			Name string `json:"name"`
