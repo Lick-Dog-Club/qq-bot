@@ -104,6 +104,8 @@ func init() {
 			if err := json.Unmarshal([]byte(args), &input); err != nil {
 				log.Println(err)
 			}
+			input.From = GetStationCode(input.From)
+			input.To = GetStationCode(input.To)
 			return Search(input).String(), nil
 		},
 	}), features.WithGroup("train"))
