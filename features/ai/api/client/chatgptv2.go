@@ -57,7 +57,7 @@ func (gpt *openaiClientV2) GetCompletion(messages []openai.ChatCompletionMessage
 	}
 	completion, err := gpt.cli.StreamCompletion(timeout, aimsgs)
 	if err != nil {
-		return "", err
+		return err.Error(), nil
 	}
 	str := ""
 	for resp := range completion {
