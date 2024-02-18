@@ -11,6 +11,8 @@ import (
 	"sync"
 	"unicode/utf8"
 
+	"github.com/samber/lo"
+
 	"github.com/sashabaranov/go-openai"
 	"github.com/sashabaranov/go-openai/jsonschema"
 	log "github.com/sirupsen/logrus"
@@ -37,6 +39,7 @@ func AllFuncCalls() (res []tools.Tool) {
 						Parameters: &jsonschema.Definition{
 							Type:       jsonschema.Object,
 							Properties: imp.AiDefine().Properties,
+							Required:   lo.Keys(imp.AiDefine().Properties),
 						},
 					},
 				},
