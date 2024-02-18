@@ -161,7 +161,7 @@ var mappingKV = KV{
 	"bili_cookie": "",
 	"user_id":     "",
 	// QQ 号码，"," 分隔，无法使用 config 设置
-	"admin_id":       os.Getenv("admin_user_id"),
+	"admin_id":       os.Getenv("ADMIN_USER_ID"),
 	"ai_token":       "",
 	"chatgpt_model":  openai.GPT3Dot5Turbo16K0613,
 	"pixiv_mode":     "daily",
