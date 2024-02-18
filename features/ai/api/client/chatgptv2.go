@@ -67,7 +67,9 @@ func (gpt *openaiClientV2) GetCompletion(messages []openai.ChatCompletionMessage
 			}
 			break
 		}
-		str += resp.GetChoices()[0].Message.Content
+		if len(resp.GetChoices()) > 0 {
+			str += resp.GetChoices()[0].Message.Content
+		}
 	}
 	return str, nil
 }
