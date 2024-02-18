@@ -2,7 +2,6 @@ package trainticket
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -12,17 +11,11 @@ import (
 	"qq/bot"
 	"qq/config"
 	"qq/features"
-	"qq/features/stock/ai"
-	openai2 "qq/features/stock/openai"
-	"qq/features/stock/tools"
-	"qq/features/stock/types"
-	"qq/util/proxy"
 	"regexp"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/sashabaranov/go-openai"
 	"github.com/sashabaranov/go-openai/jsonschema"
 )
 
@@ -52,7 +45,7 @@ func init() {
 			log.Println(err)
 		}
 		return nil
-	})
+	}, features.WithGroup("train"))
 	features.AddKeyword("to", "查询车票信息, 只显示有票的班次, 例如: 'to 杭州东 绍兴北 20240216'", func(bot bot.Bot, content string) error {
 		split := strings.Split(content, " ")
 		from := GetStationCode(split[0])
@@ -78,150 +71,54 @@ func init() {
 			log.Println(err)
 		}
 		return nil
-	})
-	features.AddKeyword("aito", "查询火车高铁票信息", func(bot bot.Bot, content string) error {
-		bot.Send(AiSearch(content))
+	}, features.WithGroup("train"))
+
+	features.AddKeyword("GetStationCodeByName", "<+name> 查询高铁/火车车站名称和 code 的对应关系表", func(bot bot.Bot, content string) error {
+		bot.Send(GetStationCode(content))
 		return nil
 	}, features.WithHidden(), features.WithAIFunc(features.AIFuncDef{
 		Properties: map[string]jsonschema.Definition{
-			"input": {
+			"name": {
 				Type:        jsonschema.String,
-				Description: "用户原文完整的问题内容",
+				Description: "地点，例如 '杭州东' '绍兴北' 等",
 			},
 		},
 		Call: func(args string) (string, error) {
-			var input = struct {
-				Input string `json:"input"`
+			var a = struct {
+				Name string `json:"name"`
 			}{}
+			json.Unmarshal([]byte(args), &a)
+			return GetStationCode(a.Name), nil
+		},
+	}), features.WithGroup("train"))
+	features.AddKeyword("Search12306", "", func(bot bot.Bot, content string) error {
+		bot.Send("未实现该方法～")
+		return nil
+	}, features.WithHidden(), features.WithAIFunc(features.AIFuncDef{
+		Properties: map[string]jsonschema.Definition{
+			"from": {
+				Type:        jsonschema.String,
+				Description: "出发地, 需要通过 GetStationCodeByName 函数获取 code 值, 例如: 出发去杭州东, 需要根据 GetStationCodeByName 函数, 然后查到对应 from='HGH'",
+			},
+			"to": {
+				Type:        jsonschema.String,
+				Description: "目的地, 需要通过 GetStationCodeByName 函数获取 code 值, 例如: 出发去杭州东, 需要根据 GetStationCodeByName 函数, 然后查到对应 to='HGH'",
+			},
+			"date": {
+				Type:        jsonschema.String,
+				Description: "查询日期, 默认今天，日期格式: '2006-01-02', 例如: '2024-02-19'",
+			},
+			"only_show_ticket": {
+				Type:        jsonschema.Boolean,
+				Description: "是否只显示有票的班次",
+			},
+		},
+		Call: func(args string) (string, error) {
+			var input SearchInput
 			json.Unmarshal([]byte(args), &input)
-			return AiSearch(input.Input), nil
+			return Search(input).String(), nil
 		},
-	}))
-}
-
-func AiSearch(content string) string {
-	client := openai2.NewOpenaiClient(openai2.NewClientOption{
-		HttpClient:  proxy.NewHttpProxyClient(),
-		Token:       config.AiToken(),
-		Model:       "gpt-4-0125-preview",
-		MaxToken:    4096,
-		Temperature: 0.2,
-		Tools: []tools.Tool{
-			{
-				Name: "Search12306",
-				Define: openai.Tool{
-					Type: openai.ToolTypeFunction,
-					Function: openai.FunctionDefinition{
-						Name:        "Search12306",
-						Description: "高铁/火车票查询，返回高铁班次信息，以及余票数量",
-						Parameters: &jsonschema.Definition{
-							Type:        jsonschema.Object,
-							Description: "高铁/火车票查询，返回高铁班次信息，以及余票数量",
-							Properties: map[string]jsonschema.Definition{
-								"from": {
-									Type:        jsonschema.String,
-									Description: "出发地, 需要通过 GetStationCodeByName 函数获取 code 值, 例如: 出发去杭州东, 需要根据 GetStationCodeByName 函数, 然后查到对应 from='HGH'",
-								},
-								"to": {
-									Type:        jsonschema.String,
-									Description: "目的地, 需要通过 GetStationCodeByName 函数获取 code 值, 例如: 出发去杭州东, 需要根据 GetStationCodeByName 函数, 然后查到对应 to='HGH'",
-								},
-								"date": {
-									Type:        jsonschema.String,
-									Description: "查询日期, 默认今天，日期格式: '2006-01-02', 例如: '2024-02-19'",
-								},
-								"only_show_ticket": {
-									Type:        jsonschema.Boolean,
-									Description: "是否只显示有票的班次",
-								},
-							},
-						},
-					},
-				},
-			},
-			{
-				Name: "GetStationCodeByName",
-				Define: openai.Tool{
-					Type: openai.ToolTypeFunction,
-					Function: openai.FunctionDefinition{
-						Name:        "GetStationCodeByName",
-						Description: "查询高铁/火车车站名称和 code 的对应关系表",
-						Parameters: &jsonschema.Definition{
-							Type:        jsonschema.Object,
-							Description: "查询高铁/火车车站名称和 code 的对应关系表",
-							Properties: map[string]jsonschema.Definition{
-								"name": {
-									Type:        jsonschema.String,
-									Description: "地点，例如 '杭州东' '绍兴北' 等",
-								},
-							},
-						},
-					},
-				},
-			},
-			{
-				Name: "StationNamesJson",
-				Define: openai.Tool{
-					Type: openai.ToolTypeFunction,
-					Function: openai.FunctionDefinition{
-						Name:        "StationNamesJson",
-						Description: "返回高铁/火车车站名称和 code 的对应完整关系表",
-						Parameters: &jsonschema.Definition{
-							Type: jsonschema.Object,
-						},
-					},
-				},
-			},
-		},
-		ToolCall: func(name string, args string) (string, error) {
-			log.Println(name, args)
-			switch name {
-			case "StationNamesJson":
-				return StationNamesJson(), nil
-			case "GetStationCodeByName":
-				var a = struct {
-					Name string `json:"name"`
-				}{}
-				json.Unmarshal([]byte(args), &a)
-				return GetStationCode(a.Name), nil
-			case "Search12306":
-				var input SearchInput
-				json.Unmarshal([]byte(args), &input)
-				return Search(input).String(), nil
-			}
-			return "", nil
-		},
-	})
-	completion, _ := client.StreamCompletion(context.TODO(), []ai.Message{
-		{
-			Role: types.RoleSystem,
-			Content: fmt.Sprintf(`当前时间: %s.
-如果用户查询高铁火车票信息, 按照以下步骤处理
-- 需要 GetStationCodeByName 查询对应的车站 code
-- 再调用 Search12306 查询班次信息
-- 没告诉你时间就那么默认是今天
-- 一等座、二等座和无座已售罄的车次无需告诉用户，重点关注二等座，二等座优先级最高, 如果二等座都卖完了，可以告诉用户其他可选的班次
-- 已经发车的班次不需要告诉用户, 只需要告诉用户可以买哪些班次
-`, time.Now().Format(time.DateTime)),
-		},
-		{
-			Role:    types.RoleUser,
-			Content: content,
-		},
-	})
-	str := ""
-	for resp := range completion {
-		if resp.IsEnd() {
-			if resp.GetError() != nil {
-				log.Println(resp.GetError())
-			}
-			break
-		}
-		if len(resp.GetChoices()) > 0 {
-			str += resp.GetChoices()[0].Message.Content
-		}
-	}
-	return str
+	}), features.WithGroup("train"))
 }
 
 var reg = regexp.MustCompile(`var station_names =\s?'(.*)';`)

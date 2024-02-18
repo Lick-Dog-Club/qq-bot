@@ -16,6 +16,8 @@ import (
 
 var _ ai.Chat = (*openaiClient)(nil)
 
+type ToolCallFunc func(name string, args string) (string, error)
+
 type openaiClient struct {
 	token       string
 	model       string
@@ -23,7 +25,7 @@ type openaiClient struct {
 	maxToken    int
 	httpClient  *http.Client
 	tools       []tools.Tool
-	toolCall    func(name string, args string) (string, error)
+	toolCall    ToolCallFunc
 
 	client *openai.Client
 }
@@ -41,7 +43,7 @@ type NewClientOption struct {
 	Temperature float64
 	// optional
 	Tools    []tools.Tool
-	ToolCall func(name string, args string) (string, error)
+	ToolCall ToolCallFunc
 }
 
 // NewOpenaiClient

@@ -2,7 +2,6 @@ package stock
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"qq/bot"
 	config2 "qq/config"
@@ -14,29 +13,28 @@ import (
 	"qq/features/stock/types"
 	"qq/util/proxy"
 	"time"
-
-	"github.com/sashabaranov/go-openai/jsonschema"
 )
 
 func init() {
 	features.AddKeyword("stock", "分析股票", func(bot bot.Bot, content string) error {
 		bot.Send(Analyze(content))
 		return nil
-	}, features.WithAIFunc(features.AIFuncDef{
-		Properties: map[string]jsonschema.Definition{
-			"ticker": {
-				Type:        jsonschema.String,
-				Description: "股票代码, 例如 000001, 000002",
-			},
-		},
-		Call: func(args string) (string, error) {
-			var input = struct {
-				Ticker string `json:"ticker"`
-			}{}
-			json.Unmarshal([]byte(args), &input)
-			return Analyze(input.Ticker), nil
-		},
-	}))
+	})
+	//, features.WithAIFunc(features.AIFuncDef{
+	//	Properties: map[string]jsonschema.Definition{
+	//		"ticker": {
+	//			Type:        jsonschema.String,
+	//			Description: "股票代码, 例如 000001, 000002",
+	//		},
+	//	},
+	//	Call: func(args string) (string, error) {
+	//		var input = struct {
+	//			Ticker string `json:"ticker"`
+	//		}{}
+	//		json.Unmarshal([]byte(args), &input)
+	//		return Analyze(input.Ticker), nil
+	//	},
+	//})
 }
 
 func Analyze(content string) string {

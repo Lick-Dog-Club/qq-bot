@@ -9,6 +9,7 @@ import (
 
 type streamChat interface {
 	streamCompletion(ctx context.Context, messages []ai.Message) (<-chan ai.CompletionResponse, error)
+	toolCall()
 }
 
 type toolCallChatWrapper struct {
