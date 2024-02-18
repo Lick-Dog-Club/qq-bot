@@ -3,12 +3,13 @@ package geo
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/sashabaranov/go-openai/jsonschema"
 	"net/http"
 	"qq/bot"
 	"qq/config"
 	"qq/features"
 	"strings"
+
+	"github.com/sashabaranov/go-openai/jsonschema"
 )
 
 func init() {

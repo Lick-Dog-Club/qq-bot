@@ -2,7 +2,12 @@ package stock
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	log "github.com/sirupsen/logrus"
+	"io"
+	"net/http"
+	"net/url"
 	"qq/bot"
 	config2 "qq/config"
 	"qq/features"
@@ -12,6 +17,7 @@ import (
 	"qq/features/stock/tools"
 	"qq/features/stock/types"
 	"qq/util/proxy"
+	"strings"
 	"time"
 
 	"github.com/sashabaranov/go-openai/jsonschema"
@@ -29,6 +35,24 @@ func init() {
 		Properties: nil,
 		Call: func(args string) (string, error) {
 			return time.Now().Format(time.DateTime), nil
+		},
+	}))
+	features.AddKeyword("stockcode", "根据名称获取股票代码", func(bot bot.Bot, content string) error {
+		bot.Send(GetCodeByName(content))
+		return nil
+	}, features.WithGroup("stock"), features.WithAIFunc(features.AIFuncDef{
+		Properties: map[string]jsonschema.Definition{
+			"name": {
+				Type:        jsonschema.String,
+				Description: "股票名称, 例如 中国平安，浪潮信息",
+			},
+		},
+		Call: func(args string) (string, error) {
+			var s = struct {
+				Name string `json:"name"`
+			}{}
+			json.Unmarshal([]byte(args), &s)
+			return GetCodeByName(s.Name), nil
 		},
 	}))
 	features.AddKeyword(impl.ToolGetStockPrice.Name, impl.ToolGetStockPrice.Define.Function.Description, func(bot bot.Bot, content string) error {
@@ -125,4 +149,67 @@ func Analyze(content string) string {
 		str += resp.GetChoices()[0].Message.Content
 	}
 	return str
+}
+
+func GetCodeByName(name string) string {
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", fmt.Sprintf("https://searchadapter.eastmoney.com/api/suggest/get?cb=jQuery1124020941285714467317_1708265862684&input=%s&type=8&token=D43BF722C8E33BDC906FB84D85E326E8&markettype=&mktnum=&jys=&classify=&securitytype=&status=&count=4&_=%v", url.QueryEscape(name), time.Now().UnixMilli()), nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	req.Header.Set("Accept", "*/*")
+	req.Header.Set("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8")
+	req.Header.Set("Connection", "keep-alive")
+	req.Header.Set("Referer", "https://www.eastmoney.com/")
+	req.Header.Set("Sec-Fetch-Dest", "script")
+	req.Header.Set("Sec-Fetch-Mode", "no-cors")
+	req.Header.Set("Sec-Fetch-Site", "same-site")
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36")
+	req.Header.Set("sec-ch-ua", `"Not A(Brand";v="99", "Google Chrome";v="121", "Chromium";v="121"`)
+	req.Header.Set("sec-ch-ua-mobile", "?0")
+	req.Header.Set("sec-ch-ua-platform", `"macOS"`)
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+	bodyText, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	var data response
+	index := strings.Index(string(bodyText), "{")
+	if err := json.NewDecoder(strings.NewReader(string(bodyText)[index:])).Decode(&data); err != nil {
+		log.Fatal(err)
+	}
+	var result []struct {
+		Name string `json:"name"`
+		Code string `json:"code"`
+	}
+	for _, datum := range data.GubaCodeTable.Data {
+		result = append(result, struct {
+			Name string `json:"name"`
+			Code string `json:"code"`
+		}{Name: datum.ShortName, Code: datum.OuterCode})
+	}
+	marshal, _ := json.Marshal(&result)
+	return string(marshal)
+}
+
+type response struct {
+	GubaCodeTable struct {
+		Data []struct {
+			ShortName         string `json:"ShortName"`
+			Url               string `json:"Url"`
+			ProtocolFollowUrl string `json:"ProtocolFollowUrl"`
+			OuterCode         string `json:"OuterCode"`
+			HeadCharacter     string `json:"HeadCharacter"`
+			RelatedCode       string `json:"RelatedCode"`
+		} `json:"Data"`
+		Status     int    `json:"Status"`
+		Message    string `json:"Message"`
+		TotalCount int    `json:"TotalCount"`
+		BizCode    string `json:"BizCode"`
+		BizMsg     string `json:"BizMsg"`
+	} `json:"GubaCodeTable"`
 }
