@@ -86,7 +86,7 @@ func init() {
 		Properties: map[string]jsonschema.Definition{
 			"input": {
 				Type:        jsonschema.String,
-				Description: "完整的查询信息，包括时间、出发地、目的地等内容",
+				Description: "用户原文完整的问题内容",
 			},
 		},
 		Call: func(args string) (string, error) {
@@ -213,7 +213,9 @@ func AiSearch(content string) string {
 		if resp.IsEnd() {
 			break
 		}
-		str += resp.GetChoices()[0].Message.Content
+		if len(resp.GetChoices()) > 0 {
+			str += resp.GetChoices()[0].Message.Content
+		}
 	}
 	return str
 }
