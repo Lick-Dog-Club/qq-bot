@@ -40,6 +40,7 @@ const systemPrompt = `你是一个ai机器人，能回答用户的任何问题, 
 5. 如果用户参与了 bilibili 抽奖，你需要告诉用户具体抽的奖项内容
 
 6. 不要对 "[CQ:image,file=file:///data/images/xxx.jpg]" 这种格式的图片做处理，直接原样返回给用户就好
+7. 返回的内容不要使用 markdown 格式
 `
 
 var (
