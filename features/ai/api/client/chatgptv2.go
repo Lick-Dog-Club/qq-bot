@@ -71,5 +71,8 @@ func (gpt *openaiClientV2) GetCompletion(messages []openai.ChatCompletionMessage
 			str += resp.GetChoices()[0].Message.Content
 		}
 	}
+	if str == "" {
+		str = "······"
+	}
 	return str, nil
 }
