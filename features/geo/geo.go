@@ -3,6 +3,7 @@ package geo
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/sashabaranov/go-openai/jsonschema"
 	"net/http"
 	"qq/bot"
 	"qq/config"
@@ -23,7 +24,31 @@ lng: %v
 `, content, lat, lng))
 		}
 		return nil
-	})
+	}, features.WithAIFunc(features.AIFuncDef{
+		Properties: map[string]jsonschema.Definition{
+			"addr": {
+				Type:        jsonschema.String,
+				Description: "地址，例如杭州云水地铁口",
+			},
+		},
+		Call: func(args string) (string, error) {
+			var input = struct {
+				Addr string `json:"addr"`
+			}{}
+			json.Unmarshal([]byte(args), &input)
+			geo := Geo(config.GeoKey(), input.Addr)
+			split := strings.Split(geo, ",")
+			if len(split) == 2 {
+				lat := split[1]
+				lng := split[0]
+				return fmt.Sprintf(`%s:
+				lat: %v
+				lng: %v
+				`, input.Addr, lat, lng), nil
+			}
+			return "", nil
+		},
+	}))
 }
 
 func Geo(key string, addr string) string {
