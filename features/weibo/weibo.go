@@ -15,7 +15,7 @@ import (
 )
 
 func init() {
-	features.AddKeyword("weibo", "获取热搜 top50", func(bot bot.Bot, s string) error {
+	features.AddKeyword("weibo", "获取微博热搜榜单", func(bot bot.Bot, s string) error {
 		p := filepath.Join("/data", "images", "weibo50.png")
 		text2png.Draw([]string{Top()}, p)
 		if bot.Message().WeSendImg != nil {
