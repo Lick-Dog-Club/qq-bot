@@ -28,7 +28,7 @@ var (
 )
 
 func init() {
-	features.AddKeyword("图片", "返回动漫图片~", func(bot bot.Bot, content string) error {
+	features.AddKeyword("pic", "返回动漫图片~", func(bot bot.Bot, content string) error {
 		path := Url()
 		if bot.Message().WeSendImg != nil {
 			resp, _ := http.Get(path)

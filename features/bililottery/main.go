@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	features.AddKeyword("抽奖", "<+bilibili-cookie> bilibili 抽奖, 自动转发up主的抽奖活动", func(bot bot.Bot, content string) error {
+	features.AddKeyword("bili-lottery", "<+bilibili-cookie> bilibili 抽奖, 自动转发up主的抽奖活动", func(bot bot.Bot, content string) error {
 		bot.Send(Run(func(s string) { bot.Send(s) }, content))
 		return nil
 	}, features.WithAIFunc(features.AIFuncDef{

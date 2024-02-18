@@ -14,7 +14,7 @@ import (
 )
 
 func init() {
-	features.AddKeyword("知乎", "获取热搜 top50", func(bot bot.Bot, s string) error {
+	features.AddKeyword("zhihu", "获取热搜 top50", func(bot bot.Bot, s string) error {
 		p := filepath.Join("/data", "images", "zhihu50.png")
 		text2png.Draw([]string{Top()}, p)
 		if bot.Message().WeSendImg != nil {
