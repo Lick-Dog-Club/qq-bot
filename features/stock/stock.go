@@ -13,6 +13,8 @@ import (
 	"qq/features/stock/types"
 	"qq/util/proxy"
 	"time"
+
+	"github.com/sashabaranov/go-openai/jsonschema"
 )
 
 func init() {
@@ -20,21 +22,55 @@ func init() {
 		bot.Send(Analyze(content))
 		return nil
 	})
-	//, features.WithAIFunc(features.AIFuncDef{
-	//	Properties: map[string]jsonschema.Definition{
-	//		"ticker": {
-	//			Type:        jsonschema.String,
-	//			Description: "股票代码, 例如 000001, 000002",
-	//		},
-	//	},
-	//	Call: func(args string) (string, error) {
-	//		var input = struct {
-	//			Ticker string `json:"ticker"`
-	//		}{}
-	//		json.Unmarshal([]byte(args), &input)
-	//		return Analyze(input.Ticker), nil
-	//	},
-	//})
+	features.AddKeyword("now", "获取当前时间", func(bot bot.Bot, content string) error {
+		bot.Send(time.Now().Format(time.DateTime))
+		return nil
+	}, features.WithHidden(), features.WithAIFunc(features.AIFuncDef{
+		Properties: nil,
+		Call: func(args string) (string, error) {
+			return time.Now().Format(time.DateTime), nil
+		},
+	}))
+	features.AddKeyword(impl.ToolGetStockPrice.Name, impl.ToolGetStockPrice.Define.Function.Description, func(bot bot.Bot, content string) error {
+		return nil
+	}, features.WithHidden(), features.WithAIFunc(features.AIFuncDef{
+		Properties: impl.ToolGetStockPrice.Define.Function.Parameters.(*jsonschema.Definition).Properties,
+		Call: func(args string) (string, error) {
+			return impl.CallTool(impl.ToolGetStockPrice.Name, args)
+		},
+	}), features.WithGroup("stock"))
+	features.AddKeyword(impl.ToolsGetCashFlow.Name, impl.ToolsGetCashFlow.Define.Function.Description, func(bot bot.Bot, content string) error {
+		return nil
+	}, features.WithHidden(), features.WithAIFunc(features.AIFuncDef{
+		Properties: impl.ToolsGetCashFlow.Define.Function.Parameters.(*jsonschema.Definition).Properties,
+		Call: func(args string) (string, error) {
+			return impl.CallTool(impl.ToolsGetCashFlow.Name, args)
+		},
+	}), features.WithGroup("stock"))
+	features.AddKeyword(impl.ToolsGetIndustryData.Name, impl.ToolsGetIndustryData.Define.Function.Description, func(bot bot.Bot, content string) error {
+		return nil
+	}, features.WithHidden(), features.WithAIFunc(features.AIFuncDef{
+		Properties: impl.ToolsGetIndustryData.Define.Function.Parameters.(*jsonschema.Definition).Properties,
+		Call: func(args string) (string, error) {
+			return impl.CallTool(impl.ToolsGetIndustryData.Name, args)
+		},
+	}), features.WithGroup("stock"))
+	features.AddKeyword(impl.ToolsGetMarketSentiment.Name, impl.ToolsGetMarketSentiment.Define.Function.Description, func(bot bot.Bot, content string) error {
+		return nil
+	}, features.WithHidden(), features.WithAIFunc(features.AIFuncDef{
+		Properties: impl.ToolsGetMarketSentiment.Define.Function.Parameters.(*jsonschema.Definition).Properties,
+		Call: func(args string) (string, error) {
+			return impl.CallTool(impl.ToolsGetMarketSentiment.Name, args)
+		},
+	}), features.WithGroup("stock"))
+	features.AddKeyword(impl.ToolsGetFinancialStatements.Name, impl.ToolsGetFinancialStatements.Define.Function.Description, func(bot bot.Bot, content string) error {
+		return nil
+	}, features.WithHidden(), features.WithAIFunc(features.AIFuncDef{
+		Properties: impl.ToolsGetFinancialStatements.Define.Function.Parameters.(*jsonschema.Definition).Properties,
+		Call: func(args string) (string, error) {
+			return impl.CallTool(impl.ToolsGetFinancialStatements.Name, args)
+		},
+	}), features.WithGroup("stock"))
 }
 
 func Analyze(content string) string {

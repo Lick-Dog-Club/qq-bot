@@ -73,14 +73,14 @@ func init() {
 		return nil
 	}, features.WithGroup("train"))
 
-	features.AddKeyword("GetStationCodeByName", "<+name> 查询高铁/火车车站名称和 code 的对应关系表", func(bot bot.Bot, content string) error {
+	features.AddKeyword("GetStationCodeByName", "<+name> 查询高铁/火车车站对应的code编码，被 Search12306 使用", func(bot bot.Bot, content string) error {
 		bot.Send(GetStationCode(content))
 		return nil
 	}, features.WithHidden(), features.WithAIFunc(features.AIFuncDef{
 		Properties: map[string]jsonschema.Definition{
 			"name": {
 				Type:        jsonschema.String,
-				Description: "地点，例如 '杭州东' '绍兴北' 等",
+				Description: "地点，例如 '杭州东' '绍兴北' 等, 返回 HGH, LSH",
 			},
 		},
 		Call: func(args string) (string, error) {
@@ -91,7 +91,7 @@ func init() {
 			return GetStationCode(a.Name), nil
 		},
 	}), features.WithGroup("train"))
-	features.AddKeyword("Search12306", "查询高铁/火车票信息", func(bot bot.Bot, content string) error {
+	features.AddKeyword("Search12306", "查询高铁/火车票班次信息", func(bot bot.Bot, content string) error {
 		bot.Send("未实现该方法～")
 		return nil
 	}, features.WithHidden(), features.WithAIFunc(features.AIFuncDef{
