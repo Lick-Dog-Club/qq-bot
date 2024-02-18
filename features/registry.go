@@ -52,7 +52,9 @@ func CallFunc(keyword string, args string) (string, error) {
 	defer mu.RUnlock()
 	if imp, ok := commands[keyword]; ok {
 		if imp.Enabled() {
-			return imp.AiDefine().Call(args)
+			res, err := imp.AiDefine().Call(args)
+			fmt.Println(res)
+			return res, err
 		}
 	}
 	return fmt.Sprintf("func '%s' 已禁用，无法调用该方法", keyword), nil
