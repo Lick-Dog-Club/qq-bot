@@ -12,11 +12,11 @@ type streamChat interface {
 }
 
 type toolCallChatWrapper struct {
-	stream *openaiClient
+	openaiClient *openaiClient
 }
 
 func (t *toolCallChatWrapper) StreamCompletion(ctx context.Context, messages []ai.Message) (<-chan ai.CompletionResponse, error) {
-	completion, err := t.stream.streamCompletion(ctx, messages)
+	completion, err := t.openaiClient.streamCompletion(ctx, messages)
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +44,7 @@ func (t *toolCallChatWrapper) StreamCompletion(ctx context.Context, messages []a
 				},
 			)
 			for _, call := range toolCalls {
-				callResult, err := t.stream.toolCall(call.Function.Name, call.Function.Arguments)
+				callResult, err := t.openaiClient.toolCall(call.Function.Name, call.Function.Arguments)
 				if err != nil {
 					resCh <- &ai.CompletionResponseImpl{Error: err}
 					return
@@ -56,7 +56,7 @@ func (t *toolCallChatWrapper) StreamCompletion(ctx context.Context, messages []a
 					ToolCallID: call.ID,
 				})
 			}
-			streamCompletion, err := t.stream.streamCompletion(ctx, messages)
+			streamCompletion, err := t.openaiClient.streamCompletion(ctx, messages)
 			if err != nil {
 				resCh <- &ai.CompletionResponseImpl{Error: err}
 				return

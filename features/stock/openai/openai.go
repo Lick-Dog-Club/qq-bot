@@ -46,7 +46,7 @@ type NewClientOption struct {
 
 // NewOpenaiClient
 //
-// stream token 需要自己算： https://github.com/pkoukk/tiktoken-go
+// openaiClient token 需要自己算： https://github.com/pkoukk/tiktoken-go
 func NewOpenaiClient(opt NewClientOption) ai.Chat {
 	config := openai.DefaultConfig(opt.Token)
 	if opt.HttpClient != nil {
@@ -128,7 +128,7 @@ func (o *openaiClient) CreateEmbeddings(ctx context.Context, texts []string) (ai
 }
 
 func (o *openaiClient) StreamCompletion(ctx context.Context, messages []ai.Message) (<-chan ai.CompletionResponse, error) {
-	return (&toolCallChatWrapper{stream: o}).StreamCompletion(ctx, messages)
+	return (&toolCallChatWrapper{openaiClient: o}).StreamCompletion(ctx, messages)
 }
 
 func (o *openaiClient) streamCompletion(ctx context.Context, messages []ai.Message) (<-chan ai.CompletionResponse, error) {
