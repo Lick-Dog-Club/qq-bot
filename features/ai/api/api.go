@@ -108,7 +108,7 @@ type chatGPTClient struct {
 	cache  *types.KeyValue
 	status *types.Status
 
-	client types.GptClientImpl
+	client func() types.GptClientImpl
 }
 
 func newChatGPTClient(uid string) *chatGPTClient {
@@ -116,12 +116,13 @@ func newChatGPTClient(uid string) *chatGPTClient {
 		uid:    uid,
 		cache:  types.NewKV(map[string]any{"namespace": "chatgpt"}),
 		status: &types.Status{},
-		client: client.NewOpenaiClientV2(config.AiToken(), config.ChatGPTApiModel(), openai.ChatCompletionRequest{
-			Temperature:     0.8,
-			PresencePenalty: 1,
-			TopP:            1,
-			//Tools:           tools.List(),
-		}),
+		client: func() types.GptClientImpl {
+			return client.NewOpenaiClientV2(config.AiToken(), config.ChatGPTApiModel(), openai.ChatCompletionRequest{
+				Temperature:     0.8,
+				PresencePenalty: 1,
+				TopP:            1,
+			})
+		},
 	}
 }
 
@@ -163,7 +164,7 @@ func (gpt *chatGPTClient) send(msg string) string {
 	var result string
 	err := retry.Times(10, func() error {
 		var err error
-		result, err = gpt.client.GetCompletion(prompt)
+		result, err = gpt.client().GetCompletion(prompt)
 		if err != nil {
 			fmt.Println(err)
 		}
