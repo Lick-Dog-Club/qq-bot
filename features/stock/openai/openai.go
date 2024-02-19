@@ -3,6 +3,7 @@ package openai
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"qq/features/stock/ai"
 	"qq/features/stock/tools"
@@ -263,6 +264,7 @@ func (o *openaiClient) CreateImage(ctx context.Context, prompt string, quality s
 }
 
 func (o *openaiClient) toError(err error) error {
+	fmt.Println(err)
 	var e = &openai.APIError{}
 	if errors.As(err, &e) {
 		if e.HTTPStatusCode == 429 {

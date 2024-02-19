@@ -6,6 +6,7 @@ import (
 	"qq/bot"
 	"qq/config"
 	"qq/features"
+	"sort"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -41,7 +42,8 @@ func init() {
 				for s, _ := range config.Configs() {
 					keys = append(keys, s)
 				}
-				bot.Send(strings.Join(keys, "\n"))
+				sort.Strings(keys)
+				bot.SendTextImage(strings.Join(keys, "\n"))
 				return nil
 			}
 
