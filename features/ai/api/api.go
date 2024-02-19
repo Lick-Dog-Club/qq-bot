@@ -10,6 +10,10 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unicode/utf8"
+
+	"github.com/pkoukk/tiktoken-go"
+	"github.com/samber/lo"
 
 	"github.com/google/uuid"
 	"github.com/sashabaranov/go-openai"
@@ -161,7 +165,6 @@ func (gpt *chatGPTClient) send(msg string) string {
 	}
 	conversation = append(conversation, um)
 	prompt := gpt.BuildPrompt(conversation, um.ID)
-	//log.Printf("###########\n%s%s", gpt.uid, prompt)
 	prompt = append([]openai.ChatCompletionMessage{
 		{
 			Role: openai.ChatMessageRoleSystem,
@@ -169,7 +172,8 @@ func (gpt *chatGPTClient) send(msg string) string {
 %s
 `, time.Now().Format(time.DateTime), systemPrompt),
 		},
-	}, prompt...)
+	}, lastConversationsByLimitTokens(prompt, 4096)...)
+	fmt.Println(prompt)
 	var result string
 	err := retry.Times(10, func() error {
 		var err error
@@ -223,4 +227,31 @@ func (gpt *chatGPTClient) BuildPrompt(messages types.UserMessageList, parentMess
 	}
 
 	return
+}
+
+func lastConversationsByLimitTokens(cs []openai.ChatCompletionMessage, limitTokenCount int) []openai.ChatCompletionMessage {
+	var (
+		res        []openai.ChatCompletionMessage
+		totalToken int
+	)
+	for _, conversation := range lo.Reverse(cs) {
+		totalToken = totalToken + WordToToken(conversation.Content)
+		if totalToken > limitTokenCount {
+			break
+		}
+		res = append(res, openai.ChatCompletionMessage{
+			Role:    conversation.Role,
+			Content: conversation.Content,
+		})
+	}
+	return lo.Reverse(res)
+}
+
+// WordToToken 4,096 tokens
+func WordToToken(s string) int {
+	tkm, err := tiktoken.GetEncoding(tiktoken.MODEL_CL100K_BASE)
+	if err != nil {
+		return int(float64(utf8.RuneCountInString(s)) / 0.75)
+	}
+	return len(tkm.Encode(s, nil, nil))
 }

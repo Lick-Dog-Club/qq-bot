@@ -16,6 +16,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/mozillazg/go-pinyin v0.20.0
 	github.com/olebedev/when v0.0.0-20221205223600-4d190b02b8d8
+	github.com/pkoukk/tiktoken-go v0.1.6
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/samber/lo v1.39.0
 	github.com/sashabaranov/go-openai v1.19.4
@@ -38,6 +39,7 @@ require (
 	github.com/bitly/go-simplejson v0.5.0 // indirect
 	github.com/cloudflare/circl v1.3.7 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/dlclark/regexp2 v1.10.0 // indirect
 	github.com/emicklei/go-restful/v3 v3.9.0 // indirect
 	github.com/fatih/color v1.15.0 // indirect
 	github.com/go-logr/logr v1.2.4 // indirect
