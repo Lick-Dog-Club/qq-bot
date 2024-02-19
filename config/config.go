@@ -41,7 +41,12 @@ type KV map[string]string
 func (k KV) String() string {
 	var s string
 	for key, value := range k {
-		s += fmt.Sprintf("%s=%s\n", key, value)
+		str := ""
+		for len(value) > 100 {
+			str += value[0:100] + "\n"
+			value = value[100:]
+		}
+		s += fmt.Sprintf("%s=%s\n", key, str)
 	}
 	return s
 }
