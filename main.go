@@ -134,7 +134,9 @@ func printREADME() {
 }
 
 var mdTemplate = `
-# QQ-bot
+# QQ Bot
+
+> 详细咨询请加 QQ 1025434218, 注明来源
 
 [![build-docker](https://github.com/Lick-Dog-Club/qq-bot/actions/workflows/build.yaml/badge.svg)](https://github.com/Lick-Dog-Club/qq-bot/actions/workflows/build.yaml)
 
@@ -142,4 +144,9 @@ var mdTemplate = `
 
 ## 指令 (y代表可ai交互的指令)
 
-` + "```text\n%s\n```"
+` + "```text\n%s\n```" + `
+
+## Example
+
+![识图+画图](./images/seedraw.jpg)
+`

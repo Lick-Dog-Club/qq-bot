@@ -16,11 +16,6 @@ var (
 	_ EmbeddingResponse  = (*EmbeddingResponseImpl)(nil)
 )
 
-var (
-	ContextLengthExceeded = errors.New("context length exceeded")
-	ErrorToManyRequests   = errors.New("当前使用的人太多啦，请稍后再来～")
-)
-
 type Chat interface {
 	Completion(ctx context.Context, messages []Message) (CompletionResponse, error)
 	StreamCompletion(ctx context.Context, messages []Message) (<-chan CompletionResponse, error)
