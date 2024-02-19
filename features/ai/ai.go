@@ -8,8 +8,12 @@ import (
 	config2 "qq/config"
 	"qq/features"
 	"qq/features/ai/api"
+	"qq/features/stock/ai"
 	openai2 "qq/features/stock/openai"
+	"qq/features/stock/types"
 	"qq/util/proxy"
+
+	"github.com/sashabaranov/go-openai"
 
 	"github.com/sashabaranov/go-openai/jsonschema"
 
@@ -43,7 +47,54 @@ func init() {
 			draw, _ := Draw(input.Prompt)
 			return draw, nil
 		},
-	}))
+	}), features.WithGroup("ai"))
+	features.AddKeyword("see", "<+图片url>: 根据 url 识别图片内容", func(bot bot.Bot, content string) error {
+		bot.Send(See([]string{content}))
+		return nil
+	}, features.WithAIFunc(features.AIFuncDef{
+		Properties: map[string]jsonschema.Definition{
+			"images": {
+				Type:        jsonschema.Array,
+				Description: "图片的url地址",
+			},
+		},
+		Call: func(args string) (string, error) {
+			var input = struct {
+				Images []string `json:"images"`
+			}{}
+			json.Unmarshal([]byte(args), &input)
+			return See(input.Images), nil
+		},
+	}), features.WithGroup("ai"))
+}
+
+func See(images []string) string {
+	client := openai2.NewOpenaiClient(openai2.NewClientOption{
+		HttpClient: proxy.NewHttpProxyClient(),
+		MaxToken:   4096,
+		Token:      config2.AiToken(),
+		Model:      openai.GPT4VisionPreview,
+	})
+	var cnt []openai.ChatMessagePart
+	for _, image := range images {
+		cnt = append(cnt, openai.ChatMessagePart{
+			Type: "image_url",
+			ImageURL: &openai.ChatMessageImageURL{
+				URL: image,
+			},
+		})
+	}
+	cnt = append(cnt, openai.ChatMessagePart{
+		Type: "text",
+		Text: "详细描述图片内容",
+	})
+	res, _ := client.Completion(context.TODO(), []ai.Message{
+		{
+			Role:         types.RoleUser,
+			MultiContent: cnt,
+		},
+	})
+	return res.GetChoices()[0].Message.Content
 }
 
 func Draw(prompt string) (string, error) {

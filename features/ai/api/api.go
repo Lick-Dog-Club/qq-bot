@@ -241,32 +241,14 @@ func lastConversationsByLimitTokens(cs []openai.ChatCompletionMessage, limitToke
 		if totalToken > limitTokenCount {
 			break
 		}
-		if ContentHasImage(conversation.Content) {
-			images := GetImagesFromImageContent(conversation.Content)
-			var ics []openai.ChatMessagePart
-			for _, image := range images {
-				ics = append(ics, openai.ChatMessagePart{
-					Type: "image_url",
-					ImageURL: &openai.ChatMessageImageURL{
-						URL: bot.GetCQImage(image),
-					},
-				})
-			}
-			res = append(res, openai.ChatCompletionMessage{
-				Role: conversation.Role,
-				MultiContent: []openai.ChatMessagePart{
-					{
-						Type: "text",
-						Text: GetWordFromImageContent(conversation.Content),
-					},
-				},
-			})
-		} else {
-			res = append(res, openai.ChatCompletionMessage{
-				Role:    conversation.Role,
-				Content: conversation.Content,
-			})
+		content := conversation.Content
+		if ContentHasImage(content) {
+			content = FormatImageContent(content)
 		}
+		res = append(res, openai.ChatCompletionMessage{
+			Role:    conversation.Role,
+			Content: content,
+		})
 	}
 	return lo.Reverse(res)
 }
@@ -276,15 +258,12 @@ var imageRegex = regexp.MustCompile(`\[cq:image,file=(.*?),url=.*?]`)
 func ContentHasImage(content string) bool {
 	return imageRegex.MatchString(content)
 }
-func GetWordFromImageContent(content string) string {
-	return imageRegex.ReplaceAllString(content, "")
-}
-func GetImagesFromImageContent(content string) (res []string) {
+func FormatImageContent(content string) string {
 	submatch := imageRegex.FindAllStringSubmatch(content, -1)
 	for _, i := range submatch {
-		res = append(res, i[1])
+		content = strings.ReplaceAll(content, i[0], bot.GetCQImage(i[1])+" ")
 	}
-	return
+	return content
 }
 
 // WordToToken 4,096 tokens
