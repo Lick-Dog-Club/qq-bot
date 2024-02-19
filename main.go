@@ -7,10 +7,12 @@ import (
 	"fmt"
 	"net/http"
 	"qq/bot"
+	"qq/config"
 	"qq/cronjob"
 	"qq/features"
 	"qq/util"
 	"strings"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 
@@ -113,6 +115,7 @@ func main() {
 		}
 	})
 
+	bot.NewQQBot(&bot.Message{}).SendToUser(config.UserID(), fmt.Sprintf("%s 系统已启动", time.Now().Format(time.DateTime)))
 	log.Println("[HTTP]: start...")
 	log.Println(http.ListenAndServe(":5701", nil))
 }
