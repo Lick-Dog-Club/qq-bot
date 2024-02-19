@@ -243,6 +243,7 @@ func lastConversationsByLimitTokens(cs []openai.ChatCompletionMessage, limitToke
 		}
 		if ContentHasImage(conversation.Content) {
 			images := GetImagesFromImageContent(conversation.Content)
+			log.Println("ContentHasImage", images)
 			var ics []openai.ChatMessagePart
 			for _, image := range images {
 				log.Println(bot.GetCQImage(image))

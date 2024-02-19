@@ -311,7 +311,7 @@ type wechatBot struct {
 }
 
 func GetCQImage(file string) string {
-	req, _ := http.NewRequest("POST", cqHost+"/get_image", strings.NewReader(fmt.Sprintf(`{"file": %s}`, file)))
+	req, _ := http.NewRequest("POST", cqHost+"/get_image", strings.NewReader(fmt.Sprintf(`{"file": %q}`, file)))
 	req.Header.Add("content-type", "application/json")
 	do, _ := c.Do(req)
 	defer do.Body.Close()
