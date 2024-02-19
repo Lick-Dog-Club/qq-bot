@@ -76,6 +76,10 @@ func GroupID() string {
 
 type UID string
 
+func (u UID) List() []string {
+	return strings.Split(string(u), ",")
+}
+
 func (u UID) Contains(id string) bool {
 	split := strings.Split(string(u), ",")
 	for _, uid := range split {

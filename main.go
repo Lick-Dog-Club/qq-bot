@@ -117,7 +117,9 @@ func main() {
 
 	go func() {
 		time.Sleep(8 * time.Second)
-		bot.NewQQBot(&bot.Message{}).SendToUser(config.UserID(), fmt.Sprintf("%s 系统已启动", time.Now().Format(time.DateTime)))
+		for _, s := range config.AdminIDs().List() {
+			bot.NewQQBot(&bot.Message{}).SendToUser(s, fmt.Sprintf("%s 系统已启动", time.Now().Format(time.DateTime)))
+		}
 	}()
 	log.Println("[HTTP]: start...")
 	log.Println(http.ListenAndServe(":5701", nil))
