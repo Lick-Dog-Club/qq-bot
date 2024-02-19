@@ -23,7 +23,7 @@ func init() {
 	features.AddKeyword("bitget", "获取当前开仓币", func(bot bot.Bot, content string) error {
 		bot.Send(Get(true))
 		return nil
-	})
+	}, features.WithHidden(), features.WithGroup("bitget"))
 	features.AddKeyword("bg-money", "获取当前资金", func(bot bot.Bot, content string) error {
 		var total float64
 		retry.Times(3, func() error {
@@ -33,7 +33,7 @@ func init() {
 		})
 		bot.Send(fmt.Sprintf("money: %.2f", total))
 		return nil
-	})
+	}, features.WithHidden(), features.WithGroup("bitget"))
 }
 
 type Coin struct {

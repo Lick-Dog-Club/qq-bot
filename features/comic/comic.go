@@ -60,7 +60,7 @@ func init() {
 			json.Unmarshal([]byte(args), &input)
 			return Get(input.Title, input.Num).Render(), nil
 		},
-	}))
+	}), features.WithHidden())
 	features.AddKeyword("comicn", "<+name: haizeiwang/海贼王> <+num: 话数> 搜索漫画话数", func(bot bot.Bot, content string) error {
 		split := strings.Split(content, " ")
 		if len(split) == 2 {
@@ -73,7 +73,7 @@ func init() {
 			}
 		}
 		return nil
-	}, features.WithGroup("comic"))
+	}, features.WithGroup("comic"), features.WithHidden(), features.WithAI())
 }
 
 type Comic struct {

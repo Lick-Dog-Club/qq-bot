@@ -10,10 +10,15 @@ import (
 )
 
 func init() {
-	features.AddKeyword("rkl", "绕口令", func(bot bot.Bot, content string) error {
+	features.AddKeyword("rkl", "获取一个绕口令", func(bot bot.Bot, content string) error {
 		bot.Send(RaoKouLing())
 		return nil
-	})
+	}, features.WithAIFunc(features.AIFuncDef{
+		Properties: nil,
+		Call: func(args string) (string, error) {
+			return RaoKouLing(), nil
+		},
+	}))
 }
 
 func RaoKouLing() string {

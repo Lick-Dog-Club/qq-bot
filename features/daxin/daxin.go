@@ -10,10 +10,15 @@ import (
 )
 
 func init() {
-	features.AddKeyword("dx", "新债查询", func(bot bot.Bot, content string) error {
+	features.AddKeyword("dx", "股票新债/打新，查询今日是否有新债", func(bot bot.Bot, content string) error {
 		bot.Send(Get())
 		return nil
-	})
+	}, features.WithAIFunc(features.AIFuncDef{
+		Properties: nil,
+		Call: func(args string) (string, error) {
+			return Get(), nil
+		},
+	}))
 }
 
 /*

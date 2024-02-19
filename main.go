@@ -59,6 +59,7 @@ import (
 	_ "qq/features/webot"
 	_ "qq/features/weibo"
 	_ "qq/features/zhihu"
+	_ "qq/features/zuan"
 )
 
 var genDoc bool

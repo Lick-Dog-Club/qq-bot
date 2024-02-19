@@ -48,11 +48,8 @@ func init() {
 
 func Draw(prompt string) (string, error) {
 	client := openai2.NewOpenaiClient(openai2.NewClientOption{
-		HttpClient:  proxy.NewHttpProxyClient(),
-		Token:       config2.AiToken(),
-		Model:       "gpt-4-0125-preview",
-		MaxToken:    4096,
-		Temperature: 0.2,
+		HttpClient: proxy.NewHttpProxyClient(),
+		Token:      config2.AiToken(),
 	})
 	res, err := client.CreateImage(context.TODO(), prompt, "", "")
 	if err != nil {

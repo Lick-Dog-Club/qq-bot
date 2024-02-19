@@ -17,7 +17,7 @@ func init() {
 	features.AddKeyword("jin10", "金十数据今日大事件", func(bot bot.Bot, content string) error {
 		bot.Send(Get(util.Today()))
 		return nil
-	})
+	}, features.WithHidden())
 }
 
 type EventItem struct {

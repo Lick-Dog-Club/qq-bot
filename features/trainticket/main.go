@@ -45,7 +45,7 @@ func init() {
 			log.Println(err)
 		}
 		return nil
-	}, features.WithGroup("train"))
+	}, features.WithGroup("train"), features.WithAI())
 	features.AddKeyword("to", "查询车票信息, 只显示有票的班次, 例如: 'to 杭州东 绍兴北 20240216'", func(bot bot.Bot, content string) error {
 		split := strings.Split(content, " ")
 		from := GetStationCode(split[0])
@@ -71,9 +71,9 @@ func init() {
 			log.Println(err)
 		}
 		return nil
-	}, features.WithGroup("train"))
+	}, features.WithGroup("train"), features.WithAI())
 
-	features.AddKeyword("GetStationCodeByName", "<+name> 查询高铁/火车车站对应的code编码，被 Search12306 使用", func(bot bot.Bot, content string) error {
+	features.AddKeyword("GetStationCodeByName", "<+name> 查询高铁/火车站对应的 code 码", func(bot bot.Bot, content string) error {
 		bot.Send(GetStationCode(content))
 		return nil
 	}, features.WithHidden(), features.WithGroup("train"))

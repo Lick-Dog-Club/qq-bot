@@ -9,10 +9,15 @@ import (
 )
 
 func init() {
-	features.AddKeyword("tip", "生活小窍门", func(bot bot.Bot, content string) error {
+	features.AddKeyword("tip", "获取一个生活小窍门", func(bot bot.Bot, content string) error {
 		bot.Send(Tip())
 		return nil
-	})
+	}, features.WithAIFunc(features.AIFuncDef{
+		Properties: nil,
+		Call: func(args string) (string, error) {
+			return Tip(), nil
+		},
+	}))
 }
 
 func Tip() string {

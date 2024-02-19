@@ -126,6 +126,26 @@ var (
 			},
 		},
 	}
+	ToolsGetCodeByName = tools.Tool{
+		Name: "GetCodeByName",
+		Define: openai.Tool{
+			Type: openai.ToolTypeFunction,
+			Function: openai.FunctionDefinition{
+				Name:        "GetCodeByName",
+				Description: "根据名称获取股票代码",
+				Parameters: &jsonschema.Definition{
+					Type:     jsonschema.Object,
+					Required: []string{"name"},
+					Properties: map[string]jsonschema.Definition{
+						"name": {
+							Type:        jsonschema.String,
+							Description: "股票名称, 例如 中国平安，浪潮信息",
+						},
+					},
+				},
+			},
+		},
+	}
 )
 
 const ApiAddrPrefix = "http://localhost:8080/api/public"
@@ -152,6 +172,12 @@ func CallTool(name string, args string) (string, error) {
 		price := GetStockPrice(input)
 		marshal, _ := json.Marshal(price)
 		return string(marshal), nil
+	case "GetCodeByName":
+		var s = struct {
+			Name string `json:"name"`
+		}{}
+		json.Unmarshal([]byte(args), &s)
+		return GetCodeByName(s.Name), nil
 	case tools.BuildInPluginCurrentDatetime.Name:
 		return time.Now().Format(time.DateTime), nil
 	}
@@ -264,16 +290,25 @@ type FinancialResp struct {
 // 获取公司财务报表数据
 func GetFinancialStatements(input GetFinancialStatementsRequest) string {
 	client := &http.Client{}
+	uv := url.Values{}
+
+	uv.Set("callback", "")
+	uv.Set("sortColumns", "REPORT_DATE")
+	uv.Set("sortTypes", "-1")
+	uv.Set("pageSize", "50")
+	uv.Set("pageNumber", "1")
+	uv.Set("columns", "ALL")
+	uv.Set("filter", fmt.Sprintf(`(SECURITY_CODE="%v")`, input.Ticker))
+	uv.Set("reportName", "RPT_FCI_PERFORMANCEE")
 	req, err := http.NewRequest("GET",
-		fmt.Sprintf("https://datacenter-web.eastmoney.com/api/data/v1/get?callback=jQuery112303147255267845681_1707118997064&sortColumns=REPORT_DATE&sortTypes=-1&pageSize=50&pageNumber=1&columns=ALL&filter=(SECURITY_CODE%%3D%%22%s%%22)&reportName=RPT_FCI_PERFORMANCEE", input.Ticker), nil)
+		fmt.Sprintf("https://datacenter-web.eastmoney.com/api/data/v1/get?%s", uv.Encode()), nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 	req.Header.Set("Accept", "*/*")
 	req.Header.Set("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8")
 	req.Header.Set("Connection", "keep-alive")
-	req.Header.Set("Cookie", "qgqp_b_id=78b7b2bfdee7c756a15fa4f64a15d88f; st_si=18517497145558; websitepoptg_api_time=1707096223192; HAList=ty-0-000001-%u5E73%u5B89%u94F6%u884C%2Cty-0-002617-%u9732%u7B11%u79D1%u6280; st_asi=delete; st_pvi=53287007095836; st_sp=2024-02-04%2016%3A50%3A49; st_inirUrl=https%3A%2F%2Fquote.eastmoney.com%2Fsz002617.html; st_sn=35; st_psi=20240205154325530-111000300841-2235918466; JSESSIONID=77377474BF25B15399769593749464A6")
-	req.Header.Set("Referer", "https://data.eastmoney.com/bbsj/yjbb/000001.html")
+	req.Header.Set("Referer", fmt.Sprintf("https://data.eastmoney.com/bbsj/yjbb/%v.html", input.Ticker))
 	req.Header.Set("Sec-Fetch-Dest", "script")
 	req.Header.Set("Sec-Fetch-Mode", "no-cors")
 	req.Header.Set("Sec-Fetch-Site", "same-site")
@@ -287,9 +322,8 @@ func GetFinancialStatements(input GetFinancialStatementsRequest) string {
 	}
 	defer resp.Body.Close()
 	bodyText, err := io.ReadAll(resp.Body)
-	index := strings.Index(string(bodyText), "{")
 	var data FinancialResp
-	json.NewDecoder(strings.NewReader(string(bodyText)[index:])).Decode(&data)
+	json.NewDecoder(strings.NewReader(string(bodyText))).Decode(&data)
 	i := lo.Map(data.Result.Data, func(item FData, index int) map[string]any {
 		return map[string]any{
 			"截止日期":          item.REPORTDATE,
@@ -517,13 +551,25 @@ func GetRegulatoryAnnouncements(GetRegulatoryAnnouncementsRequest) GetRegulatory
 }
 
 type GetCashFlowRequest struct {
-	Ticket string `json:"ticket"`
+	Ticker string `json:"ticker"`
 }
 
 // 现金流
 func GetCashFlow(input GetCashFlowRequest) string {
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", fmt.Sprintf("https://datacenter-web.eastmoney.com/api/data/v1/get?callback=jQuery112303147255267845681_1707118997064&sortColumns=REPORT_DATE&sortTypes=-1&pageSize=50&pageNumber=1&columns=ALL&filter=(SECURITY_CODE%%3D%%22%s%%22)&reportName=RPT_DMSK_FN_CASHFLOW", input.Ticket), nil)
+
+	uv := url.Values{}
+
+	uv.Set("callback", ``)
+	uv.Set("sortColumns", `REPORT_DATE`)
+	uv.Set("sortTypes", `-1`)
+	uv.Set("pageSize", `50`)
+	uv.Set("pageNumber", `1`)
+	uv.Set("columns", `ALL`)
+	uv.Set("filter", fmt.Sprintf(`(SECURITY_CODE="%v")`, input.Ticker))
+	uv.Set("reportName", `RPT_DMSK_FN_CASHFLOW`)
+
+	req, err := http.NewRequest("GET", fmt.Sprintf("https://datacenter-web.eastmoney.com/api/data/v1/get?%s", uv.Encode()), nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -544,9 +590,8 @@ func GetCashFlow(input GetCashFlowRequest) string {
 	}
 	defer resp.Body.Close()
 	bodyText, err := io.ReadAll(resp.Body)
-	index := strings.Index(string(bodyText), "{")
 	var data GetCashFlowResponse
-	json.NewDecoder(strings.NewReader(string(bodyText)[index:])).Decode(&data)
+	json.NewDecoder(strings.NewReader(string(bodyText))).Decode(&data)
 	i := lo.Map(data.Result.Data, func(item CashFlowData, index int) map[string]any {
 		return map[string]any{
 			"净现金流（元）":           item.CCEADD,
@@ -629,4 +674,69 @@ type GetCashFlowResponse struct {
 	Success bool   `json:"success"`
 	Message string `json:"message"`
 	Code    int    `json:"code"`
+}
+
+func GetCodeByName(name string) string {
+	client := &http.Client{}
+	uv := url.Values{}
+	uv.Set("client", "web")
+	uv.Set("clientType", "webSuggest")
+	uv.Set("clientVersion", "lastest")
+	uv.Set("keyword", name)
+	uv.Set("pageIndex", "1")
+	uv.Set("pageSize", "10")
+	uv.Set("securityFilter", "")
+	uv.Set("_", fmt.Sprintf("%d", time.Now().UnixMilli()))
+	req, _ := http.NewRequest("GET", "https://search-codetable.eastmoney.com/codetable/search/web?"+uv.Encode(), nil)
+	req.Header.Set("Accept", "*/*")
+	req.Header.Set("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8")
+	req.Header.Set("Connection", "keep-alive")
+	req.Header.Set("Referer", "https://www.eastmoney.com/")
+	req.Header.Set("Sec-Fetch-Dest", "script")
+	req.Header.Set("Sec-Fetch-Mode", "no-cors")
+	req.Header.Set("Sec-Fetch-Site", "same-site")
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36")
+	req.Header.Set("sec-ch-ua", `"Not A(Brand";v="99", "Google Chrome";v="121", "Chromium";v="121"`)
+	req.Header.Set("sec-ch-ua-mobile", "?0")
+	req.Header.Set("sec-ch-ua-platform", `"macOS"`)
+	resp, _ := client.Do(req)
+	defer resp.Body.Close()
+	bodyText, _ := io.ReadAll(resp.Body)
+	var data response
+	if err := json.NewDecoder(strings.NewReader(string(bodyText))).Decode(&data); err != nil {
+		log.Fatal(err)
+	}
+	var result []struct {
+		Name string `json:"name"`
+		Code string `json:"code"`
+	}
+	for _, datum := range data.Result {
+		result = append(result, struct {
+			Name string `json:"name"`
+			Code string `json:"code"`
+		}{Name: datum.ShortName, Code: datum.Code})
+	}
+	marshal, _ := json.Marshal(&result)
+	return string(marshal)
+}
+
+type response struct {
+	Code      string `json:"code"`
+	Msg       string `json:"msg"`
+	PageIndex int    `json:"pageIndex"`
+	PageSize  int    `json:"pageSize"`
+	Result    []struct {
+		Code             string `json:"code"`
+		InnerCode        string `json:"innerCode"`
+		ShortName        string `json:"shortName"`
+		Market           int    `json:"market"`
+		Pinyin           string `json:"pinyin"`
+		SecurityType     []int  `json:"securityType"`
+		SecurityTypeName string `json:"securityTypeName"`
+		SmallType        int    `json:"smallType"`
+		Status           int    `json:"status"`
+		Flag             int    `json:"flag"`
+		ExtSmallType     int    `json:"extSmallType"`
+	} `json:"result"`
+	SearchId string `json:"searchId"`
 }

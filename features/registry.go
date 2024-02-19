@@ -91,9 +91,16 @@ type AIFuncDef struct {
 	Call       func(args string) (string, error)
 }
 
+func WithAI() Option {
+	return func(cmd *cmd) error {
+		cmd.hasAi = true
+		return nil
+	}
+}
 func WithAIFunc(define AIFuncDef) Option {
 	return func(cmd *cmd) error {
 		cmd.aiDefine = &define
+		cmd.hasAi = true
 		return nil
 	}
 }
@@ -109,6 +116,7 @@ type CommandImp interface {
 	Description() string
 	Run(bot bot.Bot, content string) error
 	AiDefine() *AIFuncDef
+	HasAI() bool
 }
 
 func AddKeyword(keyword, desc string, fn commandFunc, opts ...Option) {
@@ -204,7 +212,7 @@ func BeautifulOutputLines(hidden bool, simple bool) []string {
 	var cmds []string
 	for _, imp := range AllKeywordCommands(hidden) {
 		var aiEnabled = "x"
-		if imp.AiDefine() != nil {
+		if imp.HasAI() {
 			aiEnabled = "y"
 		}
 		fmtStr := "%-16s\t%s"
@@ -271,6 +279,7 @@ type cmd struct {
 	group    string
 	disabled bool
 	aiDefine *AIFuncDef
+	hasAi    bool
 }
 
 func (c cmd) IsSysCmd() bool {
@@ -299,6 +308,9 @@ func (c cmd) Description() string {
 
 func (c cmd) AiDefine() *AIFuncDef {
 	return c.aiDefine
+}
+func (c cmd) HasAI() bool {
+	return c.hasAi
 }
 
 func (c cmd) Run(bot bot.Bot, content string) error {

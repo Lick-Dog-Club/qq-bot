@@ -18,7 +18,7 @@ require (
 	github.com/olebedev/when v0.0.0-20221205223600-4d190b02b8d8
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/samber/lo v1.39.0
-	github.com/sashabaranov/go-openai v1.17.10
+	github.com/sashabaranov/go-openai v1.19.4
 	github.com/signintech/gopdf v0.18.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/wangluozhe/requests v1.2.4
