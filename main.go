@@ -150,5 +150,5 @@ var mdTemplate = `
 
 ![识图+画图](./images/seedraw.jpg)
 
-![车票+热搜](./images/2.jpg)
+![车票+热搜](./images/2.png)
 `
