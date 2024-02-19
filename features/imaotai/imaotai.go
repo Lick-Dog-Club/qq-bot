@@ -36,7 +36,7 @@ var allShops func() AllShopMap = func() AllShopMap {
 }
 
 func init() {
-	features.AddKeyword("mt", "<+phoneNum>: 通过手机号自动预约茅台", func(bot bot.Bot, content string) error {
+	features.AddKeyword("mt", "<+phoneNum>: 通过手机号自动预约申购茅台", func(bot bot.Bot, content string) error {
 		bot.Send(Run(content))
 		return nil
 	}, features.WithGroup("maotai"), features.WithAIFunc(features.AIFuncDef{
@@ -145,7 +145,7 @@ mt-geo %s <地址>
 		bot.SendTextImage(res)
 		return nil
 	}, features.WithGroup("maotai"))
-	features.AddKeyword("mt-login", "<+phone> <+code>: 茅台登录，通过6位短信验证码登录用户", func(bot bot.Bot, content string) error {
+	features.AddKeyword("mt-login", "<+phone> <+code>: 预约申购茅台登录，通过6位短信验证码登录用户", func(bot bot.Bot, content string) error {
 		split := strings.Split(content, " ")
 		var phone, code string
 		if len(split) >= 2 {
@@ -203,7 +203,8 @@ func loginAndStore(phone, code string) string {
 	}
 	config.AddMaoTaiInfo(info)
 	return fmt.Sprintf(`
-用户添加成功
+用户添加成功！
+
 过期时间是: %s
 设置 geo 信息请执行(当前用户是否已设置 Geo 信息：%t):
 
