@@ -42,6 +42,9 @@ func (k KV) String() string {
 	var s string
 	for key, value := range k {
 		str := ""
+		if len(value) <= 100 {
+			str = value
+		}
 		for len(value) > 100 {
 			str += value[0:100] + "\n"
 			value = value[100:]
