@@ -95,6 +95,10 @@ func Request(userID string, ask string) string {
 	return result
 }
 
+func Clear(userID string) {
+	manager.deleteUser(userID)
+}
+
 type gptManager[T userImp] struct {
 	sync.RWMutex
 	users map[string]userImp

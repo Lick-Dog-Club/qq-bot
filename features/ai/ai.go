@@ -21,6 +21,11 @@ import (
 )
 
 func init() {
+	features.AddKeyword("clear", "清除 ai 历史对话记录", func(bot bot.Bot, content string) error {
+		api.Clear(bot.UserID())
+		bot.Send("done")
+		return nil
+	}, features.WithGroup("ai"))
 	features.SetDefault("ai 自动回答", func(bot bot.Bot, content string) error {
 		req := api.Request
 		log.Printf("%s: %s", bot.UserID(), content)
