@@ -44,6 +44,7 @@ import (
 	_ "qq/features/ddys"
 	_ "qq/features/geo"
 	_ "qq/features/help"
+	_ "qq/features/holiday"
 	_ "qq/features/imaotai"
 	_ "qq/features/jin10"
 	_ "qq/features/kfc"
