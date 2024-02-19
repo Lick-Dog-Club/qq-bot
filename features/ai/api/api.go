@@ -185,7 +185,6 @@ func (gpt *chatGPTClient) send(msg string) string {
 `, time.Now().Format(time.DateTime), systemPrompt),
 		},
 	}, lastConversationsByLimitTokens(prompt, 4096)...)
-	fmt.Println(prompt)
 	var result string
 	err := retry.Times(10, func() error {
 		var err error

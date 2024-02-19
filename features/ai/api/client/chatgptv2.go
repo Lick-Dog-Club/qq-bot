@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"fmt"
 	"qq/features"
 	"qq/features/ai/api/types"
 	"qq/features/stock/ai"
@@ -56,6 +57,7 @@ func (gpt *openaiClientV2) GetCompletion(messages []openai.ChatCompletionMessage
 			MultiContent: msg.MultiContent,
 		})
 	}
+	fmt.Println(aimsgs)
 	completion, err := gpt.cli.StreamCompletion(timeout, aimsgs)
 	if err != nil {
 		return err.Error(), nil
