@@ -115,14 +115,18 @@ func main() {
 		}
 	})
 
+	brithCry()
+	log.Println("[HTTP]: start...")
+	log.Println(http.ListenAndServe(":5701", nil))
+}
+
+func brithCry() {
 	go func() {
-		time.Sleep(8 * time.Second)
+		time.Sleep(5 * time.Second)
 		for _, s := range config.AdminIDs().List() {
 			bot.NewQQBot(&bot.Message{}).SendToUser(s, fmt.Sprintf("%s 系统已启动", time.Now().Format(time.DateTime)))
 		}
 	}()
-	log.Println("[HTTP]: start...")
-	log.Println(http.ListenAndServe(":5701", nil))
 }
 
 func printREADME() {
