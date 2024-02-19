@@ -1,6 +1,7 @@
 package bot
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -307,6 +308,26 @@ func send(message *Message, msg string) string {
 type wechatBot struct {
 	message Message
 	msgMap  *WeMsgMap
+}
+
+func GetCQImage(file string) string {
+	req, _ := http.NewRequest("POST", cqHost+"/get_image", strings.NewReader(fmt.Sprintf(`{"file": %s}`, file)))
+	req.Header.Add("content-type", "application/json")
+	do, _ := c.Do(req)
+	defer do.Body.Close()
+	all, _ := io.ReadAll(do.Body)
+	fmt.Println(all)
+	var res imageResponse
+	json.NewDecoder(bytes.NewReader(all)).Decode(&res)
+	return res.Data.Url
+}
+
+type imageResponse struct {
+	Data struct {
+		Size     int    `json:"size"`
+		Filename string `json:"filename"`
+		Url      string `json:"url"`
+	} `json:"data"`
 }
 
 type WeMsgMap struct {

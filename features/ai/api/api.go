@@ -3,10 +3,12 @@ package api
 import (
 	"fmt"
 	"log"
+	"qq/bot"
 	"qq/config"
 	"qq/features/ai/api/client"
 	"qq/features/ai/api/types"
 	"qq/util/retry"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -239,12 +241,52 @@ func lastConversationsByLimitTokens(cs []openai.ChatCompletionMessage, limitToke
 		if totalToken > limitTokenCount {
 			break
 		}
-		res = append(res, openai.ChatCompletionMessage{
-			Role:    conversation.Role,
-			Content: conversation.Content,
-		})
+		if ContentHasImage(conversation.Content) {
+			images := GetImagesFromImageContent(conversation.Content)
+			var ics []openai.ChatMessagePart
+			for _, image := range images {
+				log.Println(bot.GetCQImage(image))
+				ics = append(ics, openai.ChatMessagePart{
+					Type: "image_url",
+					ImageURL: &openai.ChatMessageImageURL{
+						URL: fmt.Sprintf("%s;base64,%s", "data:image/jpeg", ""),
+					},
+				})
+			}
+			//res = append(res, openai.ChatCompletionMessage{
+			//	Role: conversation.Role,
+			//	MultiContent: []openai.ChatMessagePart{
+			//		{
+			//			Type: "text",
+			//			Text: GetWordFromImageContent(conversation.Content),
+			//		},
+			//	},
+			//})
+		}
+		{
+			res = append(res, openai.ChatCompletionMessage{
+				Role:    conversation.Role,
+				Content: conversation.Content,
+			})
+		}
 	}
 	return lo.Reverse(res)
+}
+
+var imageRegex = regexp.MustCompile(`\[cq:image,file=(.*?),url=.*?]`)
+
+func ContentHasImage(content string) bool {
+	return imageRegex.MatchString(content)
+}
+func GetWordFromImageContent(content string) string {
+	return imageRegex.ReplaceAllString(content, "")
+}
+func GetImagesFromImageContent(content string) (res []string) {
+	submatch := imageRegex.FindAllStringSubmatch(content, -1)
+	for _, i := range submatch {
+		res = append(res, i[1])
+	}
+	return
 }
 
 // WordToToken 4,096 tokens
