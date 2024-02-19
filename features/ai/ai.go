@@ -12,6 +12,7 @@ import (
 	openai2 "qq/features/stock/openai"
 	"qq/features/stock/types"
 	"qq/util/proxy"
+	"qq/util/retry"
 
 	"github.com/sashabaranov/go-openai"
 
@@ -97,12 +98,23 @@ func See(images []string) string {
 		Type: "text",
 		Text: "详细描述图片内容",
 	})
-	res, _ := client.Completion(context.TODO(), []ai.Message{
-		{
-			Role:         types.RoleUser,
-			MultiContent: cnt,
-		},
+	var res ai.CompletionResponse
+	var err error
+	err := retry.Times(5, func() error {
+		res, err = client.Completion(context.TODO(), []ai.Message{
+			{
+				Role:         types.RoleUser,
+				MultiContent: cnt,
+			},
+		})
+		if err != nil {
+			return err
+		}
+		return nil
 	})
+	if err != nil {
+		return ""
+	}
 	return res.GetChoices()[0].Message.Content
 }
 
