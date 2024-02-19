@@ -55,7 +55,11 @@ func init() {
 		Properties: map[string]jsonschema.Definition{
 			"images": {
 				Type:        jsonschema.Array,
-				Description: "图片的url地址",
+				Description: "图片的url地址列表",
+				Items: &jsonschema.Definition{
+					Type:        jsonschema.String,
+					Description: "图片url地址",
+				},
 			},
 		},
 		Call: func(args string) (string, error) {
