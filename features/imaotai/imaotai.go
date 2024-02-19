@@ -18,18 +18,42 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"sync"
 	"time"
+
+	"github.com/sashabaranov/go-openai/jsonschema"
 
 	"github.com/forgoer/openssl"
 )
 
-var allShops AllShopMap = getMap()
+var once sync.Once
+var shops AllShopMap
+var allShops func() AllShopMap = func() AllShopMap {
+	once.Do(func() {
+		shops = getMap()
+	})
+	return shops
+}
 
 func init() {
-	features.AddKeyword("mt", "<+phoneNum>: 自动预约茅台", func(bot bot.Bot, content string) error {
+	features.AddKeyword("mt", "<+phoneNum>: 通过手机号自动预约茅台", func(bot bot.Bot, content string) error {
 		bot.Send(Run(content))
 		return nil
-	}, features.WithGroup("maotai"))
+	}, features.WithGroup("maotai"), features.WithAIFunc(features.AIFuncDef{
+		Properties: map[string]jsonschema.Definition{
+			"phone": {
+				Type:        jsonschema.String,
+				Description: "13位的手机号, 例如 18888888888",
+			},
+		},
+		Call: func(args string) (string, error) {
+			var s = struct {
+				Phone string `json:"phone"`
+			}{}
+			json.Unmarshal([]byte(args), &s)
+			return Run(s.Phone), nil
+		},
+	}))
 	features.AddKeyword("mt-redo", "全部重新申购", func(bot bot.Bot, content string) error {
 		bot.SendTextImage(ReservationAll())
 		return nil
@@ -121,40 +145,64 @@ mt-geo %s <地址>
 		bot.SendTextImage(res)
 		return nil
 	}, features.WithGroup("maotai"))
-	features.AddKeyword("mt-login", "<+phone> <+code>: 自动预约茅台", func(bot bot.Bot, content string) error {
+	features.AddKeyword("mt-login", "<+phone> <+code>: 茅台登录，通过6位短信验证码登录用户", func(bot bot.Bot, content string) error {
 		split := strings.Split(content, " ")
 		var phone, code string
 		if len(split) >= 2 {
 			phone = strings.TrimSpace(split[0])
 			code = strings.TrimSpace(split[1])
 		}
-		uid, token, cookie := login(phone, code)
-		info := config.MaoTaiInfo{
-			Phone:    phone,
-			Uid:      uid,
-			Token:    token,
-			Cookie:   cookie,
-			ExpireAt: time.Time{},
-		}
-		var geoSet bool
-		if taiInfo, ok := config.MaoTaiInfoMap()[phone]; ok {
-			info.Lat = taiInfo.Lat
-			info.Lng = taiInfo.Lng
-			geoSet = true
-		}
+		bot.Send(loginAndStore(phone, code))
+		return nil
+	}, features.WithGroup("maotai"), features.WithAIFunc(features.AIFuncDef{
+		Properties: map[string]jsonschema.Definition{
+			"phone": {
+				Type:        jsonschema.String,
+				Description: "13位的手机号, 例如 18888888888",
+			},
+			"code": {
+				Type:        jsonschema.String,
+				Description: "短信验证码, 例如 123456",
+			},
+		},
+		Call: func(args string) (string, error) {
+			var s = struct {
+				Phone string `json:"phone"`
+				Code  string `json:"code"`
+			}{}
+			json.Unmarshal([]byte(args), &s)
+			return loginAndStore(s.Phone, s.Code), nil
+		},
+	}))
+}
 
-		if token != "" {
-			decodeString, _ := base64.StdEncoding.DecodeString(strings.Split(token, ".")[1])
-			var e exp
-			json.Unmarshal([]byte(string(decodeString)+"}"), &e)
-			info.ExpireAt = time.Unix(e.Exp, 0)
-		}
-		if info.ExpireAt.IsZero() {
-			bot.Send("信息有误，添加失败")
-			return nil
-		}
-		config.AddMaoTaiInfo(info)
-		bot.Send(fmt.Sprintf(`
+func loginAndStore(phone, code string) string {
+	uid, token, cookie := login(phone, code)
+	info := config.MaoTaiInfo{
+		Phone:    phone,
+		Uid:      uid,
+		Token:    token,
+		Cookie:   cookie,
+		ExpireAt: time.Time{},
+	}
+	var geoSet bool
+	if taiInfo, ok := config.MaoTaiInfoMap()[phone]; ok {
+		info.Lat = taiInfo.Lat
+		info.Lng = taiInfo.Lng
+		geoSet = true
+	}
+
+	if token != "" {
+		decodeString, _ := base64.StdEncoding.DecodeString(strings.Split(token, ".")[1])
+		var e exp
+		json.Unmarshal([]byte(string(decodeString)+"}"), &e)
+		info.ExpireAt = time.Unix(e.Exp, 0)
+	}
+	if info.ExpireAt.IsZero() {
+		return "信息有误，添加失败"
+	}
+	config.AddMaoTaiInfo(info)
+	return fmt.Sprintf(`
 用户添加成功
 过期时间是: %s
 设置 geo 信息请执行(当前用户是否已设置 Geo 信息：%t):
@@ -164,9 +212,7 @@ mt-geo %s <地址>
 申购茅台请执行:
 
 mt %s
-`, info.ExpireAt.Format(time.DateTime), geoSet, info.Phone, info.Phone))
-		return nil
-	}, features.WithGroup("maotai"))
+`, info.ExpireAt.Format(time.DateTime), geoSet, info.Phone, info.Phone)
 }
 
 func ReservationAll() string {
@@ -311,7 +357,7 @@ func getItemShop(url string, itemID int, latLng LatLng) (shopIDs []shopInfo) {
 	for _, shop := range data.Data.Shops {
 		for _, item := range shop.Items {
 			if item.ItemID == fmt.Sprintf("%d", itemID) {
-				if addr, ok := allShops[shop.ShopID]; ok {
+				if addr, ok := allShops()[shop.ShopID]; ok {
 					dis := GetDistance(oriLatLng, LatLng{
 						lat: addr.Lat,
 						lng: addr.Lng,
