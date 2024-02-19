@@ -14,6 +14,10 @@ import (
 
 func init() {
 	features.AddKeyword("cs", "设置环境变量, ex: ai_token=xxx, 多个用换行隔开", func(bot bot.Bot, content string) error {
+		if !bot.IsFromAdmin() {
+			bot.Send("必须是管理员才能操作！")
+			return nil
+		}
 		if content == "me" {
 			config.Set(map[string]string{"user_id": bot.UserID()})
 			bot.Send("已设置: user_id=" + bot.UserID())
@@ -36,43 +40,43 @@ func init() {
 		return nil
 	}, features.WithSysCmd(), features.WithHidden(), features.WithGroup("config"))
 	features.AddKeyword("cg", "<+key|[keys: 全部keys]>显示环境变量", func(bot bot.Bot, content string) error {
-		if bot.IsFromAdmin() {
-			if content == "keys" {
-				var keys []string
-				for s, _ := range config.Configs() {
-					keys = append(keys, s)
-				}
-				sort.Strings(keys)
-				bot.SendTextImage(strings.Join(keys, "\n"))
-				return nil
-			}
-
-			if content != "" {
-				bot.Send(config.Configs()[content])
-				return nil
-			}
-
-			path, err := bot.SendTextImage(config.Configs().String())
-			if err != nil {
-				log.Println(err)
-			}
-			fmt.Println(path)
+		if !bot.IsFromAdmin() {
+			bot.Send("必须是管理员才能操作！")
 			return nil
 		}
-		bot.Send("未授权")
+		if content == "keys" {
+			var keys []string
+			for s, _ := range config.Configs() {
+				keys = append(keys, s)
+			}
+			sort.Strings(keys)
+			bot.SendTextImage(strings.Join(keys, "\n"))
+			return nil
+		}
+
+		if content != "" {
+			bot.Send(config.Configs()[content])
+			return nil
+		}
+
+		path, err := bot.SendTextImage(config.Configs().String())
+		if err != nil {
+			log.Println(err)
+		}
+		fmt.Println(path)
 		return nil
 	}, features.WithSysCmd(), features.WithHidden(), features.WithGroup("config"))
 	features.AddKeyword("cgall", "显示环境变量", func(bot bot.Bot, content string) error {
-		if bot.IsFromAdmin() {
-			path, err := bot.SendTextImage(config.Configs().String())
-			fmt.Println(config.Configs().String())
-			if err != nil {
-				log.Println(err)
-			}
-			log.Println("cgall: " + path)
+		if !bot.IsFromAdmin() {
+			bot.Send("必须是管理员才能操作！")
 			return nil
 		}
-		bot.Send("未授权")
+		path, err := bot.SendTextImage(config.Configs().String())
+		fmt.Println(config.Configs().String())
+		if err != nil {
+			log.Println(err)
+		}
+		log.Println("cgall: " + path)
 		return nil
 	}, features.WithSysCmd(), features.WithHidden(), features.WithGroup("config"))
 }
