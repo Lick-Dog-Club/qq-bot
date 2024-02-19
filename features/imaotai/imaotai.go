@@ -152,7 +152,12 @@ mt-geo %s <地址>
 			phone = strings.TrimSpace(split[0])
 			code = strings.TrimSpace(split[1])
 		}
-		bot.Send(loginAndStore(phone, code))
+		store, err := loginAndStore(phone, code)
+		if err != nil {
+			bot.Send(err.Error())
+			return nil
+		}
+		bot.Send(store)
 		return nil
 	}, features.WithGroup("maotai"), features.WithAIFunc(features.AIFuncDef{
 		Properties: map[string]jsonschema.Definition{
@@ -171,12 +176,16 @@ mt-geo %s <地址>
 				Code  string `json:"code"`
 			}{}
 			json.Unmarshal([]byte(args), &s)
-			return loginAndStore(s.Phone, s.Code), nil
+			_, err := loginAndStore(s.Phone, s.Code)
+			if err != nil {
+				return err.Error(), nil
+			}
+			return "用户添加成功", nil
 		},
 	}))
 }
 
-func loginAndStore(phone, code string) string {
+func loginAndStore(phone, code string) (string, error) {
 	uid, token, cookie := login(phone, code)
 	info := config.MaoTaiInfo{
 		Phone:    phone,
@@ -199,7 +208,7 @@ func loginAndStore(phone, code string) string {
 		info.ExpireAt = time.Unix(e.Exp, 0)
 	}
 	if info.ExpireAt.IsZero() {
-		return "信息有误，添加失败"
+		return "", errors.New("信息有误，添加失败")
 	}
 	config.AddMaoTaiInfo(info)
 	return fmt.Sprintf(`
@@ -213,7 +222,7 @@ mt-geo %s <地址>
 申购茅台请执行:
 
 mt %s
-`, info.ExpireAt.Format(time.DateTime), geoSet, info.Phone, info.Phone)
+`, info.ExpireAt.Format(time.DateTime), geoSet, info.Phone, info.Phone), nil
 }
 
 func ReservationAll() string {
