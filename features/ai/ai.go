@@ -100,7 +100,7 @@ func See(images []string) string {
 	})
 	var res ai.CompletionResponse
 	var err error
-	err := retry.Times(5, func() error {
+	e := retry.Times(5, func() error {
 		res, err = client.Completion(context.TODO(), []ai.Message{
 			{
 				Role:         types.RoleUser,
@@ -112,8 +112,8 @@ func See(images []string) string {
 		}
 		return nil
 	})
-	if err != nil {
-		return ""
+	if e != nil {
+		return e.Error()
 	}
 	return res.GetChoices()[0].Message.Content
 }
