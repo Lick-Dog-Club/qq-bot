@@ -2,7 +2,6 @@ package openai
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"qq/features/stock/ai"
@@ -265,17 +264,18 @@ func (o *openaiClient) CreateImage(ctx context.Context, prompt string, quality s
 
 func (o *openaiClient) toError(err error) error {
 	fmt.Println(err)
-	var e = &openai.APIError{}
-	if errors.As(err, &e) {
-		if e.HTTPStatusCode == 429 {
-			err = ai.ErrorToManyRequests
-		}
-		if e.Code == "context_length_exceeded" {
-			err = ai.ContextLengthExceeded
-		}
-	}
-
 	return err
+	//var e = &openai.APIError{}
+	//if errors.As(err, &e) {
+	//	if e.HTTPStatusCode == 429 {
+	//		err = ai.ErrorToManyRequests
+	//	}
+	//	if e.Code == "context_length_exceeded" {
+	//		err = ai.ContextLengthExceeded
+	//	}
+	//}
+	//
+	//return err
 }
 
 func (o *openaiClient) toRequest(messages []ai.Message, stream bool) openai.ChatCompletionRequest {
