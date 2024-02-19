@@ -63,6 +63,7 @@ func init() {
 	features.AddKeyword("cgall", "显示环境变量", func(bot bot.Bot, content string) error {
 		if bot.IsFromAdmin() {
 			path, err := bot.SendTextImage(config.Configs().String())
+			fmt.Println(config.Configs().String())
 			if err != nil {
 				log.Println(err)
 			}
