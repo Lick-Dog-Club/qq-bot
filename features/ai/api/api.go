@@ -174,7 +174,7 @@ func (gpt *chatGPTClient) send(msg string) string {
 	prompt = append([]openai.ChatCompletionMessage{
 		{
 			Role: openai.ChatMessageRoleSystem,
-			Content: fmt.Sprintf(`今天是：%s
+			Content: fmt.Sprintf(`当前时间是：%s
 %s
 `, time.Now().Format(time.DateTime), systemPrompt),
 		},

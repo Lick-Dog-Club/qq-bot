@@ -22,15 +22,6 @@ func init() {
 		bot.Send(Analyze(content))
 		return nil
 	}, features.WithAI())
-	features.AddKeyword("now", "获取当前时间", func(bot bot.Bot, content string) error {
-		bot.Send(time.Now().Format(time.DateTime))
-		return nil
-	}, features.WithHidden(), features.WithAIFunc(features.AIFuncDef{
-		Properties: nil,
-		Call: func(args string) (string, error) {
-			return time.Now().Format(time.DateTime), nil
-		},
-	}))
 	features.AddKeyword(impl.ToolsGetCodeByName.Name, impl.ToolsGetCodeByName.Define.Function.Description, func(bot bot.Bot, content string) error {
 		bot.Send(impl.GetCodeByName(content))
 		return nil
