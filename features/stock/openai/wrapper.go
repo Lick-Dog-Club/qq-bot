@@ -7,11 +7,6 @@ import (
 	"github.com/sashabaranov/go-openai"
 )
 
-type streamChat interface {
-	streamCompletion(ctx context.Context, messages []ai.Message) (<-chan ai.CompletionResponse, error)
-	toolCall()
-}
-
 type toolCallChatWrapper struct {
 	openaiClient *openaiClient
 }
