@@ -2,6 +2,7 @@ import { defineConfig } from 'vitepress'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
+  base: process.env.NODE_ENV === 'production' ? '/qq-bot/' : '/',
   title: "QQ Bot",
   description: "qq 机器人，chatgpt/k8s部署/软件自更新/色图/天气等。",
   themeConfig: {
