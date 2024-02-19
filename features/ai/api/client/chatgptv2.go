@@ -51,8 +51,9 @@ func (gpt *openaiClientV2) GetCompletion(messages []openai.ChatCompletionMessage
 	var aimsgs []ai.Message
 	for _, msg := range messages {
 		aimsgs = append(aimsgs, ai.Message{
-			Role:    types2.Role(msg.Role),
-			Content: msg.Content,
+			Role:         types2.Role(msg.Role),
+			Content:      msg.Content,
+			MultiContent: msg.MultiContent,
 		})
 	}
 	completion, err := gpt.cli.StreamCompletion(timeout, aimsgs)

@@ -29,9 +29,10 @@ type Chat interface {
 }
 
 type Message struct {
-	Role      types.Role
-	Content   string
-	ImageUrls []string
+	Role         types.Role
+	Content      string
+	ImageUrls    []string
+	MultiContent []openai.ChatMessagePart
 
 	ToolCall []openai.ToolCall
 

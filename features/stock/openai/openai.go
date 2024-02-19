@@ -325,9 +325,10 @@ func formatChoice(choice openai.ChatCompletionChoice) *ai.Choice {
 
 func formatMessage(message ai.Message) openai.ChatCompletionMessage {
 	m := openai.ChatCompletionMessage{
-		Role:       string(message.Role),
-		Content:    message.Content,
-		ToolCallID: message.ToolCallID,
+		Role:         string(message.Role),
+		Content:      message.Content,
+		ToolCallID:   message.ToolCallID,
+		MultiContent: message.MultiContent,
 	}
 
 	if message.ToolCall != nil {

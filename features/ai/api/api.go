@@ -243,28 +243,25 @@ func lastConversationsByLimitTokens(cs []openai.ChatCompletionMessage, limitToke
 		}
 		if ContentHasImage(conversation.Content) {
 			images := GetImagesFromImageContent(conversation.Content)
-			log.Println("ContentHasImage", images)
 			var ics []openai.ChatMessagePart
 			for _, image := range images {
-				log.Println(bot.GetCQImage(image))
 				ics = append(ics, openai.ChatMessagePart{
 					Type: "image_url",
 					ImageURL: &openai.ChatMessageImageURL{
-						URL: fmt.Sprintf("%s;base64,%s", "data:image/jpeg", ""),
+						URL: bot.GetCQImage(image),
 					},
 				})
 			}
-			//res = append(res, openai.ChatCompletionMessage{
-			//	Role: conversation.Role,
-			//	MultiContent: []openai.ChatMessagePart{
-			//		{
-			//			Type: "text",
-			//			Text: GetWordFromImageContent(conversation.Content),
-			//		},
-			//	},
-			//})
-		}
-		{
+			res = append(res, openai.ChatCompletionMessage{
+				Role: conversation.Role,
+				MultiContent: []openai.ChatMessagePart{
+					{
+						Type: "text",
+						Text: GetWordFromImageContent(conversation.Content),
+					},
+				},
+			})
+		} else {
 			res = append(res, openai.ChatCompletionMessage{
 				Role:    conversation.Role,
 				Content: conversation.Content,
