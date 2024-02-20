@@ -8,8 +8,8 @@ hero:
   tagline: 多模态对话、指令交互
   actions:
     - theme: brand
-      text: 查看文档
-      link: /markdown-examples
+      text: 快速开始
+      link: /quick-started.md
 
 features:
   - title: 🚞 查询高铁/火车票信息
