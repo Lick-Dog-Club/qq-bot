@@ -12,7 +12,7 @@ import (
 func init() {
 	cronjob.Manager().NewCommand("lpr", func(robot bot.CronBot) error {
 		lprs := lpr.Get()
-		if len(lprs) > 0 && time.Now().Date() == lprs[0].Date.Date() {
+		if len(lprs) > 0 && time.Now().Format("2006-01-02") == lprs[0].Date.Format("2006-01-02") {
 			robot.SendGroup(
 				config.GroupID(),
 				fmt.Sprintf("LPR 调整了，日期 %v 一年 '%v%%' 五年 '%v%%'",
