@@ -3,15 +3,17 @@ package lpr
 import (
 	"bytes"
 	"fmt"
-	"github.com/antchfx/htmlquery"
-	log "github.com/sirupsen/logrus"
 	"io"
 	"net/http"
 	"qq/bot"
 	"qq/features"
 	"qq/util"
+	"sort"
 	"strings"
 	"time"
+
+	"github.com/antchfx/htmlquery"
+	log "github.com/sirupsen/logrus"
 )
 
 func init() {
@@ -26,6 +28,18 @@ func init() {
 }
 
 type LPRs []LPR
+
+func (r LPRs) Len() int {
+	return len(r)
+}
+
+func (r LPRs) Less(i, j int) bool {
+	return r[i].Date.After(r[j].Date)
+}
+
+func (r LPRs) Swap(i, j int) {
+	r[i], r[j] = r[j], r[i]
+}
 
 func (r LPRs) String() string {
 	bf := bytes.Buffer{}
@@ -90,5 +104,6 @@ func Get() LPRs {
 			FiveYear: util.ToFloat64(fiveYear),
 		})
 	}
+	sort.Sort(l)
 	return l
 }
