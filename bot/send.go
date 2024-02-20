@@ -298,7 +298,11 @@ func send(message *Message, msg string) string {
 		req, _ = http.NewRequest("POST", cqHost+"/send_msg", strings.NewReader(fmt.Sprintf(`{"user_id": %d, "message": %q}`, sid, strings.Trim(msg, "\n"))))
 	}
 	req.Header.Add("content-type", "application/json")
-	do, _ := c.Do(req)
+	do, err := c.Do(req)
+	if err != nil {
+		log.Println(err)
+		return ""
+	}
 	defer do.Body.Close()
 	var res sendResponse
 	json.NewDecoder(do.Body).Decode(&res)

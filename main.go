@@ -125,7 +125,7 @@ func main() {
 
 func brithCry() {
 	go func() {
-		time.Sleep(5 * time.Second)
+		time.Sleep(15 * time.Second)
 		for _, s := range config.AdminIDs().List() {
 			bot.NewQQBot(&bot.Message{}).SendToUser(s, fmt.Sprintf("%s 系统已启动", time.Now().Format(time.DateTime)))
 		}
