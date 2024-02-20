@@ -9,7 +9,7 @@ hero:
   actions:
     - theme: brand
       text: 快速开始
-      link: /quick-started.md
+      link: /quick-start.md
 
 features:
   - title: 🚞 查询高铁/火车票信息
