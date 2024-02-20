@@ -13,7 +13,7 @@ import (
 )
 
 func init() {
-	features.AddKeyword("geo", "geo 查询", func(bot bot.Bot, content string) error {
+	features.AddKeyword("geo", "geo 地理位置查询", func(bot bot.Bot, content string) error {
 		geo := Geo(config.GeoKey(), content)
 		split := strings.Split(geo, ",")
 		if len(split) == 2 {

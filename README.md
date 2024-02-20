@@ -25,10 +25,10 @@
 @bot	(y)draw         	<+prompt>: 使用 ai 画图
 @bot	(x)clear        	清除 ai 历史对话记录
 @bot	(y)GetCodeByName	根据名称获取股票代码
-@bot	(x)canceltask   	取消任务
-@bot	(x)task         	添加任务
-@bot	(x)listtask     	任务列表
 @bot	(x)help         	帮助信息
+@bot	(x)listtask     	任务列表
+@bot	(x)task         	添加任务
+@bot	(x)canceltask   	取消任务
 @bot	(y)bili-lottery 	<+bilibili-cookie> bilibili 抽奖, 自动转发up主的抽奖活动
 @bot	(y)holiday      	获取节假日数据, 获取法定节假日数据, 返回节日名称和具体的放假时间
 @bot	(y)ddys         	<+dy/dm>, 获取最新的电影、动漫资讯, 默认 +dy
@@ -38,12 +38,12 @@
 @bot	(y)dx           	股票新债/打新，查询今日是否有新债
 @bot	(y)weibo        	获取今日实时的微博热搜榜单
 @bot	(y)zuan         	返回一句祖安/骂人的话
-@bot	(x)webot        	微信机器人扫码登录
+@bot	(y)geo          	geo 地理位置查询
 @bot	(y)tip          	获取一个生活小窍门
+@bot	(x)webot        	微信机器人扫码登录
 @bot	(y)zhihu        	获取知乎热搜榜单
-@bot	(y)rkl          	获取一个绕口令
 @bot	(y)pic          	返回动漫图片~
-@bot	(y)geo          	geo 查询
+@bot	(y)rkl          	获取一个绕口令
 @bot	(y)stock        	分析股票
 @bot	(x)default      	ai 自动回答
 ```
