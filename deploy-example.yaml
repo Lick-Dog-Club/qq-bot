@@ -214,6 +214,7 @@ spec:
       containers:
         - name: aktools
           image: registry.cn-shanghai.aliyuncs.com/akfamily/aktools:jupyter
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
               name: aktools-http
@@ -224,6 +225,7 @@ spec:
             - aktools
         - name: clash
           image: dreamacro/clash
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 7890
               name: proxy
