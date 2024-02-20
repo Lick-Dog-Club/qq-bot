@@ -20,6 +20,7 @@ import (
 	//_ "qq/cronjob/kfc"
 	_ "qq/cronjob/autoupdate"
 	_ "qq/cronjob/ddys"
+	_ "qq/cronjob/lpr"
 
 	// _ "qq/cronjob/btc"
 	_ "qq/cronjob/comic"
@@ -49,6 +50,7 @@ import (
 	_ "qq/features/jin10"
 	_ "qq/features/kfc"
 	_ "qq/features/lifetip"
+	_ "qq/features/lpr"
 	_ "qq/features/picture"
 	_ "qq/features/pixiv"
 	_ "qq/features/raokouling"
