@@ -1,11 +1,11 @@
 
 # QQ Bot
 
-> 详细咨询请加 QQ 1025434218, 注明来源
-
 [![build-docker](https://github.com/Lick-Dog-Club/qq-bot/actions/workflows/build.yaml/badge.svg)](https://github.com/Lick-Dog-Club/qq-bot/actions/workflows/build.yaml)
 
 > qq 机器人
+>
+> 详细咨询请加 QQ 1025434218, 注明来源
 
 ## 指令 (y代表可ai交互的指令)
 
@@ -25,9 +25,9 @@
 @bot	(y)draw         	<+prompt>: 使用 ai 画图
 @bot	(x)clear        	清除 ai 历史对话记录
 @bot	(y)GetCodeByName	根据名称获取股票代码
-@bot	(x)task         	添加任务
-@bot	(x)listtask     	任务列表
 @bot	(x)canceltask   	取消任务
+@bot	(x)listtask     	任务列表
+@bot	(x)task         	添加任务
 @bot	(x)help         	帮助信息
 @bot	(y)bili-lottery 	<+bilibili-cookie> bilibili 抽奖, 自动转发up主的抽奖活动
 @bot	(y)holiday      	获取节假日数据, 获取法定节假日数据, 返回节日名称和具体的放假时间
@@ -40,8 +40,8 @@
 @bot	(x)webot        	微信机器人扫码登录
 @bot	(y)tip          	获取一个生活小窍门
 @bot	(y)zhihu        	获取知乎热搜榜单
-@bot	(y)rkl          	获取一个绕口令
 @bot	(y)pic          	返回动漫图片~
+@bot	(y)rkl          	获取一个绕口令
 @bot	(y)geo          	geo 查询
 @bot	(y)stock        	分析股票
 @bot	(x)default      	ai 自动回答
