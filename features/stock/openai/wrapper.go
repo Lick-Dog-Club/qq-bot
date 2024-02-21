@@ -52,7 +52,7 @@ func (t *toolCallChatWrapper) StreamCompletion(ctx context.Context, messages []a
 					ToolCallID: call.ID,
 				})
 			}
-			streamCompletion, err := t.openaiClient.streamCompletion(ctx, messages)
+			streamCompletion, err := t.StreamCompletion(ctx, messages)
 			if err != nil {
 				resCh <- &ai.CompletionResponseImpl{Error: err}
 				return
