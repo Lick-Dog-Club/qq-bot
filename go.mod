@@ -19,7 +19,7 @@ require (
 	github.com/pkoukk/tiktoken-go v0.1.6
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/samber/lo v1.39.0
-	github.com/sashabaranov/go-openai v1.19.4
+	github.com/sashabaranov/go-openai v1.20.0
 	github.com/signintech/gopdf v0.18.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/wangluozhe/requests v1.2.4

@@ -33,7 +33,7 @@ func AllFuncCalls() (res []tools.Tool) {
 				Name: imp.Keyword(),
 				Define: openai.Tool{
 					Type: openai.ToolTypeFunction,
-					Function: openai.FunctionDefinition{
+					Function: &openai.FunctionDefinition{
 						Name:        imp.Keyword(),
 						Description: imp.Description(),
 						Parameters: &jsonschema.Definition{

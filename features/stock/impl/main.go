@@ -22,7 +22,7 @@ var (
 		Name: "GetStockPrice",
 		Define: openai.Tool{
 			Type: openai.ToolTypeFunction,
-			Function: openai.FunctionDefinition{
+			Function: &openai.FunctionDefinition{
 				Name:        "GetStockPrice",
 				Description: "获取特定股票价格信息，返回了：`日期`，`开盘`，`收盘`，`最高`，`最低`，`成交量` 的信息",
 				Parameters: &jsonschema.Definition{
@@ -56,7 +56,7 @@ var (
 		Name: "GetFinancialStatements",
 		Define: openai.Tool{
 			Type: openai.ToolTypeFunction,
-			Function: openai.FunctionDefinition{
+			Function: &openai.FunctionDefinition{
 				Name:        "GetFinancialStatements",
 				Description: "获取公司财务报表数据，返回了： '每股收益', '营业收入（元）', '营业收入去年同期（元）', '营业收入同比增长(%）', '营业收入季度环比增长(％）', '净利润（元）', '净利润去年同期（元）', '净利润同比增长(%）', '净利润季度环比增长(％）', '每股净资产（元）', '净资产收益率(%）' 的信息",
 				Parameters: &jsonschema.Definition{
@@ -76,7 +76,7 @@ var (
 		Name: "GetIndustryData",
 		Define: openai.Tool{
 			Type: openai.ToolTypeFunction,
-			Function: openai.FunctionDefinition{
+			Function: &openai.FunctionDefinition{
 				Name:        "GetIndustryData",
 				Description: "获取特定行业数据, 返回 行业代码,行业名称,股票数(只),市价总值(元),平均市盈率,平均价格(元)",
 				Parameters: &jsonschema.Definition{
@@ -89,7 +89,7 @@ var (
 		Name: "GetCashFlow",
 		Define: openai.Tool{
 			Type: openai.ToolTypeFunction,
-			Function: openai.FunctionDefinition{
+			Function: &openai.FunctionDefinition{
 				Name:        "GetCashFlow",
 				Description: "获取现金流数据, 返回 '净现金流（元）','净现金流同比(%）','经营性现金流量净额（元）','经营性现金流量净额占比(％)','客户及同业存款净增加额,金额（元）','客户及同业存款净增加额,占比(%）','投资性现金流量净额（元）','投资性现金流量净额净额占比(%)','贷款增加额金额（元）','贷款增加额占比(%）','取得投资收益收到的现金金额（元）','取得投资收益收到的现金占比(%）','融资性现金流量净额（元）','融资性现金流量净额占比(%）'",
 				Parameters: &jsonschema.Definition{
@@ -109,7 +109,7 @@ var (
 		Name: "GetMarketSentiment",
 		Define: openai.Tool{
 			Type: openai.ToolTypeFunction,
-			Function: openai.FunctionDefinition{
+			Function: &openai.FunctionDefinition{
 				Name:        "GetMarketSentiment",
 				Description: "获取市场信心指数，返回近一周/一个月/一年的指数",
 				Parameters: &jsonschema.Definition{
@@ -130,7 +130,7 @@ var (
 		Name: "GetCodeByName",
 		Define: openai.Tool{
 			Type: openai.ToolTypeFunction,
-			Function: openai.FunctionDefinition{
+			Function: &openai.FunctionDefinition{
 				Name:        "GetCodeByName",
 				Description: "根据名称获取股票代码",
 				Parameters: &jsonschema.Definition{
