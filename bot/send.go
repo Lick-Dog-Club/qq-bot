@@ -32,6 +32,7 @@ type botimp interface {
 type Bot interface {
 	botimp
 	UserID() string
+	From() string
 	IsFromAdmin() bool
 	IsGroupMessage() bool
 	Send(msg string) string
@@ -64,6 +65,10 @@ func (d *dummyBot) Message() *Message {
 
 func (d *dummyBot) UserID() string {
 	return ""
+}
+
+func (d *dummyBot) From() string {
+	return "dummy"
 }
 
 func (d *dummyBot) IsFromAdmin() bool {
@@ -122,6 +127,10 @@ func (m *qqBot) Message() *Message {
 
 func (m *qqBot) UserID() string {
 	return m.msg.SenderUserID
+}
+
+func (m *qqBot) From() string {
+	return "QQ"
 }
 
 func (m *qqBot) IsGroupMessage() bool {
@@ -386,6 +395,10 @@ func (w *wechatBot) SendToUser(uid string, s string) string {
 
 func (w *wechatBot) UserID() string {
 	return w.message.SenderUserID
+}
+
+func (w *wechatBot) From() string {
+	return "Wechat"
 }
 
 func (w *wechatBot) IsFromAdmin() bool {

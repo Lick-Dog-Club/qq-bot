@@ -1,7 +1,9 @@
 package api
 
 import (
+	"bytes"
 	"fmt"
+	"html/template"
 	"log"
 	"qq/bot"
 	"qq/config"
@@ -21,8 +23,9 @@ import (
 	"github.com/sashabaranov/go-openai"
 )
 
-const systemPrompt = `你是一个ai机器人，能回答用户的任何问题, 你的回答必须满足下面的格式, 不要使用markdown格式返回:
-1. 如果返回的是图片地址，你必须使用 "[CQ:image,file={imageURL}]" 这个格式返回, query 的参数也要完整的返回
+const pro = `你是一个ai机器人，能回答用户的任何问题, 你的回答必须满足下面的格式, 不要使用 markdown 格式返回:
+{{- if eq .From "QQ" }}
+- 如果返回的是图片地址，你必须使用 "[CQ:image,file={imageURL}]" 这个格式返回, query 的参数也要完整的返回
 	例如:
 	  imageURL=https://xxx/img.jpg
 	  你需要返回: [CQ:image,file=https://xxx/img.jpg]
@@ -30,26 +33,25 @@ const systemPrompt = `你是一个ai机器人，能回答用户的任何问题, 
 	  imageURL=https://xxx/img.jpg?type=png&uuid=xxx
 	  你需要返回: [CQ:image,file=https://xxx/img.jpg?type=png&uuid=xxx]
 
-2. 如果返回的是图片本地路径，你必须使用 "[CQ:image,file=file://{imagePath}]" 这个格式返回
+- 如果返回的是图片本地路径，你必须使用 "[CQ:image,file=file://{imagePath}]" 这个格式返回
 	例如:
 	  imagePath=/tmp/a.png
 	  你需要返回: [CQ:image,file=file:///tmp/a.png]
+{{- end }}
 
-3. 如果用户希望你给他一张图片, 按照以下优先级给图片
+- 如果用户希望你给他一张图片, 按照以下优先级给图片
   - 优先返回 pixiv 的图片
   - 其次返回动漫图片
 
-4. 如果用户参与了 bilibili 抽奖，你需要告诉用户具体抽的奖项内容
+- 如果用户参与了 bilibili 抽奖，你需要告诉用户具体抽的奖项内容
 
-5. 不要对 "[CQ:image,file=file:///data/images/xxx.jpg]" 这种格式的图片做处理
-
-6. 用户查询高铁火车票信息, 按照以下步骤处理
+- 用户查询高铁火车票信息, 按照以下步骤处理
 	- 没告诉你时间就那么默认是今天, 需要告诉用户今天是什么日期
 	- 调用 "Search12306" 查询班次信息
 	- 一等座、二等座和无座已售罄的车次无需告诉用户，重点关注二等座，二等座优先级最高, 如果二等座都卖完了，可以告诉用户其他可选的班次
 	- 已经发车的班次不需要告诉用户, 只需要告诉用户可以买哪些班次
 
-7. 如果问你，股票相关的问题，你需要化身为短线炒股专家，拥有丰富的炒股经验，请你从多个方面分析股票适不适合短线投资, 时间范围是距今(包括今天)近一个月或三个月的数据，如果用户给的是股票名称，那么先转化成股票代码，如果有多个股票代码，需要先询问用户使用哪个
+- 如果问你，股票相关的问题，你需要化身为短线炒股专家，拥有丰富的炒股经验，请你从多个方面分析股票适不适合短线投资, 时间范围是距今(包括今天)近一个月或三个月的数据，如果用户给的是股票名称，那么先转化成股票代码，如果有多个股票代码，需要先询问用户使用哪个
 	## 你需要从以下角度逐个分析
 	
 	1. 技术分析，例如多个技术指标（如RSI、MACD）给出超卖信号且股价接近支撑位，可能是抄底的机会。
@@ -61,16 +63,18 @@ const systemPrompt = `你是一个ai机器人，能回答用户的任何问题, 
     
     所有你给出的结论都需要有真实的数据作为支撑！
 
-8. 茅台申购步骤，如果用户没给出手机号，那么先询问用户手机号
+- 茅台申购步骤，如果用户没给出手机号，那么先询问用户手机号
    1. 通过用户给的手机号自动预约茅台
    2. 如果“用户未登陆，短信已发送”，那么需要询问用户6位短信验证码，添加用户
    3. 添加用户成功之后再次询问用户是否需要进行申购
    4. 返回申购结果详情
 `
 
+var systemPrompt, _ = template.New("").Parse(pro)
+
 var (
-	manager = newGptManager[*chatGPTClient](func(uid string) userImp {
-		return newChatGPTClient(uid)
+	manager = newGptManager[*chatGPTClient](func(uid, from string) userImp {
+		return newChatGPTClient(uid, from)
 	})
 )
 
@@ -79,11 +83,11 @@ type userImp interface {
 	send(string) string
 }
 
-func Request(userID string, ask string) string {
-	user := manager.getByUser(userID)
+func Request(userID string, ask, from string) string {
+	user := manager.getByUser(userID, from)
 	if user.lastAskTime().Add(10 * time.Minute).Before(time.Now()) {
 		manager.deleteUser(userID)
-		user = manager.getByUser(userID)
+		user = manager.getByUser(userID, from)
 	}
 	result := user.send(ask)
 	log.Printf("%s: %s\ngpt: %s\n", userID, ask, result)
@@ -97,10 +101,10 @@ func Clear(userID string) {
 type gptManager[T userImp] struct {
 	sync.RWMutex
 	users map[string]userImp
-	newFn func(userID string) userImp
+	newFn func(userID, from string) userImp
 }
 
-func newGptManager[T userImp](newFn func(uid string) userImp) *gptManager[T] {
+func newGptManager[T userImp](newFn func(uid, from string) userImp) *gptManager[T] {
 	return &gptManager[T]{users: map[string]userImp{}, newFn: newFn}
 }
 
@@ -110,12 +114,12 @@ func (m *gptManager[T]) deleteUser(userID string) {
 	delete(m.users, userID)
 }
 
-func (m *gptManager[T]) getByUser(userID string) userImp {
+func (m *gptManager[T]) getByUser(userID, from string) userImp {
 	m.Lock()
 	defer m.Unlock()
 	client, ok := m.users[userID]
 	if !ok {
-		client = m.newFn(userID)
+		client = m.newFn(userID, from)
 		m.users[userID] = client
 	}
 	return client
@@ -127,13 +131,15 @@ type chatGPTClient struct {
 	status *types.Status
 
 	client func() types.GptClientImpl
+	from   string
 }
 
-func newChatGPTClient(uid string) *chatGPTClient {
+func newChatGPTClient(uid, from string) *chatGPTClient {
 	return &chatGPTClient{
 		uid:    uid,
 		cache:  types.NewKV(map[string]any{"namespace": "chatgpt"}),
 		status: &types.Status{},
+		from:   from,
 		client: func() types.GptClientImpl {
 			return client.NewOpenaiClientV2(config.AiToken(), config.ChatGPTApiModel(), openai.ChatCompletionRequest{
 				Temperature:     0.8,
@@ -170,12 +176,14 @@ func (gpt *chatGPTClient) send(msg string) string {
 	}
 	conversation = append(conversation, um)
 	prompt := gpt.BuildPrompt(conversation, um.ID)
+	bf := bytes.Buffer{}
+	systemPrompt.Execute(&bf, map[string]string{"From": gpt.from})
 	prompt = append([]openai.ChatCompletionMessage{
 		{
 			Role: openai.ChatMessageRoleSystem,
 			Content: fmt.Sprintf(`当前时间是：%s
 %s
-`, time.Now().Format(time.DateTime), systemPrompt),
+`, time.Now().Format(time.DateTime), bf.String()),
 		},
 	}, lastConversationsByLimitTokens(prompt, config.AIMaxToken())...)
 	var result string
