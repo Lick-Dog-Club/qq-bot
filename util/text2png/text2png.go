@@ -10,7 +10,7 @@ import (
 	"github.com/golang/freetype/truetype"
 )
 
-//go:embed AaBuKeYan-2.ttf
+//go:embed FangZhengShuSongJianTi-1.ttf
 var fontBytes []byte
 
 func handleLines(lines []string) (res []string) {
