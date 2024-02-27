@@ -18,7 +18,7 @@ import (
 
 func init() {
 	features.AddKeyword("gm", "早上好", func(bot bot.Bot, content string) error {
-		bot.Send(Get())
+		bot.SendTextImage(Get())
 		return nil
 	})
 }
