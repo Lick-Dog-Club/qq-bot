@@ -100,6 +100,10 @@ func AdminIDs() UID {
 	return UID(c.Load().(KV)["admin_id"])
 }
 
+func Webot() string {
+	return c.Load().(KV)["webot"]
+}
+
 func BiliCookie() string {
 	return c.Load().(KV)["bili_cookie"]
 }
@@ -162,6 +166,13 @@ func TgAppHash() string {
 func Birthday() string {
 	return c.Load().(KV)["birthday"]
 }
+func WebotUsers() map[string]struct{} {
+	m := make(map[string]struct{})
+	for _, s := range strings.Split(c.Load().(KV)["webot_users"], ",") {
+		m[s] = struct{}{}
+	}
+	return m
+}
 
 func TgAppID() int32 {
 	atoi, _ := strconv.Atoi(c.Load().(KV)["tg_app_id"])
@@ -183,6 +194,8 @@ var mappingKV = KV{
 	"chatgpt_model":  openai.GPT3Dot5Turbo16K0613,
 	"pixiv_mode":     "daily",
 	"pixiv_session":  "",
+	"webot":          "",
+	"webot_users":    "",
 	"group_id":       os.Getenv("GROUP_ID"),
 	"namespace":      os.Getenv("APP_NAMESPACE"),
 	"pod_name":       os.Getenv("POD_NAME"),

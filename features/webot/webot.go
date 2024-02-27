@@ -1,11 +1,12 @@
 package webot
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
-	"os"
 	"qq/bot"
+	"qq/config"
 	"qq/features"
 	"qq/util"
 	"strings"
@@ -50,11 +51,11 @@ func RunWechat(b bot.Bot) {
 					log.Println(err)
 					return
 				}
-				senderID := receiver.ID()
+				senderID := receiver.AvatarID()
 				if msg.IsComeFromGroup() {
-					gid = receiver.ID()
+					gid = receiver.AvatarID()
 					sender, _ := msg.SenderInGroup()
-					senderID = sender.ID()
+					senderID = sender.AvatarID()
 				}
 
 				atMsg := fmt.Sprintf("@%s", msg.Owner().NickName)
@@ -106,10 +107,10 @@ func RunWechat(b bot.Bot) {
 	}
 
 	// 创建热存储容器对象
-	f := "/data/webot-storage.json"
-	create, _ := os.Create(f)
-	create.Close()
-	reloadStorage := openwechat.NewFileHotReloadStorage(f)
+	reloadStorage := &ConfigStorage{
+		Key: "webot",
+		bf:  bytes.NewBufferString(config.Webot()),
+	}
 	defer reloadStorage.Close()
 	// 执行热登录
 	if err := webot.HotLogin(reloadStorage, openwechat.NewRetryLoginOption()); err != nil {
@@ -159,25 +160,37 @@ type userMaps struct {
 }
 
 func newUserMaps() *userMaps {
-	return &userMaps{users: map[string]struct{}{}}
+	return &userMaps{users: config.WebotUsers()}
 }
 
 func (um *userMaps) add(nick string) {
 	um.Lock()
 	defer um.Unlock()
-	um.users[nick] = struct{}{}
+	users := config.WebotUsers()
+	users[nick] = struct{}{}
+	var s []string
+	for name := range users {
+		s = append(s, name)
+	}
+	config.Set(map[string]string{"webot_users": strings.Join(s, ",")})
 }
 
 func (um *userMaps) del(nick string) {
 	um.Lock()
 	defer um.Unlock()
-	delete(um.users, nick)
+	m := config.WebotUsers()
+	delete(m, nick)
+	var s []string
+	for name := range m {
+		s = append(s, name)
+	}
+	config.Set(map[string]string{"webot_users": strings.Join(s, ",")})
 }
 
 func (um *userMaps) exists(nick string) bool {
 	um.RLock()
 	defer um.RUnlock()
-	_, ok := um.users[nick]
+	_, ok := config.WebotUsers()[nick]
 	return ok
 }
 
@@ -185,7 +198,7 @@ func (um *userMaps) String() (res string) {
 	um.RLock()
 	defer um.RUnlock()
 	var users []string
-	for user, _ := range um.users {
+	for user, _ := range config.WebotUsers() {
 		users = append(users, user)
 	}
 
@@ -245,4 +258,26 @@ func holdUp(sb *superBot, keyword string, content string) bool {
 	default:
 		return false
 	}
+}
+
+type ConfigStorage struct {
+	Key  string
+	bf   *bytes.Buffer
+	once sync.Once
+}
+
+func (c *ConfigStorage) Read(p []byte) (n int, err error) {
+	return c.bf.Read(p)
+}
+
+func (c *ConfigStorage) Write(p []byte) (n int, err error) {
+	write, err := c.bf.Write(p)
+	if err == nil {
+		config.Set(map[string]string{c.Key: c.bf.String()})
+	}
+	return write, err
+}
+
+func (c *ConfigStorage) Close() error {
+	return nil
 }
