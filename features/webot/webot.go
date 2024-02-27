@@ -11,6 +11,7 @@ import (
 	"qq/util"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/eatmoreapple/openwechat"
 	log "github.com/sirupsen/logrus"
@@ -42,6 +43,11 @@ func RunWechat(b bot.Bot) {
 		ctx.Message.GetPicture()
 	})
 	dispatcher.OnText(func(ctx *openwechat.MessageContext) {
+		unix := time.Unix(ctx.Message.CreateTime, 0)
+		if unix.Before(time.Now()) {
+			log.Println("过滤之前的消息", ctx.Message)
+			return
+		}
 		go func() {
 			if sb.IsBotEnabledForThisMsg(ctx.Message) {
 				msg := ctx.Message
@@ -61,9 +67,6 @@ func RunWechat(b bot.Bot) {
 					sender, _ := msg.Sender()
 					senderID = receiver.UserName + sender.UserName
 				}
-
-				fmt.Println(ctx.Message.CreateTime, senderID)
-				return
 
 				atMsg := fmt.Sprintf("@%s", msg.Owner().NickName)
 				body := strings.ReplaceAll(msg.Content, atMsg, "")
