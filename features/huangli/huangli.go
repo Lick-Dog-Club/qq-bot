@@ -58,6 +58,14 @@ type Result struct {
 	Jieqi             string `json:"jieqi"`
 }
 
+func (r Result) Tldr() string {
+	s := fmt.Sprintf("%s%s\n适宜: %s\n禁忌: %s", r.Lubarmonth, r.Lunarday, r.Fitness, r.Taboo)
+	if r.LunarFestival != "" {
+		s += "\n农历节日: " + r.LunarFestival
+	}
+	return s
+}
+
 type response struct {
 	Code   int    `json:"code"`
 	Msg    string `json:"msg"`

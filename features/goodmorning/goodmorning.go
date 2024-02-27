@@ -28,14 +28,15 @@ func init() {
 
 func Get() string {
 	content := fmt.Sprintf(`今天是 %s
-=======================
 %s
 =======================
 %s
 =======================
 %s
+=======================
 %s
-`, holiday.WeekDays[time.Now().Weekday()], weather.Get("杭州"), strings.Join(lo.ChunkString(star.Get(config.Birthday()), 40), "\n"), GetBirthDayInfo(), holiday.GetNextHolidays().Render())
+%s
+`, holiday.WeekDays[time.Now().Weekday()], huangli.Get(time.Now()).Tldr(), weather.Get("杭州"), strings.Join(lo.ChunkString(star.Get(config.Birthday()), 40), "\n"), GetBirthDayInfo(), holiday.GetNextHolidays().Render())
 	return content
 
 }
