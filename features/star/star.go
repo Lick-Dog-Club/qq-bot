@@ -16,7 +16,7 @@ import (
 
 func init() {
 	features.AddKeyword("star", "<+date: 2000-01-01> 根据日期获取对应的星座", func(bot bot.Bot, content string) error {
-		bot.Send(Get(content))
+		bot.Send(GetStar(content))
 		return nil
 	}, features.WithAIFunc(features.AIFuncDef{
 		Properties: map[string]jsonschema.Definition{
