@@ -230,11 +230,6 @@ func replyText(msg *openwechat.Message) func(content string) (*openwechat.SentMe
 				return nil, errors.New("群里面不能自己用机器人")
 			}
 		}
-		user, _ := msg.Bot().GetCurrentUser()
-		helper := user.FileHelper()
-		return func(content string) (*openwechat.SentMessage, error) {
-			return user.SendTextToFriend(helper, content)
-		}
 	}
 	return msg.ReplyText
 }
