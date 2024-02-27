@@ -41,57 +41,59 @@ func RunWechat(b bot.Bot) {
 		ctx.Message.GetPicture()
 	})
 	dispatcher.OnText(func(ctx *openwechat.MessageContext) {
-		if sb.IsBotEnabledForThisMsg(ctx.Message) {
-			msg := ctx.Message
-			gid := ""
-			receiver, err := msg.Receiver()
-			if err != nil {
-				log.Println(err)
-				return
-			}
-			senderID := receiver.ID()
-			if msg.IsComeFromGroup() {
-				gid = receiver.ID()
-				sender, _ := msg.SenderInGroup()
-				senderID = sender.ID()
-			}
-
-			atMsg := fmt.Sprintf("@%s", msg.Owner().NickName)
-			body := strings.ReplaceAll(msg.Content, atMsg, "")
-			keyword, content := util.GetKeywordAndContent(body)
-			log.Printf("body: %v\n, key: %v\n,content: %v", body, keyword, content)
-
-			if holdUp(sb, keyword, content) && msg.IsSendBySelf() {
-				send := func(text string) {
-					replyText(msg)(text)
-				}
-				if keyword == "list" {
-					send(sb.um.String())
+		go func() {
+			if sb.IsBotEnabledForThisMsg(ctx.Message) {
+				msg := ctx.Message
+				gid := ""
+				receiver, err := msg.Receiver()
+				if err != nil {
+					log.Println(err)
 					return
 				}
-				send("done!")
-				return
-			}
+				senderID := receiver.ID()
+				if msg.IsComeFromGroup() {
+					gid = receiver.ID()
+					sender, _ := msg.SenderInGroup()
+					senderID = sender.ID()
+				}
 
-			if err := features.Run(bot.NewWechatBot(bot.Message{
-				SenderUserID:  senderID,
-				Message:       msg.Content,
-				IsSendByGroup: msg.IsComeFromGroup(),
-				GroupID:       gid,
-				WeReply:       replyText(msg),
-				WeSendImg: func(file io.Reader) (*openwechat.SentMessage, error) {
-					image, err := replyImg(msg)(file)
-					if err != nil {
-						log.Println(err)
-						return nil, err
+				atMsg := fmt.Sprintf("@%s", msg.Owner().NickName)
+				body := strings.ReplaceAll(msg.Content, atMsg, "")
+				keyword, content := util.GetKeywordAndContent(body)
+				log.Printf("body: %v\n, key: %v\n,content: %v", body, keyword, content)
+
+				if holdUp(sb, keyword, content) && msg.IsSendBySelf() {
+					send := func(text string) {
+						replyText(msg)(text)
 					}
-					sb.msgMap.Add(image.MsgId, image)
-					return image, err
-				},
-			}, sb.msgMap), keyword, content); err != nil {
-				log.Println(err)
+					if keyword == "list" {
+						send(sb.um.String())
+						return
+					}
+					send("done!")
+					return
+				}
+
+				if err := features.Run(bot.NewWechatBot(bot.Message{
+					SenderUserID:  senderID,
+					Message:       msg.Content,
+					IsSendByGroup: msg.IsComeFromGroup(),
+					GroupID:       gid,
+					WeReply:       replyText(msg),
+					WeSendImg: func(file io.Reader) (*openwechat.SentMessage, error) {
+						image, err := replyImg(msg)(file)
+						if err != nil {
+							log.Println(err)
+							return nil, err
+						}
+						sb.msgMap.Add(image.MsgId, image)
+						return image, err
+					},
+				}, sb.msgMap), keyword, content); err != nil {
+					log.Println(err)
+				}
 			}
-		}
+		}()
 	})
 	webot.MessageHandler = dispatcher.Dispatch
 
