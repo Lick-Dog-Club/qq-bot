@@ -20,15 +20,17 @@
 @bot	(x)mt-list      	当前用户以及过期时间
 @bot	(x)mt-reward    	领取小游戏奖励
 @bot	(x)mt-game-up   	加速小游戏
+@bot	(x)starx        	<+date: 2000-01-01> 根据日期获取对应的星座运势
+@bot	(y)star         	<+date: 2000-01-01> 根据日期获取对应的星座
 @bot	(y)p            	<+n/r/rai> 返回 pixiv 热门图片
 @bot	(y)see          	<+图片url>: 根据 url 识别图片内容
 @bot	(y)draw         	<+prompt>: 使用 ai 画图
 @bot	(x)clear        	清除 ai 历史对话记录
 @bot	(y)GetCodeByName	根据名称获取股票代码
-@bot	(x)help         	帮助信息
 @bot	(x)listtask     	任务列表
 @bot	(x)canceltask   	取消任务
 @bot	(x)task         	添加任务
+@bot	(x)help         	帮助信息
 @bot	(y)bili-lottery 	<+bilibili-cookie> bilibili 抽奖, 自动转发up主的抽奖活动
 @bot	(x)next-holiday 	获取下一个节假日, 获取下一个法定节假日, 返回节日名称和具体的放假时间
 @bot	(y)holiday      	获取节假日数据, 获取法定节假日数据, 返回节日名称和具体的放假时间
