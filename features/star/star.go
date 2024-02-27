@@ -32,7 +32,11 @@ func init() {
 			json.Unmarshal([]byte(args), &s)
 			return GetStar(s.Date), nil
 		},
-	}))
+	}), features.WithGroup("star"))
+	features.AddKeyword("starx", "<+date: 2000-01-01> 根据日期获取对应的星座运势", func(bot bot.Bot, content string) error {
+		bot.Send(Get(content))
+		return nil
+	}, features.WithGroup("star"))
 }
 
 func Get(day string) string {
