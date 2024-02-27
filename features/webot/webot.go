@@ -110,7 +110,7 @@ func RunWechat(b bot.Bot) {
 	reloadStorage := openwechat.NewFileHotReloadStorage(f)
 	defer reloadStorage.Close()
 	// 执行热登录
-	if err := webot.HotLogin(reloadStorage); err != nil {
+	if err := webot.HotLogin(reloadStorage, openwechat.NewRetryLoginOption()); err != nil {
 		log.Println(err)
 		return
 	}
