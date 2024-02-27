@@ -1,10 +1,10 @@
 package webot
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"io"
+	"os"
 	"qq/bot"
 	"qq/config"
 	"qq/features"
@@ -117,10 +117,12 @@ func RunWechat(b bot.Bot) {
 	}
 
 	// 创建热存储容器对象
-	reloadStorage := &ConfigStorage{
-		Key: "webot",
-		bf:  bytes.NewBufferString(config.Webot()),
+	f := "/data/webot-storage.json"
+	if _, err2 := os.Stat(f); os.IsNotExist(err2) {
+		create, _ := os.Create(f)
+		create.Close()
 	}
+	reloadStorage := openwechat.NewFileHotReloadStorage(f)
 	defer reloadStorage.Close()
 	// 执行热登录
 	if err := webot.HotLogin(reloadStorage, openwechat.NewRetryLoginOption()); err != nil {
@@ -268,29 +270,4 @@ func holdUp(sb *superBot, keyword string, content string) bool {
 	default:
 		return false
 	}
-}
-
-type ConfigStorage struct {
-	Key  string
-	bf   *bytes.Buffer
-	once sync.Once
-}
-
-func (c *ConfigStorage) Read(p []byte) (n int, err error) {
-	return c.bf.Read(p)
-}
-
-func (c *ConfigStorage) Write(p []byte) (n int, err error) {
-	c.once.Do(func() {
-		config.Set(map[string]string{c.Key: ""})
-	})
-	write, err := c.bf.Write(p)
-	if err == nil {
-		config.Set(map[string]string{c.Key: c.bf.String()})
-	}
-	return write, err
-}
-
-func (c *ConfigStorage) Close() error {
-	return nil
 }
