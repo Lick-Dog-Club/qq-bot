@@ -44,7 +44,7 @@ func RunWechat(b bot.Bot) {
 	})
 	dispatcher.OnText(func(ctx *openwechat.MessageContext) {
 		unix := time.Unix(ctx.Message.CreateTime, 0)
-		if unix.Before(time.Now()) {
+		if unix.Add(8 * time.Second).Before(time.Now()) {
 			log.Println("过滤之前的消息", ctx.Message)
 			return
 		}
