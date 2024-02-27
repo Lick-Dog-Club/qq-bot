@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 	"qq/bot"
 	"qq/features"
 	"qq/util"
@@ -103,7 +104,10 @@ func RunWechat(b bot.Bot) {
 	}
 
 	// 创建热存储容器对象
-	reloadStorage := openwechat.NewFileHotReloadStorage("/data/webot-storage.json")
+	f := "/data/webot-storage.json"
+	create, _ := os.Create(f)
+	create.Close()
+	reloadStorage := openwechat.NewFileHotReloadStorage(f)
 	defer reloadStorage.Close()
 	// 执行热登录
 	if err := webot.HotLogin(reloadStorage); err != nil {
