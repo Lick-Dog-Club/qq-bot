@@ -55,6 +55,7 @@ import (
 	_ "qq/features/picture"
 	_ "qq/features/pixiv"
 	_ "qq/features/raokouling"
+	_ "qq/features/star"
 	_ "qq/features/stock"
 	_ "qq/features/sysupdate"
 	_ "qq/features/task"

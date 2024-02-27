@@ -4,11 +4,36 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"qq/bot"
 	"qq/config"
+	"qq/features"
 	"qq/util"
 	"strings"
 	"time"
+
+	"github.com/sashabaranov/go-openai/jsonschema"
 )
+
+func init() {
+	features.AddKeyword("star", "<+date: 2000-01-01> 根据日期获取对应的星座", func(bot bot.Bot, content string) error {
+		bot.Send(Get(content))
+		return nil
+	}, features.WithAIFunc(features.AIFuncDef{
+		Properties: map[string]jsonschema.Definition{
+			"date": {
+				Type:        jsonschema.String,
+				Description: "日期，格式为 2006-01-02",
+			},
+		},
+		Call: func(args string) (string, error) {
+			var s = struct {
+				Date string `json:"date"`
+			}{}
+			json.Unmarshal([]byte(args), &s)
+			return GetStar(s.Date), nil
+		},
+	}))
+}
 
 func Get(day string) string {
 	get, _ := http.Get(fmt.Sprintf("https://apis.tianapi.com/star/index?key=%s&astro=%s", config.TianApiKey(), GetStar(day)))
