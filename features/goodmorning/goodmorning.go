@@ -10,10 +10,13 @@ import (
 	"qq/features"
 	"qq/features/holiday"
 	"qq/features/huangli"
+	"qq/features/star"
 	"qq/features/weather"
 	"qq/util"
 	"strings"
 	"time"
+
+	"github.com/samber/lo"
 )
 
 func init() {
@@ -31,7 +34,8 @@ func Get() string {
 %s
 =======================
 %s
-`, holiday.WeekDays[time.Now().Weekday()], weather.Get("杭州"), holiday.GetNextHolidays().Render(), GetBirthDayInfo())
+%s
+`, holiday.WeekDays[time.Now().Weekday()], weather.Get("杭州"), strings.Join(lo.ChunkString(star.Get(config.Birthday()), 40), "\n"), GetBirthDayInfo(), holiday.GetNextHolidays().Render())
 	return content
 
 }
