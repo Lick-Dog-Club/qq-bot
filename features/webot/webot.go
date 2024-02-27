@@ -281,6 +281,9 @@ func (c *ConfigStorage) Read(p []byte) (n int, err error) {
 }
 
 func (c *ConfigStorage) Write(p []byte) (n int, err error) {
+	c.once.Do(func() {
+		config.Set(map[string]string{c.Key: ""})
+	})
 	write, err := c.bf.Write(p)
 	if err == nil {
 		config.Set(map[string]string{c.Key: c.bf.String()})
