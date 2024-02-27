@@ -9,7 +9,7 @@ require (
 	github.com/antchfx/htmlquery v1.3.0
 	github.com/cenkalti/backoff/v4 v4.2.1
 	github.com/duc-cnzj/when-rules v0.0.0-20230427085034-04cfb63088f8
-	github.com/eatmoreapple/openwechat v1.4.3
+	github.com/eatmoreapple/openwechat v1.4.6
 	github.com/fogleman/gg v1.3.0
 	github.com/forgoer/openssl v1.6.0
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0

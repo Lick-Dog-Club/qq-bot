@@ -34,9 +34,14 @@ func RunWechat(b bot.Bot) {
 	webot := openwechat.DefaultBot(openwechat.Desktop) // 桌面模式
 	var sb = &superBot{bot: webot, msgMap: bot.NewWeMsgMap(), um: newUserMaps()}
 
-	// 注册消息处理函数
-	webot.MessageHandler = func(msg *openwechat.Message) {
-		if msg.IsText() && sb.IsBotEnabledForThisMsg(msg) {
+	dispatcher := openwechat.NewMessageMatchDispatcher()
+	dispatcher.OnImage(func(ctx *openwechat.MessageContext) {
+		log.Printf("%#v", ctx)
+		ctx.Message.GetPicture()
+	})
+	dispatcher.OnText(func(ctx *openwechat.MessageContext) {
+		if sb.IsBotEnabledForThisMsg(ctx.Message) {
+			msg := ctx.Message
 			gid := ""
 			receiver, err := msg.Receiver()
 			if err != nil {
@@ -86,7 +91,9 @@ func RunWechat(b bot.Bot) {
 				log.Println(err)
 			}
 		}
-	}
+	})
+	webot.MessageHandler = dispatcher.Dispatch
+
 	// 注册登陆二维码回调
 	webot.UUIDCallback = func(uuid string) {
 		b.Send("访问下面网址扫描二维码登录")
@@ -95,16 +102,19 @@ func RunWechat(b bot.Bot) {
 		b.Send(qrcodeUrl)
 	}
 
-	// 登陆
-	if err := webot.Login(); err != nil {
-		fmt.Println(err)
+	// 创建热存储容器对象
+	reloadStorage := openwechat.NewFileHotReloadStorage("/data/webot-storage.json")
+	defer reloadStorage.Close()
+	// 执行热登录
+	if err := webot.HotLogin(reloadStorage); err != nil {
+		log.Println(err)
 		return
 	}
 
 	// 获取登陆的用户
 	self, err := webot.GetCurrentUser()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
 

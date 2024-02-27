@@ -28,6 +28,7 @@ func init() {
 
 func Get() string {
 	content := fmt.Sprintf(`今天是 %s
+
 %s
 =======================
 %s

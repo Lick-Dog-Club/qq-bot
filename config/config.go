@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"qq/util"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -190,6 +191,7 @@ var mappingKV = KV{
 	"http_proxy":     os.Getenv("HTTP_PROXY"),
 	"binance_key":    "",
 	"birthday":       "",
+	"ai_max_token":   "128000",
 	"binance_secret": "",
 	"binance_diff":   "100",
 	"maotai":         "",
@@ -244,6 +246,10 @@ func BgPassphrase() string {
 
 func BgApiSecretKey() string {
 	return c.Load().(KV)["bg_api_secret_key"]
+}
+
+func AIMaxToken() int64 {
+	return util.ToInt64(c.Load().(KV)["ai_max_token"])
 }
 
 type MTInfos map[string]MaoTaiInfo

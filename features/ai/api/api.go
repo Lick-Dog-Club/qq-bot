@@ -177,7 +177,7 @@ func (gpt *chatGPTClient) send(msg string) string {
 %s
 `, time.Now().Format(time.DateTime), systemPrompt),
 		},
-	}, lastConversationsByLimitTokens(prompt, 4096)...)
+	}, lastConversationsByLimitTokens(prompt, config.AIMaxToken())...)
 	var result string
 	err := retry.Times(10, func() error {
 		var err error
@@ -233,14 +233,14 @@ func (gpt *chatGPTClient) BuildPrompt(messages types.UserMessageList, parentMess
 	return
 }
 
-func lastConversationsByLimitTokens(cs []openai.ChatCompletionMessage, limitTokenCount int) []openai.ChatCompletionMessage {
+func lastConversationsByLimitTokens(cs []openai.ChatCompletionMessage, limitTokenCount int64) []openai.ChatCompletionMessage {
 	var (
 		res        []openai.ChatCompletionMessage
 		totalToken int
 	)
 	for _, conversation := range lo.Reverse(cs) {
 		totalToken = totalToken + WordToToken(conversation.Content)
-		if totalToken > limitTokenCount {
+		if totalToken > int(limitTokenCount) {
 			break
 		}
 		content := conversation.Content

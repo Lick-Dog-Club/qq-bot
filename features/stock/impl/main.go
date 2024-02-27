@@ -226,9 +226,7 @@ func GetStockPrice(req GetStockPriceRequest) []GetStockPriceResponse {
 
 // GetFinancialStatementsRequest 是获取公司财务报表数据的请求参数
 type GetFinancialStatementsRequest struct {
-	Ticker  string `json:"ticker"`  // 股票代码
-	Year    int    `json:"year"`    // 年份
-	Quarter int    `json:"quarter"` // 季度
+	Ticker string `json:"ticker"` // 股票代码
 }
 
 // FinancialStatement 包含了财务报表的关键数据
