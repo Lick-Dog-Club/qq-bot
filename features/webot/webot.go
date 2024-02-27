@@ -56,6 +56,12 @@ func RunWechat(b bot.Bot) {
 					gid = receiver.AvatarID()
 					sender, _ := msg.SenderInGroup()
 					senderID = sender.AvatarID()
+					log.Printf("GGGGGGGG: receiverID: %v, senderID: %v", receiver.AvatarID(), senderID)
+					log.Println("GGGGGGGG: ", receiver.UserName, sender.UserName)
+					log.Printf("%#v", sender)
+				} else {
+					log.Printf("UUUUUUUUU: receiverID: %v, senderID: %v", receiver.AvatarID(), senderID)
+					log.Println("UUUUUUUUU: ", receiver.UserName)
 				}
 
 				atMsg := fmt.Sprintf("@%s", msg.Owner().NickName)
