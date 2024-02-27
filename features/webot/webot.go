@@ -39,8 +39,8 @@ func RunWechat(b bot.Bot) {
 
 	dispatcher := openwechat.NewMessageMatchDispatcher()
 	dispatcher.OnImage(func(ctx *openwechat.MessageContext) {
-		log.Printf("%#v", ctx)
-		ctx.Message.GetPicture()
+		log.Printf("%#v\n\n", ctx)
+		log.Printf("%#v\n\n", ctx.Message)
 	})
 	dispatcher.OnText(func(ctx *openwechat.MessageContext) {
 		unix := time.Unix(ctx.Message.CreateTime, 0)
@@ -51,6 +51,7 @@ func RunWechat(b bot.Bot) {
 		go func() {
 			if sb.IsBotEnabledForThisMsg(ctx.Message) {
 				msg := ctx.Message
+				log.Printf("%#v\n\n", ctx.Message)
 				gid := ""
 				receiver, err := msg.Receiver()
 				if err != nil {
