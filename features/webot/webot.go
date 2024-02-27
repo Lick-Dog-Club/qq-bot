@@ -26,9 +26,13 @@ import (
 //      add 用户昵称/群组昵称
 //      del 用户昵称/群组昵称
 
+var o sync.Once
+
 func init() {
 	features.AddKeyword("webot", "微信机器人扫码登录", func(bot bot.Bot, content string) error {
-		RunWechat(bot)
+		o.Do(func() {
+			RunWechat(bot)
+		})
 		return nil
 	})
 }
