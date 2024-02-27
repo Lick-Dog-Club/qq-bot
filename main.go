@@ -31,7 +31,7 @@ import (
 
 	//_ "qq/cronjob/picture"
 	_ "qq/cronjob/bitget"
-	_ "qq/cronjob/tianqi"
+	_ "qq/cronjob/goodmorning"
 
 	//_ "qq/cronjob/trainticketleft"
 	_ "qq/cronjob/xiaofeiquan"
@@ -44,6 +44,7 @@ import (
 	_ "qq/features/daxin"
 	_ "qq/features/ddys"
 	_ "qq/features/geo"
+	_ "qq/features/goodmorning"
 	_ "qq/features/help"
 	_ "qq/features/holiday"
 	_ "qq/features/imaotai"

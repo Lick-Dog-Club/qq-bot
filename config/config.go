@@ -158,6 +158,10 @@ func TgAppHash() string {
 	return c.Load().(KV)["tg_app_hash"]
 }
 
+func Birthday() string {
+	return c.Load().(KV)["birthday"]
+}
+
 func TgAppID() int32 {
 	atoi, _ := strconv.Atoi(c.Load().(KV)["tg_app_id"])
 	return int32(atoi)
@@ -185,6 +189,7 @@ var mappingKV = KV{
 	"tian_api_key":   os.Getenv("TIAN_API_KEY"),
 	"http_proxy":     os.Getenv("HTTP_PROXY"),
 	"binance_key":    "",
+	"birthday":       "",
 	"binance_secret": "",
 	"binance_diff":   "100",
 	"maotai":         "",

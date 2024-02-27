@@ -16,12 +16,10 @@ import (
 
 const weatherURL = "https://restapi.amap.com/v3/weather/weatherInfo?key=%s&city=%s&extensions=all&output=json"
 
-var temp, _ = template.New("").Parse(`
-城市: {{.City}}
+var temp, _ = template.New("").Parse(`城市: {{.City}}
 
 白天: {{.Dayweather}} {{.Daytemp}} ℃
-夜晚: {{.Nightweather}} {{.Nighttemp}} ℃
-`)
+夜晚: {{.Nightweather}} {{.Nighttemp}} ℃`)
 
 type input struct {
 	City         string
