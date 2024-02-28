@@ -162,6 +162,26 @@ func TgAppHash() string {
 func Birthday() string {
 	return c.Load().(KV)["birthday"]
 }
+
+type Task struct {
+	ID      int    `json:"id"`
+	RunAt   string `json:"run_at"`
+	Content string `json:"content"`
+	UserID  string `json:"user_id"`
+	GroupID string `json:"group_id"`
+}
+
+func Tasks() (res []Task) {
+	json.Unmarshal([]byte(c.Load().(KV)["tasks"]), &res)
+	return
+}
+
+func SyncTasks(res []Task) {
+	marshal, _ := json.Marshal(&res)
+	Set(map[string]string{"tasks": string(marshal)})
+	return
+}
+
 func WebotUsers() map[string]struct{} {
 	m := make(map[string]struct{})
 	for _, s := range strings.Split(c.Load().(KV)["webot_users"], ",") {
@@ -190,6 +210,7 @@ var mappingKV = KV{
 	"chatgpt_model":  openai.GPT3Dot5Turbo16K0613,
 	"pixiv_mode":     "daily",
 	"pixiv_session":  "",
+	"tasks":          "",
 	"webot_users":    "",
 	"group_id":       os.Getenv("GROUP_ID"),
 	"namespace":      os.Getenv("APP_NAMESPACE"),

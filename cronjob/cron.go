@@ -2,9 +2,12 @@ package cronjob
 
 import (
 	"context"
+	"qq/config"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/samber/lo"
 
 	log "github.com/sirupsen/logrus"
 
@@ -73,6 +76,10 @@ func (c *robfigCronV3Runner) AddOnceCommand(t time.Time, fn func()) int {
 	s := newOnceSchedule(t, c.c).(*onceSchedule)
 	s.id = c.c.Schedule(s, cron.FuncJob(func() {
 		cronManager.RemoveOnceCommand(int(s.id))
+		filter := lo.Filter(config.Tasks(), func(item config.Task, index int) bool {
+			return item.ID != int(s.id)
+		})
+		config.SyncTasks(filter)
 		c.c.Remove(s.id)
 		fn()
 	}))

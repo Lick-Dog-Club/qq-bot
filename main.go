@@ -12,6 +12,7 @@ import (
 	"qq/features"
 	"qq/features/webot"
 	"qq/util"
+	"qq/util/random"
 	"strings"
 	"time"
 
@@ -86,6 +87,7 @@ func main() {
 	}
 
 	cm := cronjob.Manager()
+	loadTasks(cm)
 	cm.Run(context.TODO())
 	defer cm.Shutdown(context.TODO())
 
@@ -125,6 +127,34 @@ func main() {
 	brithCry()
 	log.Println("[HTTP]: start...")
 	log.Println(http.ListenAndServe(":5701", nil))
+}
+
+func loadTasks(cm cronjob.CronManager) {
+	var newTasks []config.Task
+	for _, task := range config.Tasks() {
+		parse, _ := time.Parse(time.DateTime, task.RunAt)
+		b := bot.NewQQBot(&bot.Message{
+			SenderUserID:  task.UserID,
+			IsSendByGroup: task.GroupID != "",
+			GroupID:       task.GroupID,
+		})
+		tid := cm.NewOnceCommand(random.String(20), parse, func(bot.Bot) error {
+			if k, v := util.GetKeywordAndContent(task.Content); features.Match(k) {
+				features.Run(b, k, v)
+			} else {
+				b.SendToUser(task.UserID, task.Content)
+			}
+			return nil
+		})
+		newTasks = append(newTasks, config.Task{
+			ID:      tid,
+			RunAt:   task.RunAt,
+			Content: task.Content,
+			UserID:  task.UserID,
+			GroupID: task.GroupID,
+		})
+	}
+	config.SyncTasks(newTasks)
 }
 
 func brithCry() {

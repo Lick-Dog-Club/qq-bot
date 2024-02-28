@@ -3,12 +3,15 @@ package task
 import (
 	"fmt"
 	"qq/bot"
+	"qq/config"
 	"qq/cronjob"
 	"qq/features"
 	"qq/util"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/samber/lo"
 
 	"github.com/duc-cnzj/when-rules/zh"
 	"github.com/olebedev/when"
@@ -32,11 +35,15 @@ func init() {
 			bot.Send(err.Error())
 			return err
 		}
+		filter := lo.Filter(config.Tasks(), func(item config.Task, index int) bool {
+			return item.ID != atoi
+		})
+		config.SyncTasks(filter)
 		cronjob.Manager().RemoveOnceCommand(int(atoi))
 		bot.Send("已取消")
 		return nil
 	}, features.WithGroup("task"))
-	features.AddKeyword("task", "添加任务", func(b bot.Bot, content string) error {
+	features.AddKeyword("task", "<+content: 具体内容> 添加一次性的任务/提醒事项", func(b bot.Bot, content string) error {
 		parse, err := w.Parse(content, time.Now())
 		if err != nil {
 			b.Send(err.Error())
@@ -64,6 +71,23 @@ func init() {
 			b.Send(content)
 			return nil
 		})
+		var uid, gid string
+		if b.IsGroupMessage() {
+			gid = b.UserID()
+		} else {
+			uid = b.UserID()
+		}
+		res := config.Tasks()
+		res = append(res, config.Task{
+			ID:      tid,
+			RunAt:   parse.Time.Format(time.DateTime),
+			Content: content,
+			UserID:  uid,
+			GroupID: gid,
+		})
+
+		config.SyncTasks(res)
+
 		b.Send(fmt.Sprintf("已设置:\n时间: %s, 内容: %s\n取消任务请执行: canceltask %d", parse.Time.Format(time.DateTime), content, tid))
 		return nil
 	}, features.WithGroup("task"))
