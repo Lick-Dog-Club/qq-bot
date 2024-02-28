@@ -165,15 +165,17 @@ func Birthday() string {
 
 type Task struct {
 	ID      int    `json:"id"`
+	Name    string `json:"name"`
 	RunAt   string `json:"run_at"`
 	Content string `json:"content"`
 	UserID  string `json:"user_id"`
 	GroupID string `json:"group_id"`
 }
 
-func Tasks() (res []Task) {
+func Tasks() []Task {
+	res := make([]Task, 0)
 	json.Unmarshal([]byte(c.Load().(KV)["tasks"]), &res)
-	return
+	return res
 }
 
 func SyncTasks(res []Task) {

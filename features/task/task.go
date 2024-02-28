@@ -7,7 +7,7 @@ import (
 	"qq/cronjob"
 	"qq/features"
 	"qq/util"
-	"strconv"
+	"qq/util/random"
 	"strings"
 	"time"
 
@@ -30,17 +30,19 @@ func init() {
 		return nil
 	}, features.WithGroup("task"))
 	features.AddKeyword("canceltask", "取消任务", func(bot bot.Bot, content string) error {
-		atoi, err := strconv.Atoi(strings.TrimSpace(content))
-		if err != nil {
-			bot.Send(err.Error())
-			return err
-		}
-		filter := lo.Filter(config.Tasks(), func(item config.Task, index int) bool {
-			return item.ID != atoi
+		find, b := lo.Find(config.Tasks(), func(item config.Task) bool {
+			return item.Name == content
 		})
-		config.SyncTasks(filter)
-		cronjob.Manager().RemoveOnceCommand(int(atoi))
-		bot.Send("已取消")
+		if b {
+			filter := lo.Filter(config.Tasks(), func(item config.Task, index int) bool {
+				return item.ID != find.ID
+			})
+			config.SyncTasks(filter)
+			cronjob.Manager().RemoveOnceCommand(int(find.ID))
+			bot.Send("已取消")
+		} else {
+			bot.Send("未找到任务")
+		}
 		return nil
 	}, features.WithGroup("task"))
 	features.AddKeyword("task", "<+content: 具体内容> 添加一次性的任务/提醒事项", func(b bot.Bot, content string) error {
@@ -58,21 +60,25 @@ func init() {
 		var tid int
 		after := strings.SplitAfter(content, parse.Text)
 		cc := content
+		name := random.String(20)
 		if len(after) == 2 {
 			if k, v := util.GetKeywordAndContent(after[1]); features.Match(k) {
 				cc = after[1]
-				tid = cronjob.Manager().NewOnceCommand(content, parse.Time, func(bot.Bot) error {
+				tid = cronjob.Manager().NewOnceCommand(name, parse.Time, func(bot.Bot) error {
 					features.Run(b, k, v)
 					return nil
 				})
-				b.Send(fmt.Sprintf("已设置:\n时间: %s, 命令: %s\n取消任务请执行: canceltask %d", parse.Time.Format(time.DateTime), k, tid))
-				return nil
+				b.Send(fmt.Sprintf("已设置:\n时间: %s, 命令: %s\n取消任务请执行: canceltask %v", parse.Time.Format(time.DateTime), k, name))
 			}
+		} else {
+			tid = cronjob.Manager().NewOnceCommand(name, parse.Time, func(bot.Bot) error {
+				b.Send(content)
+				return nil
+			})
+
+			b.Send(fmt.Sprintf("已设置:\n时间: %s, 内容: %s\n取消任务请执行: canceltask %v", parse.Time.Format(time.DateTime), content, name))
 		}
-		tid = cronjob.Manager().NewOnceCommand(content, parse.Time, func(bot.Bot) error {
-			b.Send(content)
-			return nil
-		})
+
 		var uid, gid string
 		if b.IsGroupMessage() {
 			gid = b.UserID()
@@ -82,6 +88,7 @@ func init() {
 		res := config.Tasks()
 		res = append(res, config.Task{
 			ID:      tid,
+			Name:    name,
 			RunAt:   parse.Time.Format(time.DateTime),
 			Content: cc,
 			UserID:  uid,
@@ -89,8 +96,6 @@ func init() {
 		})
 
 		config.SyncTasks(res)
-
-		b.Send(fmt.Sprintf("已设置:\n时间: %s, 内容: %s\n取消任务请执行: canceltask %d", parse.Time.Format(time.DateTime), content, tid))
 		return nil
 	}, features.WithGroup("task"))
 }
