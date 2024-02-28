@@ -12,7 +12,6 @@ import (
 	"qq/features"
 	"qq/features/webot"
 	"qq/util"
-	"qq/util/random"
 	"strings"
 	"time"
 
@@ -88,7 +87,7 @@ func main() {
 
 	cm := cronjob.Manager()
 	cm.Run(context.TODO())
-	loadTasks(cm)
+	cm.LoadOnceTasks()
 	defer cm.Shutdown(context.TODO())
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -127,38 +126,6 @@ func main() {
 	brithCry()
 	log.Println("[HTTP]: start...")
 	log.Println(http.ListenAndServe(":5701", nil))
-}
-
-func loadTasks(cm cronjob.CronManager) {
-	var newTasks []config.Task
-	for _, task := range config.Tasks() {
-		parse, _ := time.ParseInLocation(time.DateTime, task.RunAt, time.Local)
-		if time.Now().After(parse) {
-			continue
-		}
-		b := bot.NewQQBot(&bot.Message{
-			SenderUserID:  task.UserID,
-			IsSendByGroup: task.GroupID != "",
-			GroupID:       task.GroupID,
-		})
-		tid := cm.NewOnceCommand(random.String(20), parse, func(bot.Bot) error {
-			if k, v := util.GetKeywordAndContent(task.Content); features.Match(k) {
-				features.Run(b, k, v)
-			} else {
-				b.SendToUser(task.UserID, task.Content)
-			}
-			return nil
-		})
-		newTasks = append(newTasks, config.Task{
-			ID:      tid,
-			Name:    task.Name,
-			RunAt:   task.RunAt,
-			Content: task.Content,
-			UserID:  task.UserID,
-			GroupID: task.GroupID,
-		})
-	}
-	config.SyncTasks(newTasks)
 }
 
 func brithCry() {

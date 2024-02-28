@@ -4,6 +4,10 @@ import (
 	"context"
 	"fmt"
 	"qq/bot"
+	"qq/config"
+	"qq/features"
+	"qq/util"
+	"qq/util/random"
 	"sort"
 	"sync"
 	"time"
@@ -36,7 +40,7 @@ type CronManager interface {
 	NewOnceCommand(name string, t time.Time, fn func(bot bot.Bot) error) int
 	Run(ctx context.Context) error
 	RemoveOnceCommand(id int) error
-
+	LoadOnceTasks()
 	Shutdown(context.Context) error
 
 	List() []CommandImp
@@ -52,6 +56,38 @@ type manager struct {
 
 func newManager(runner CronRunner) *manager {
 	return &manager{commands: make(map[string]*command), runner: runner, onceCommands: map[int]*onceCommand{}}
+}
+
+func (m *manager) LoadOnceTasks() {
+	var newTasks []config.Task
+	for _, task := range config.Tasks() {
+		parse, _ := time.ParseInLocation(time.DateTime, task.RunAt, time.Local)
+		if time.Now().After(parse) {
+			continue
+		}
+		b := bot.NewQQBot(&bot.Message{
+			SenderUserID:  task.UserID,
+			IsSendByGroup: task.GroupID != "",
+			GroupID:       task.GroupID,
+		})
+		tid := m.NewOnceCommand(random.String(20), parse, func(bot.Bot) error {
+			if k, v := util.GetKeywordAndContent(task.Content); features.Match(k) {
+				features.Run(b, k, v)
+			} else {
+				b.SendToUser(task.UserID, task.Content)
+			}
+			return nil
+		})
+		newTasks = append(newTasks, config.Task{
+			ID:      tid,
+			Name:    task.Name,
+			RunAt:   task.RunAt,
+			Content: task.Content,
+			UserID:  task.UserID,
+			GroupID: task.GroupID,
+		})
+	}
+	config.SyncTasks(newTasks)
 }
 
 func (m *manager) NewCommand(name string, fn func(bot bot.CronBot) error) CommandImp {
