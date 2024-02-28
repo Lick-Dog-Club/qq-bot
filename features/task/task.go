@@ -57,8 +57,10 @@ func init() {
 
 		var tid int
 		after := strings.SplitAfter(content, parse.Text)
+		cc := content
 		if len(after) == 2 {
 			if k, v := util.GetKeywordAndContent(after[1]); features.Match(k) {
+				cc = after[1]
 				tid = cronjob.Manager().NewOnceCommand(content, parse.Time, func(bot.Bot) error {
 					features.Run(b, k, v)
 					return nil
@@ -81,7 +83,7 @@ func init() {
 		res = append(res, config.Task{
 			ID:      tid,
 			RunAt:   parse.Time.Format(time.DateTime),
-			Content: content,
+			Content: cc,
 			UserID:  uid,
 			GroupID: gid,
 		})
