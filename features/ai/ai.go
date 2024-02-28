@@ -23,14 +23,14 @@ import (
 
 func init() {
 	features.AddKeyword("clear", "清除 ai 历史对话记录", func(bot bot.Bot, content string) error {
-		api.Clear(userID(bot))
+		api.Clear(uuid(bot))
 		bot.Send("done")
 		return nil
 	}, features.WithGroup("ai"))
 	features.SetDefault("ai 自动回答", func(bot bot.Bot, content string) error {
 		req := api.Request
 		log.Printf("%s: %s", bot.UserID(), content)
-		bot.Send(req(userID(bot), content, bot.From(), bot.UserID(), bot.GroupID()))
+		bot.Send(req(uuid(bot), content, bot.From(), bot.UserID(), bot.GroupID()))
 		return nil
 	})
 
@@ -78,7 +78,7 @@ func init() {
 	}), features.WithGroup("ai"))
 }
 
-func userID(bot bot.Bot) string {
+func uuid(bot bot.Bot) string {
 	return fmt.Sprintf("%s:%v", bot.UserID(), bot.IsGroupMessage())
 }
 
