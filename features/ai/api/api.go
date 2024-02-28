@@ -47,6 +47,8 @@ const pro = `今天是 {{.Today}}, 当前的 UID 是: "{{.UID}}", 是否来自�
 
 - 如果用户参与了 bilibili 抽奖，你需要告诉用户具体抽的奖项内容
 
+- 如果你设置了一个任务或者提醒事项，你要告诉用户怎么取消这个任务或者提醒, 任务/提醒相关的问题，请你挑选 “canceltask” “listtask” “task” 方法回答 
+
 - 用户查询高铁火车票信息, 按照以下步骤处理
 	- 没告诉你时间就那么默认是今天, 需要告诉用户今天是什么日期
 	- 调用 "Search12306" 查询班次信息
@@ -82,17 +84,17 @@ var (
 
 type userImp interface {
 	lastAskTime() time.Time
-	send(s, uid, gid string) string
+	send(s, id, uid, gid string) string
 }
 
-func Request(userID string, ask, from, gid string) string {
-	user := manager.getByUser(userID, from)
+func Request(id string, ask, from, uid, gid string) string {
+	user := manager.getByUser(id, from)
 	if user.lastAskTime().Add(10 * time.Minute).Before(time.Now()) {
-		manager.deleteUser(userID)
-		user = manager.getByUser(userID, from)
+		manager.deleteUser(id)
+		user = manager.getByUser(id, from)
 	}
-	result := user.send(ask, userID, gid)
-	log.Printf("%s: %s\ngpt: %s\n", userID, ask, result)
+	result := user.send(ask, id, uid, gid)
+	log.Printf("%s: %s\ngpt: %s\n", id, ask, result)
 	return result
 }
 
@@ -175,7 +177,7 @@ func buildSysPrompt(s SysPrompt) string {
 	return bf.String()
 }
 
-func (gpt *chatGPTClient) send(msg string, uid, gid string) string {
+func (gpt *chatGPTClient) send(msg string, uid, userid, gid string) string {
 	if gpt.status.IsAsking() {
 		return "正在回答上一个问题: " + gpt.status.Msg()
 	}
@@ -205,7 +207,7 @@ func (gpt *chatGPTClient) send(msg string, uid, gid string) string {
 `, time.Now().Format(time.DateTime), buildSysPrompt(SysPrompt{
 				From:    gpt.from,
 				Today:   time.Now(),
-				UserID:  uid,
+				UserID:  userid,
 				GroupID: gid,
 			})),
 		},

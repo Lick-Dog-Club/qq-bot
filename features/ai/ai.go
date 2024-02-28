@@ -30,7 +30,7 @@ func init() {
 	features.SetDefault("ai 自动回答", func(bot bot.Bot, content string) error {
 		req := api.Request
 		log.Printf("%s: %s", bot.UserID(), content)
-		bot.Send(req(userID(bot), content, bot.From(), bot.GroupID()))
+		bot.Send(req(userID(bot), content, bot.From(), bot.UserID(), bot.GroupID()))
 		return nil
 	})
 

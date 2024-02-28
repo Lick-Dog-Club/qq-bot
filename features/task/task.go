@@ -28,26 +28,34 @@ func init() {
 	w.Add(zh.All...)
 	w.Add(common.All...)
 
-	features.AddKeyword("listtask", "任务列表", func(bot bot.Bot, content string) error {
+	features.AddKeyword("listtask", "显示任务列表", func(bot bot.Bot, content string) error {
 		bot.Send(cronjob.Manager().ListOnceCommands())
 		return nil
-	}, features.WithGroup("task"))
-	features.AddKeyword("canceltask", "取消任务", func(bot bot.Bot, content string) error {
-		find, b := lo.Find(config.Tasks(), func(item config.Task) bool {
-			return item.Name == content
-		})
-		if b {
-			filter := lo.Filter(config.Tasks(), func(item config.Task, index int) bool {
-				return item.ID != find.ID
-			})
-			config.SyncTasks(filter)
-			cronjob.Manager().RemoveOnceCommand(int(find.ID))
-			bot.Send("已取消")
-		} else {
-			bot.Send("未找到任务")
-		}
+	}, features.WithGroup("task"), features.WithAIFunc(features.AIFuncDef{
+		Properties: map[string]jsonschema.Definition{},
+		Call: func(args string) (string, error) {
+			return cronjob.Manager().ListOnceCommands(), nil
+		},
+	}))
+	features.AddKeyword("canceltask", "<+taskID>根据 id 取消任务", func(bot bot.Bot, content string) error {
+		bot.Send(Cancel(content))
 		return nil
-	}, features.WithGroup("task"))
+	}, features.WithGroup("task"), features.WithAIFunc(features.AIFuncDef{
+		Properties: map[string]jsonschema.Definition{
+			"taskID": {
+				Type:        jsonschema.String,
+				Description: "任务的ID",
+			},
+		},
+		Call: func(args string) (string, error) {
+			var s = struct {
+				TaskID string `json:"taskID"`
+			}{}
+			json.Unmarshal([]byte(args), &s)
+			return Cancel(s.TaskID), nil
+		},
+	},
+	))
 	features.AddKeyword("task", "<+content: 具体内容> 添加一次性的任务/提醒事项", func(b bot.Bot, content string) error {
 		parse, err := w.Parse(content, time.Now())
 		if err != nil {
@@ -104,6 +112,21 @@ func init() {
 			})), nil
 		},
 	}))
+}
+
+func Cancel(content string) string {
+	find, b := lo.Find(config.Tasks(), func(item config.Task) bool {
+		return item.Name == content
+	})
+	if b {
+		filter := lo.Filter(config.Tasks(), func(item config.Task, index int) bool {
+			return item.ID != find.ID
+		})
+		config.SyncTasks(filter)
+		cronjob.Manager().RemoveOnceCommand(int(find.ID))
+		return "已取消"
+	}
+	return "未找到任务"
 }
 
 func AddTask(t time.Time, c string, b bot.Bot) string {
