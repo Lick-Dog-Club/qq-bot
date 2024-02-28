@@ -22,9 +22,9 @@
 @bot	(x)mt-game-up   	加速小游戏
 @bot	(x)starx        	<+date: 2000-01-01> 根据日期获取对应的星座运势
 @bot	(y)star         	<+date: 2000-01-01> 根据日期获取对应的星座
-@bot	(x)task         	<+content: 具体内容> 添加一次性的任务/提醒事项
-@bot	(x)listtask     	任务列表
-@bot	(x)canceltask   	取消任务
+@bot	(y)task         	<+content: 具体内容> 添加一次性的任务/提醒事项
+@bot	(y)canceltask   	<+taskID>根据 id 取消任务
+@bot	(y)listtask     	显示任务列表
 @bot	(y)holiday      	获取年份对应的法定节假日数据, 返回节日名称和具体的放假时间
 @bot	(y)next-holiday 	获取下一个法定节假日, 返回节日名称和具体的放假时间
 @bot	(y)p            	<+n/r/rai> 返回 pixiv 热门图片
@@ -45,8 +45,8 @@
 @bot	(y)tip          	获取一个生活小窍门
 @bot	(x)webot        	微信机器人扫码登录
 @bot	(y)zhihu        	获取知乎热搜榜单
-@bot	(y)pic          	返回动漫图片~
 @bot	(y)rkl          	获取一个绕口令
+@bot	(y)pic          	返回动漫图片~
 @bot	(y)stock        	分析股票
 @bot	(x)gm           	早上好
 @bot	(x)default      	ai 自动回答

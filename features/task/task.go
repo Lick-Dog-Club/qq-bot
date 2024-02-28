@@ -150,7 +150,7 @@ func AddTask(t time.Time, c string, b bot.Bot) string {
 
 	var uid, gid string
 	if b.IsGroupMessage() {
-		gid = b.UserID()
+		gid = b.GroupID()
 	} else {
 		uid = b.UserID()
 	}
