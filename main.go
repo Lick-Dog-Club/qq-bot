@@ -87,8 +87,8 @@ func main() {
 	}
 
 	cm := cronjob.Manager()
-	loadTasks(cm)
 	cm.Run(context.TODO())
+	loadTasks(cm)
 	defer cm.Shutdown(context.TODO())
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -133,6 +133,9 @@ func loadTasks(cm cronjob.CronManager) {
 	var newTasks []config.Task
 	for _, task := range config.Tasks() {
 		parse, _ := time.Parse(time.DateTime, task.RunAt)
+		if time.Now().After(parse) {
+			continue
+		}
 		b := bot.NewQQBot(&bot.Message{
 			SenderUserID:  task.UserID,
 			IsSendByGroup: task.GroupID != "",
