@@ -1,6 +1,7 @@
 package task
 
 import (
+	"encoding/json"
 	"fmt"
 	"qq/bot"
 	"qq/config"
@@ -10,6 +11,8 @@ import (
 	"qq/util/random"
 	"strings"
 	"time"
+
+	"github.com/sashabaranov/go-openai/jsonschema"
 
 	"github.com/samber/lo"
 
@@ -57,45 +60,87 @@ func init() {
 		}
 		log.Println(parse.Time.String(), parse)
 
-		var tid int
 		after := strings.SplitAfter(content, parse.Text)
 		cc := content
-		name := random.String(20)
 		if len(after) == 2 {
-			if k, v := util.GetKeywordAndContent(after[1]); features.Match(k) {
-				cc = after[1]
-				tid = cronjob.Manager().NewOnceCommand(name, parse.Time, func(bot.Bot) error {
-					features.Run(b, k, v)
-					return nil
-				})
-				b.Send(fmt.Sprintf("已设置:\n时间: %s, 命令: %s\n取消任务请执行: canceltask %v", parse.Time.Format(time.DateTime), k, name))
-			}
-		} else {
-			tid = cronjob.Manager().NewOnceCommand(name, parse.Time, func(bot.Bot) error {
-				b.Send(content)
-				return nil
-			})
-
-			b.Send(fmt.Sprintf("已设置:\n时间: %s, 内容: %s\n取消任务请执行: canceltask %v", parse.Time.Format(time.DateTime), content, name))
+			cc = after[1]
 		}
+		b.Send(AddTask(parse.Time, cc, b))
+		return nil
+	}, features.WithGroup("task"), features.WithAIFunc(features.AIFuncDef{
+		Properties: map[string]jsonschema.Definition{
+			"time": {
+				Type:        jsonschema.String,
+				Description: "执行的时间，格式为 `2006-01-02 15:04:05`",
+			},
+			"content": {
+				Type:        jsonschema.String,
+				Description: "用户给的完整的内容",
+			},
+			"uid": {
+				Type:        jsonschema.String,
+				Description: "用户的 UID",
+			},
+			"gid": {
+				Type:        jsonschema.String,
+				Description: "群的 GID",
+			},
+		},
+		Call: func(args string) (string, error) {
+			var s = struct {
+				Time    string `json:"time"`
+				Content string `json:"content"`
+				UID     string `json:"uid"`
+				GID     string `json:"gid"`
+			}{}
 
-		var uid, gid string
-		if b.IsGroupMessage() {
-			gid = b.UserID()
-		} else {
-			uid = b.UserID()
-		}
-		res := config.Tasks()
-		res = append(res, config.Task{
-			ID:      tid,
-			Name:    name,
-			RunAt:   parse.Time.Format(time.DateTime),
-			Content: cc,
-			UserID:  uid,
-			GroupID: gid,
+			json.Unmarshal([]byte(args), &s)
+			parse, _ := time.Parse(time.DateTime, s.Time)
+
+			return AddTask(parse, s.Content, bot.NewQQBot(&bot.Message{
+				SenderUserID:  s.UID,
+				IsSendByGroup: s.GID != "",
+				GroupID:       s.GID,
+			})), nil
+		},
+	}))
+}
+
+func AddTask(t time.Time, c string, b bot.Bot) string {
+	var result string
+	var tid int
+	name := random.String(20)
+	if k, v := util.GetKeywordAndContent(c); features.Match(k) {
+		tid = cronjob.Manager().NewOnceCommand(name, t, func(bot.Bot) error {
+			features.Run(b, k, v)
+			return nil
+		})
+		result = fmt.Sprintf("已设置:\n时间: %s, 命令: %s\n取消任务请执行: canceltask %v", t.Format(time.DateTime), k, name)
+	} else {
+		tid = cronjob.Manager().NewOnceCommand(name, t, func(bot.Bot) error {
+			b.Send(c)
+			return nil
 		})
 
-		config.SyncTasks(res)
-		return nil
-	}, features.WithGroup("task"))
+		result = fmt.Sprintf("已设置:\n时间: %s, 内容: %s\n取消任务请执行: canceltask %v", t.Format(time.DateTime), c, name)
+	}
+
+	var uid, gid string
+	if b.IsGroupMessage() {
+		gid = b.UserID()
+	} else {
+		uid = b.UserID()
+	}
+	res := config.Tasks()
+	res = append(res, config.Task{
+		ID:      tid,
+		Name:    name,
+		RunAt:   t.Format(time.DateTime),
+		Content: c,
+		UserID:  uid,
+		GroupID: gid,
+	})
+
+	config.SyncTasks(res)
+	return result
 }

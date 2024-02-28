@@ -23,7 +23,7 @@ import (
 	"github.com/sashabaranov/go-openai"
 )
 
-const pro = `今天是 {{.Today}}
+const pro = `今天是 {{.Today}}, 当前的 UID 是: "{{.UID}}", 是否来自群聊: "{{.FromGroup}}", 群组 ID: "{{.GroupID}}"
 
 你是一个ai机器人，能回答用户的任何问题, 你的回答必须满足下面的格式, 不要使用 markdown 格式返回:
 {{- if eq .From "QQ" }}
@@ -82,16 +82,16 @@ var (
 
 type userImp interface {
 	lastAskTime() time.Time
-	send(string) string
+	send(s, uid, gid string) string
 }
 
-func Request(userID string, ask, from string) string {
+func Request(userID string, ask, from, gid string) string {
 	user := manager.getByUser(userID, from)
 	if user.lastAskTime().Add(10 * time.Minute).Before(time.Now()) {
 		manager.deleteUser(userID)
 		user = manager.getByUser(userID, from)
 	}
-	result := user.send(ask)
+	result := user.send(ask, userID, gid)
 	log.Printf("%s: %s\ngpt: %s\n", userID, ask, result)
 	return result
 }
@@ -156,7 +156,26 @@ func (gpt *chatGPTClient) lastAskTime() time.Time {
 	return gpt.status.LastAskTime()
 }
 
-func (gpt *chatGPTClient) send(msg string) string {
+type SysPrompt struct {
+	From    string
+	Today   time.Time
+	UserID  string
+	GroupID string
+}
+
+func buildSysPrompt(s SysPrompt) string {
+	bf := bytes.Buffer{}
+	systemPrompt.Execute(&bf, map[string]any{
+		"From":      s.From,
+		"Today":     s.Today.Format("2006-01-02"),
+		"UID":       s.UserID,
+		"FromGroup": s.GroupID != "",
+		"GroupID":   s.GroupID,
+	})
+	return bf.String()
+}
+
+func (gpt *chatGPTClient) send(msg string, uid, gid string) string {
 	if gpt.status.IsAsking() {
 		return "正在回答上一个问题: " + gpt.status.Msg()
 	}
@@ -178,14 +197,17 @@ func (gpt *chatGPTClient) send(msg string) string {
 	}
 	conversation = append(conversation, um)
 	prompt := gpt.BuildPrompt(conversation, um.ID)
-	bf := bytes.Buffer{}
-	systemPrompt.Execute(&bf, map[string]string{"From": gpt.from, "Today": time.Now().Format("2006-01-02")})
 	prompt = append([]openai.ChatCompletionMessage{
 		{
 			Role: openai.ChatMessageRoleSystem,
 			Content: fmt.Sprintf(`当前时间是：%s
 %s
-`, time.Now().Format(time.DateTime), bf.String()),
+`, time.Now().Format(time.DateTime), buildSysPrompt(SysPrompt{
+				From:    gpt.from,
+				Today:   time.Now(),
+				UserID:  uid,
+				GroupID: gid,
+			})),
 		},
 	}, lastConversationsByLimitTokens(prompt, config.AIMaxToken())...)
 	var result string

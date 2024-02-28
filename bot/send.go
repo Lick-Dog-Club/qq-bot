@@ -38,6 +38,7 @@ type Bot interface {
 	Send(msg string) string
 	SendTextImage(text string) (string, error)
 	Message() *Message
+	GroupID() string
 }
 
 type CronBot interface {
@@ -64,6 +65,9 @@ func (d *dummyBot) Message() *Message {
 }
 
 func (d *dummyBot) UserID() string {
+	return ""
+}
+func (d *dummyBot) GroupID() string {
 	return ""
 }
 
@@ -127,6 +131,10 @@ func (m *qqBot) Message() *Message {
 
 func (m *qqBot) UserID() string {
 	return m.msg.SenderUserID
+}
+
+func (m *qqBot) GroupID() string {
+	return m.msg.GroupID
 }
 
 func (m *qqBot) From() string {
@@ -395,6 +403,10 @@ func (w *wechatBot) SendToUser(uid string, s string) string {
 
 func (w *wechatBot) UserID() string {
 	return w.message.SenderUserID
+}
+
+func (w *wechatBot) GroupID() string {
+	return w.message.GroupID
 }
 
 func (w *wechatBot) From() string {
