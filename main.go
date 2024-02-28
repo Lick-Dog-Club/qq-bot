@@ -132,7 +132,7 @@ func main() {
 func loadTasks(cm cronjob.CronManager) {
 	var newTasks []config.Task
 	for _, task := range config.Tasks() {
-		parse, _ := time.Parse(time.DateTime, task.RunAt)
+		parse, _ := time.ParseInLocation(time.DateTime, task.RunAt, time.Local)
 		if time.Now().After(parse) {
 			continue
 		}
