@@ -95,7 +95,7 @@ func init() {
 			}{}
 
 			json.Unmarshal([]byte(args), &s)
-			parse, _ := time.Parse(time.DateTime, s.Time)
+			parse, _ := time.ParseInLocation(time.DateTime, s.Time, time.Local)
 
 			return AddTask(parse, s.Content, bot.NewQQBot(&bot.Message{
 				SenderUserID:  s.UID,
