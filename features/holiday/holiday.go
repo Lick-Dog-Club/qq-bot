@@ -18,7 +18,7 @@ import (
 )
 
 func init() {
-	features.AddKeyword("holiday", "获取节假日数据, 获取法定节假日数据, 返回节日名称和具体的放假时间", func(bot bot.Bot, content string) error {
+	features.AddKeyword("holiday", "获取年份对应的法定节假日数据, 返回节日名称和具体的放假时间", func(bot bot.Bot, content string) error {
 		bot.SendTextImage(Get(time.Now().Year()))
 		return nil
 	}, features.WithAIFunc(features.AIFuncDef{
@@ -35,11 +35,15 @@ func init() {
 			json.Unmarshal([]byte(args), &input)
 			return Get(input.Year), nil
 		},
-	}))
-	features.AddKeyword("next-holiday", "获取下一个节假日, 获取下一个法定节假日, 返回节日名称和具体的放假时间", func(bot bot.Bot, content string) error {
+	}), features.WithGroup("holiday"))
+	features.AddKeyword("next-holiday", "获取下一个法定节假日, 返回节日名称和具体的放假时间", func(bot bot.Bot, content string) error {
 		bot.SendTextImage(GetNextHolidays().Render())
 		return nil
-	})
+	}, features.WithAIFunc(features.AIFuncDef{
+		Call: func(args string) (string, error) {
+			return GetNextHolidays().Render(), nil
+		},
+	}), features.WithGroup("holiday"))
 }
 
 type response struct {
@@ -110,9 +114,17 @@ var temp = template.Must(template.New("").Parse(`
 `))
 
 func GetNextHolidays() Holis {
-	items := GetItems(time.Now().Year())
+	res := getNextHolidays(time.Now().Year(), time.Now())
+	if len(res) < 1 {
+		res = getNextHolidays(time.Now().Year()+1, time.Now())
+	}
+	return res
+}
+
+func getNextHolidays(year int, now time.Time) Holis {
+	items := GetItems(year)
 	filter := lo.Filter(items, func(item Holiday, index int) bool {
-		return item.Datetime().After(time.Now())
+		return item.Datetime().After(now)
 	})
 	by := lo.GroupBy(filter, func(item Holiday) string {
 		return item.Name

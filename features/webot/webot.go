@@ -45,6 +45,7 @@ func RunWechat(b bot.Bot) {
 	dispatcher.OnImage(func(ctx *openwechat.MessageContext) {
 		log.Printf("%#v\n\n", ctx)
 		log.Printf("%#v\n\n", ctx.Message)
+		//picture, _ := ctx.GetPicture()
 	})
 	dispatcher.OnText(func(ctx *openwechat.MessageContext) {
 		unix := time.Unix(ctx.Message.CreateTime, 0)

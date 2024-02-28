@@ -23,7 +23,9 @@ import (
 	"github.com/sashabaranov/go-openai"
 )
 
-const pro = `你是一个ai机器人，能回答用户的任何问题, 你的回答必须满足下面的格式, 不要使用 markdown 格式返回:
+const pro = `今天是 {{.Today}}
+
+你是一个ai机器人，能回答用户的任何问题, 你的回答必须满足下面的格式, 不要使用 markdown 格式返回:
 {{- if eq .From "QQ" }}
 - 如果返回的是图片地址，你必须使用 "[CQ:image,file={imageURL}]" 这个格式返回, query 的参数也要完整的返回
 	例如:
@@ -177,7 +179,7 @@ func (gpt *chatGPTClient) send(msg string) string {
 	conversation = append(conversation, um)
 	prompt := gpt.BuildPrompt(conversation, um.ID)
 	bf := bytes.Buffer{}
-	systemPrompt.Execute(&bf, map[string]string{"From": gpt.from})
+	systemPrompt.Execute(&bf, map[string]string{"From": gpt.from, "Today": time.Now().Format("2006-01-02")})
 	prompt = append([]openai.ChatCompletionMessage{
 		{
 			Role: openai.ChatMessageRoleSystem,

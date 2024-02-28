@@ -27,14 +27,14 @@
 @bot	(y)draw         	<+prompt>: 使用 ai 画图
 @bot	(x)clear        	清除 ai 历史对话记录
 @bot	(y)GetCodeByName	根据名称获取股票代码
-@bot	(x)listtask     	任务列表
 @bot	(x)canceltask   	取消任务
 @bot	(x)task         	添加任务
+@bot	(x)listtask     	任务列表
 @bot	(x)help         	帮助信息
 @bot	(y)bili-lottery 	<+bilibili-cookie> bilibili 抽奖, 自动转发up主的抽奖活动
-@bot	(x)next-holiday 	获取下一个节假日, 获取下一个法定节假日, 返回节日名称和具体的放假时间
-@bot	(y)holiday      	获取节假日数据, 获取法定节假日数据, 返回节日名称和具体的放假时间
+@bot	(y)holiday      	获取年份对应的法定节假日数据, 返回节日名称和具体的放假时间
 @bot	(y)ddys         	<+dy/dm>, 获取最新的电影、动漫资讯, 默认 +dy
+@bot	(y)next-holiday 	获取下一个法定节假日, 返回节日名称和具体的放假时间
 @bot	(y)kfc          	KFC 骚话, 返回肯德基疯狂星期四文案
 @bot	(y)lpr          	获取当前贷款市场报价利率(lpr)数值
 @bot	(y)weather      	<+城市> 获取天气信息, 默认杭州
