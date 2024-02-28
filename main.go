@@ -10,6 +10,7 @@ import (
 	"qq/config"
 	"qq/cronjob"
 	"qq/features"
+	"qq/features/webot"
 	"qq/util"
 	"strings"
 	"time"
@@ -27,7 +28,8 @@ import (
 	_ "qq/cronjob/dx"
 	_ "qq/cronjob/lottery"
 	_ "qq/cronjob/maotai"
-	_ "qq/cronjob/zaoan"
+
+	//_ "qq/cronjob/zaoan"
 
 	//_ "qq/cronjob/picture"
 	_ "qq/cronjob/bitget"
@@ -130,6 +132,7 @@ func brithCry() {
 		time.Sleep(15 * time.Second)
 		for _, s := range config.AdminIDs().List() {
 			bot.NewQQBot(&bot.Message{}).SendToUser(s, fmt.Sprintf("%s 系统已启动", time.Now().Format(time.DateTime)))
+			webot.Run(bot.NewQQBot(&bot.Message{SenderUserID: config.UserID()}))
 		}
 	}()
 }

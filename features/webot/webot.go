@@ -30,14 +30,18 @@ var o sync.Once
 
 func init() {
 	features.AddKeyword("webot", "微信机器人扫码登录", func(bot bot.Bot, content string) error {
-		o.Do(func() {
-			RunWechat(bot)
-		})
+		Run(bot)
 		return nil
 	})
 }
 
-func RunWechat(b bot.Bot) {
+func Run(bot bot.Bot) {
+	o.Do(func() {
+		runWechat(bot)
+	})
+}
+
+func runWechat(b bot.Bot) {
 	webot := openwechat.DefaultBot(openwechat.Desktop) // 桌面模式
 	var sb = &superBot{bot: webot, msgMap: bot.NewWeMsgMap(), um: newUserMaps()}
 
