@@ -151,6 +151,7 @@ func loadTasks(cm cronjob.CronManager) {
 		})
 		newTasks = append(newTasks, config.Task{
 			ID:      tid,
+			Name:    task.Name,
 			RunAt:   task.RunAt,
 			Content: task.Content,
 			UserID:  task.UserID,
