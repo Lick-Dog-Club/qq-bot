@@ -37,7 +37,7 @@ func CharCount(s string) int {
 func Draw(lines []string, out string) error {
 	lines = handleLines(lines)
 	var max float64
-	const fontSize = 32
+	const fontSize = 28
 
 	for _, ll := range lines {
 		max = math.Max(max, float64(CharCount(ll)))
@@ -46,14 +46,14 @@ func Draw(lines []string, out string) error {
 	face := truetype.NewFace(f, &truetype.Options{
 		Size: fontSize,
 	})
-	var W float64 = float64(max) * fontSize * 0.55
-	var H = 45 * len(lines)
+	var W float64 = float64(max) * fontSize * 0.6
+	var H = 40 * len(lines)
 	dc := gg.NewContext(int(W), H)
 	dc.SetRGB(1, 1, 1)
 	dc.Clear()
 	dc.SetRGB(0, 0, 0)
 	dc.SetFontFace(face)
-	const h = 42
+	const h = 38
 	for i, line := range lines {
 		y := H/2 - h*len(lines)/2 + i*h
 		dc.DrawStringWrapped(line, W, float64(y), 0.95, 0, W, 1.5, gg.AlignLeft)
