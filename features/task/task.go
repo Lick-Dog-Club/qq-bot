@@ -82,8 +82,13 @@ func init() {
 				Description: "执行的时间，格式为 `2006-01-02 15:04:05`",
 			},
 			"content": {
-				Type:        jsonschema.String,
-				Description: "用户给的完整的内容",
+				Type: jsonschema.String,
+				Description: `用户给的完整的内容
+例如:
+-. “30秒后提醒我吃饭” 'content=吃饭'，
+-. “30秒后执行 to 杭州东 绍兴北” 'content=to 杭州东 绍兴北'
+-. “30秒后执行 p rai” 'content=p rai'
+`,
 			},
 			"uid": {
 				Type:        jsonschema.String,
