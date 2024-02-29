@@ -82,6 +82,44 @@ func uuid(bot bot.Bot) string {
 	return fmt.Sprintf("%s:%v", bot.UserID(), bot.IsGroupMessage())
 }
 
+func SeeB64(b64 string, contentType string) string {
+	client := openai2.NewOpenaiClient(openai2.NewClientOption{
+		HttpClient: proxy.NewHttpProxyClient(),
+		MaxToken:   4096,
+		Token:      config2.AiToken(),
+		Model:      openai.GPT4VisionPreview,
+	})
+	var cnt []openai.ChatMessagePart
+	cnt = append(cnt, openai.ChatMessagePart{
+		Type: "image_url",
+		ImageURL: &openai.ChatMessageImageURL{
+			URL: fmt.Sprintf("data:%s;base64,%s", contentType, b64),
+		},
+	})
+	cnt = append(cnt, openai.ChatMessagePart{
+		Type: "text",
+		Text: "详细描述图片内容",
+	})
+	var res ai.CompletionResponse
+	var err error
+	e := retry.Times(5, func() error {
+		res, err = client.Completion(context.TODO(), []ai.Message{
+			{
+				Role:         types.RoleUser,
+				MultiContent: cnt,
+			},
+		})
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	if e != nil {
+		return e.Error()
+	}
+	return res.GetChoices()[0].Message.Content
+}
+
 func See(images []string) string {
 	client := openai2.NewOpenaiClient(openai2.NewClientOption{
 		HttpClient: proxy.NewHttpProxyClient(),

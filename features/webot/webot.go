@@ -1,13 +1,16 @@
 package webot
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"qq/bot"
 	"qq/config"
 	"qq/features"
+	"qq/features/ai"
 	"qq/util"
 	"strings"
 	"sync"
@@ -47,9 +50,53 @@ func runWechat(b bot.Bot) {
 
 	dispatcher := openwechat.NewMessageMatchDispatcher()
 	dispatcher.OnImage(func(ctx *openwechat.MessageContext) {
-		log.Printf("%#v\n\n", ctx)
+		unix := time.Unix(ctx.Message.CreateTime, 0)
+		if unix.Add(8 * time.Second).Before(time.Now()) {
+			log.Println("过滤之前的消息", ctx.Message)
+			return
+		}
 		log.Printf("%#v\n\n", ctx.Message)
-		//picture, _ := ctx.GetPicture()
+		picture, _ := ctx.GetPicture()
+		all, _ := io.ReadAll(picture.Body)
+		b64 := ai.SeeB64(base64.StdEncoding.EncodeToString(all), http.DetectContentType(all))
+		go func() {
+			if sb.IsBotEnabledForThisMsg(ctx.Message) {
+				msg := ctx.Message
+				log.Printf("%#v\n\n", ctx.Message)
+				gid := ""
+				receiver, err := msg.Receiver()
+				if err != nil {
+					log.Println(err)
+					return
+				}
+
+				var senderID string
+				if msg.IsComeFromGroup() {
+					gid = receiver.AvatarID()
+					sender, _ := msg.SenderInGroup()
+					senderID = receiver.UserName + sender.UserName
+				} else {
+					sender, _ := msg.Sender()
+					senderID = receiver.UserName + sender.UserName
+				}
+				bot.NewWechatBot(bot.Message{
+					SenderUserID:  senderID,
+					Message:       msg.Content,
+					IsSendByGroup: msg.IsComeFromGroup(),
+					GroupID:       gid,
+					WeReply:       replyText(msg),
+					WeSendImg: func(file io.Reader) (*openwechat.SentMessage, error) {
+						image, err := replyImg(msg)(file)
+						if err != nil {
+							log.Println(err)
+							return nil, err
+						}
+						sb.msgMap.Add(image.MsgId, image)
+						return image, err
+					},
+				}, sb.msgMap).Send(b64)
+			}
+		}()
 	})
 	dispatcher.OnText(func(ctx *openwechat.MessageContext) {
 		unix := time.Unix(ctx.Message.CreateTime, 0)
