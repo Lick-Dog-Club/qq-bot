@@ -125,7 +125,8 @@ func runWechat(b bot.Bot) {
 					senderID = receiver.UserName + sender.UserName
 				}
 
-				atMsg := fmt.Sprintf("@%s", msg.Owner().NickName)
+				log.Printf("msg.Owner(): %#v\n", msg.Owner())
+				atMsg := fmt.Sprintf("@%s", msg.Owner().DisplayName)
 				body := strings.ReplaceAll(msg.Content, atMsg, "")
 				keyword, content := util.GetKeywordAndContent(body)
 				log.Printf("body: %v\n, key: %v\n,content: %v", body, keyword, content)
