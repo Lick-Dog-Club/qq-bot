@@ -3,7 +3,6 @@ package webot
 import (
 	"encoding/base64"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -12,6 +11,7 @@ import (
 	"qq/features"
 	"qq/features/ai"
 	"qq/util"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -133,8 +133,11 @@ msg.Owner().NickName %v
 msg.Owner().UserName %v
 msg.Owner().RemarkName %v
 `, msg.Owner().Alias, msg.Owner().DisplayName, msg.Owner().NickName, msg.Owner().UserName, msg.Owner().RemarkName)
-				atMsg := fmt.Sprintf("@%s", msg.Owner().DisplayName)
-				body := strings.ReplaceAll(msg.Content, atMsg, "")
+				body := msg.Content
+				if msg.IsComeFromGroup() {
+					compile := regexp.MustCompile(`(@\S+)`)
+					body = compile.ReplaceAllString(msg.Content, "")
+				}
 				keyword, content := util.GetKeywordAndContent(body)
 				log.Printf("body: %v\n, key: %v\n,content: %v", body, keyword, content)
 
