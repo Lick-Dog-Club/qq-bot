@@ -135,8 +135,9 @@ msg.Owner().RemarkName %v
 `, msg.Owner().Alias, msg.Owner().DisplayName, msg.Owner().NickName, msg.Owner().UserName, msg.Owner().RemarkName)
 				body := msg.Content
 				if msg.IsComeFromGroup() {
+					body = strings.ReplaceAll(body, "\u2005", " ")
 					compile := regexp.MustCompile(`(@\S+)`)
-					body = compile.ReplaceAllString(msg.Content, "")
+					body = compile.ReplaceAllString(body, "")
 				}
 				keyword, content := util.GetKeywordAndContent(body)
 				log.Printf("body: %v\n, key: %v\n,content: %v", body, keyword, content)
