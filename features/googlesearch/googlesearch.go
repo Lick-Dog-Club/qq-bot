@@ -49,7 +49,7 @@ func init() {
 		},
 	}), features.WithHidden())
 
-	features.AddKeyword("mclick", "通过搜索链接获取网页内容", func(bot bot.Bot, content string) error {
+	features.AddKeyword("mclick", "通过链接获取内容详情", func(bot bot.Bot, content string) error {
 		bot.Send("不支持此功能！")
 		return nil
 	}, features.WithAIFunc(features.AIFuncDef{
