@@ -34,7 +34,7 @@ func init() {
 			"recency_days": {
 				Type:        jsonschema.Integer,
 				Description: "搜索的时间范围, 单位是天",
-				Enum:        []string{"1", "10"},
+				Enum:        []string{"7", "30", "60"},
 			},
 		},
 		Call: func(args string) (string, error) {
