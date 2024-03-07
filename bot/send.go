@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"qq/config"
 	"qq/util/random"
+	"qq/util/retry"
 	"qq/util/text2png"
 	"strconv"
 	"strings"
@@ -441,9 +442,16 @@ func (w *wechatBot) SendTextImageToGroup(gid string, text string) (string, error
 }
 
 func (w *wechatBot) Send(msg string) string {
-	text, err := w.message.WeReply(msg)
-	if err != nil {
-		log.Println(err)
+	var text *openwechat.SentMessage
+	var err error
+	if err := retry.Times(3, func() error {
+		text, err = w.message.WeReply(msg)
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+		return nil
+	}); err != nil {
 		return ""
 	}
 	//WeMessageMap.Add(text.MsgId, text)

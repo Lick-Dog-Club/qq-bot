@@ -28,7 +28,7 @@ func AllFuncCalls() (res []tools.Tool) {
 	mu.RLock()
 	defer mu.RUnlock()
 	for _, imp := range commands {
-		if imp.Enabled() && imp.AiDefine() != nil {
+		if imp.Enabled() && imp.HasAI() && imp.AiDefine() != nil {
 			res = append(res, tools.Tool{
 				Name: imp.Keyword(),
 				Define: openai.Tool{
