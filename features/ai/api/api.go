@@ -41,6 +41,11 @@ const pro = `今天是 {{.Today}}, 当前的 UID 是: "{{.UID}}", 是否来自�
 	  你需要返回: [CQ:image,file=file:///tmp/a.png]
 {{- end }}
 
+- 使用 google search 的步骤为
+  1. 你需要调用 "google_search" 方法, 并且传入 "query" 和 "recency_days" 参数
+  2. "mclick" 获取网页内容
+  3. 根据内容回答用户问题
+
 - 如果用户希望你给他一张图片, 按照以下优先级给图片
   - 优先返回 pixiv 的图片
   - 其次返回动漫图片

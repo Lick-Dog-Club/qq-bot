@@ -134,6 +134,12 @@ func TianApiKey() string {
 func HttpProxy() string {
 	return c.Load().(KV)["http_proxy"]
 }
+func GoogleSearchKey() string {
+	return c.Load().(KV)["google_key"]
+}
+func GoogleSearchCX() string {
+	return c.Load().(KV)["google_cx"]
+}
 
 func BinanceKey() string {
 	return c.Load().(KV)["binance_key"]
@@ -221,6 +227,8 @@ var mappingKV = KV{
 	"tian_api_key":   os.Getenv("TIAN_API_KEY"),
 	"http_proxy":     os.Getenv("HTTP_PROXY"),
 	"binance_key":    "",
+	"google_key":     "",
+	"google_cx":      "",
 	"birthday":       "",
 	"ai_max_token":   "128000",
 	"binance_secret": "",

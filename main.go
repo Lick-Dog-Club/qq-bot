@@ -47,6 +47,7 @@ import (
 	_ "qq/features/ddys"
 	_ "qq/features/geo"
 	_ "qq/features/goodmorning"
+	_ "qq/features/googlesearch"
 	_ "qq/features/help"
 	_ "qq/features/holiday"
 	_ "qq/features/imaotai"

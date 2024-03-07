@@ -28,7 +28,7 @@ import (
 )
 
 func init() {
-	features.AddKeyword("ddys", "<+dy/dm>, 获取最新的电影、动漫资讯, 默认 +dy", func(bot bot.Bot, content string) error {
+	features.AddKeyword("ddys", "<+dy/dm>, 获取 ddys 网站的电影、动漫资讯, 默认 +dy", func(bot bot.Bot, content string) error {
 		for _, m := range Get(content, 3*24*time.Hour) {
 			bot.Send("正在获取数据中。。。")
 			bot.Send(m.String())

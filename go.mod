@@ -14,6 +14,7 @@ require (
 	github.com/forgoer/openssl v1.6.0
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/google/uuid v1.3.0
+	github.com/k3a/html2text v1.2.1
 	github.com/mozillazg/go-pinyin v0.20.0
 	github.com/olebedev/when v0.0.0-20221205223600-4d190b02b8d8
 	github.com/pkoukk/tiktoken-go v0.1.6
