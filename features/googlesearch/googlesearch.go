@@ -115,10 +115,11 @@ func viewPage(link, ask string) (*ClickResult, error) {
 	if err2 != nil {
 		return nil, err2
 	}
+	cli := proxy.NewHttpProxyClient()
 	request, err2 := http.NewRequest("GET", parse.String(), nil)
 	request.Header.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36")
 	request.Header.Add("Referer", fmt.Sprintf("%s://%s", parse.Scheme, parse.Host))
-	resp, err2 := http.DefaultClient.Do(request)
+	resp, err2 := cli.Do(request)
 	if err2 != nil {
 		return nil, err2
 	}
@@ -127,7 +128,7 @@ func viewPage(link, ask string) (*ClickResult, error) {
 	text := html2text.HTML2Text(string(all))
 
 	client := openai2.NewOpenaiClient(openai2.NewClientOption{
-		HttpClient:  proxy.NewHttpProxyClient(),
+		HttpClient:  cli,
 		Token:       config.AiToken(),
 		Model:       openai.GPT3Dot5Turbo16K0613,
 		MaxToken:    2000,
