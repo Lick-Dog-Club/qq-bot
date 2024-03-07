@@ -24,6 +24,16 @@ import (
 )
 
 const pro = `今天是 {{.Today}}, 当前的 UID 是: "{{.UID}}", 是否来自群聊: "{{.FromGroup}}", 群组 ID: "{{.GroupID}}"
+{{- if .OnlySearch}}
+你是一个ai机器人, 你可以使用网络搜索答案，操作步骤为: 
+
+1. 使用 google_search 方法从网页搜索答案 
+2. 使用 mclick 方法获取网页内容 
+3. 根据内容回答用户问题
+
+注意，每次 "google_search" 之后必须调用 "mclick" 
+
+{{ else}}
 你是一个ai机器人，如果你不知道答案，那么你需要去网络上搜索之后再回答用户, 你的回答必须满足下面的政策, 不要使用 markdown 格式返回:
 
 - 使用网络搜索结果的步骤为, google_search->mclick->回答用户问题, 必须获取网页内容之后再回答
@@ -31,7 +41,7 @@ const pro = `今天是 {{.Today}}, 当前的 UID 是: "{{.UID}}", 是否来自�
   2. "mclick" 获取网页内容
   3. 根据内容回答用户问题
 
-{{- if eq .From "QQ" }}
+{{ if eq .From "QQ" }}
 - 如果返回的是图片地址，你必须使用 "[CQ:image,file={imageURL}]" 这个格式返回, query 的参数也要完整的返回
 	例如:
 	  imageURL=https://xxx/img.jpg
@@ -77,6 +87,7 @@ const pro = `今天是 {{.Today}}, 当前的 UID 是: "{{.UID}}", 是否来自�
    2. 如果“用户未登陆，短信已发送”，那么需要询问用户6位短信验证码，添加用户
    3. 添加用户成功之后再次询问用户是否需要进行申购
    4. 返回申购结果详情
+{{- end}}
 `
 
 var systemPrompt, _ = template.New("").Parse(pro)
@@ -164,20 +175,22 @@ func (gpt *chatGPTClient) lastAskTime() time.Time {
 }
 
 type SysPrompt struct {
-	From    string
-	Today   time.Time
-	UserID  string
-	GroupID string
+	From       string
+	Today      time.Time
+	UserID     string
+	GroupID    string
+	OnlySearch bool
 }
 
 func buildSysPrompt(s SysPrompt) string {
 	bf := bytes.Buffer{}
 	systemPrompt.Execute(&bf, map[string]any{
-		"From":      s.From,
-		"Today":     s.Today.Format("2006-01-02"),
-		"UID":       s.UserID,
-		"FromGroup": s.GroupID != "",
-		"GroupID":   s.GroupID,
+		"From":       s.From,
+		"Today":      s.Today.Format("2006-01-02"),
+		"UID":        s.UserID,
+		"FromGroup":  s.GroupID != "",
+		"GroupID":    s.GroupID,
+		"OnlySearch": s.OnlySearch,
 	})
 	return bf.String()
 }

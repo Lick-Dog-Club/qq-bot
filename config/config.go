@@ -140,6 +140,9 @@ func GoogleSearchKey() string {
 func GoogleSearchCX() string {
 	return c.Load().(KV)["google_cx"]
 }
+func GPTOnlySearch() bool {
+	return c.Load().(KV)["only_search"] == "1"
+}
 
 func BinanceKey() string {
 	return c.Load().(KV)["binance_key"]
@@ -229,6 +232,7 @@ var mappingKV = KV{
 	"binance_key":    "",
 	"google_key":     "",
 	"google_cx":      "",
+	"only_search":    "",
 	"birthday":       "",
 	"ai_max_token":   "128000",
 	"binance_secret": "",
