@@ -131,13 +131,13 @@ func viewPage(link string) (*ClickResult, error) {
 		HttpClient:  proxy.NewHttpProxyClient(),
 		Token:       config.AiToken(),
 		Model:       openai.GPT3Dot5Turbo16K0613,
-		MaxToken:    4096,
+		MaxToken:    2000,
 		Temperature: 0.2,
 	})
 	completion, err := client.Completion(context.TODO(), []ai.Message{
 		{
 			Role:    types.RoleUser,
-			Content: fmt.Sprintf("总结以下内容：\n%s", text),
+			Content: fmt.Sprintf("总结以下内容, 500字以内：\n%s", text),
 		},
 	})
 	if err != nil {
