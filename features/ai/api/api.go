@@ -223,10 +223,11 @@ func (gpt *chatGPTClient) send(msg string, userid, gid string) string {
 			Content: fmt.Sprintf(`当前时间是：%s
 %s
 `, time.Now().Format(time.DateTime), buildSysPrompt(SysPrompt{
-				From:    gpt.from,
-				Today:   time.Now(),
-				UserID:  userid,
-				GroupID: gid,
+				From:       gpt.from,
+				Today:      time.Now(),
+				UserID:     userid,
+				GroupID:    gid,
+				OnlySearch: config.GPTOnlySearch(),
 			})),
 		},
 	}, lastConversationsByLimitTokens(prompt, config.AIMaxToken())...)
