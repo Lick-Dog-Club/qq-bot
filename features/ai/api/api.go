@@ -42,7 +42,7 @@ const pro = `今天是 {{.Today}}, 当前的 UID 是: "{{.UID}}", 是否来自�
 {{- end }}
 
 - 使用 google search 的步骤为
-  1. 你需要调用 "google_search" 方法, 并且传入 "query" 和 "recency_days" 参数
+  1. 你需要调用 "google_search" 方法, 并且传入 "query" 和 "recency_days" 参数, "query" 输入用户问题的详细内容，确保搜索更加精确
   2. "mclick" 获取网页内容
   3. 根据内容回答用户问题
 
