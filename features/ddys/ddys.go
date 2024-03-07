@@ -2,7 +2,6 @@ package ddys
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -16,8 +15,6 @@ import (
 	"sync"
 	"text/template"
 	"time"
-
-	"github.com/sashabaranov/go-openai/jsonschema"
 
 	"github.com/wangluozhe/requests"
 	"github.com/wangluozhe/requests/models"
@@ -34,26 +31,27 @@ func init() {
 			bot.Send(m.String())
 		}
 		return nil
-	}, features.WithAIFunc(features.AIFuncDef{
-		Properties: map[string]jsonschema.Definition{
-			"param": {
-				Type:        jsonschema.String,
-				Description: "电影(dy) or 动漫(dm)",
-				Enum:        []string{"dy", "dm"},
-			},
-		},
-		Call: func(args string) (string, error) {
-			var input = struct {
-				Param string `json:"param"`
-			}{}
-			json.Unmarshal([]byte(args), &input)
-			str := ""
-			for _, m := range Get(input.Param, 3*24*time.Hour) {
-				str += m.String()
-			}
-			return str, nil
-		},
-	}))
+	})
+	//, features.WithAIFunc(features.AIFuncDef{
+	//	Properties: map[string]jsonschema.Definition{
+	//		"param": {
+	//			Type:        jsonschema.String,
+	//			Description: "电影(dy) or 动漫(dm)",
+	//			Enum:        []string{"dy", "dm"},
+	//		},
+	//	},
+	//	Call: func(args string) (string, error) {
+	//		var input = struct {
+	//			Param string `json:"param"`
+	//		}{}
+	//		json.Unmarshal([]byte(args), &input)
+	//		str := ""
+	//		for _, m := range Get(input.Param, 3*24*time.Hour) {
+	//			str += m.String()
+	//		}
+	//		return str, nil
+	//	},
+	//})
 }
 
 type movie struct {
