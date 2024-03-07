@@ -54,23 +54,22 @@ func init() {
 		return nil
 	}, features.WithAIFunc(features.AIFuncDef{
 		Properties: map[string]jsonschema.Definition{
-			"links": {
-				Type:        jsonschema.Array,
-				Description: "链接列表, 最多给 5 个链接地址",
-				Items: &jsonschema.Definition{
-					Type: jsonschema.String,
-				},
+			"link": {
+				Type:        jsonschema.String,
+				Description: "链接地址",
+			},
+			"ask": {
+				Type:        jsonschema.String,
+				Description: "用户的问题原话",
 			},
 		},
 		Call: func(args string) (string, error) {
 			var s = struct {
-				Links []string `json:"links"`
+				Link string `json:"link"`
+				Ask  string `json:"ask"`
 			}{}
 			json.Unmarshal([]byte(args), &s)
-			if len(s.Links) > 5 {
-				s.Links = s.Links[:5]
-			}
-			var result = Mclick(s.Links...)
+			var result = Mclick(s.Ask, s.Link)
 			marshal, _ := json.Marshal(result)
 			return string(marshal), nil
 		},
@@ -98,10 +97,10 @@ type ClickResult struct {
 	Summary string `json:"summary"`
 }
 
-func Mclick(links ...string) []*ClickResult {
+func Mclick(ask string, links ...string) []*ClickResult {
 	var result []*ClickResult
 	for _, link := range links {
-		page, err := viewPage(link)
+		page, err := viewPage(link, ask)
 		if err != nil {
 			fmt.Println(err)
 			continue
@@ -111,7 +110,7 @@ func Mclick(links ...string) []*ClickResult {
 	return result
 }
 
-func viewPage(link string) (*ClickResult, error) {
+func viewPage(link, ask string) (*ClickResult, error) {
 	parse, err2 := url.Parse(link)
 	if err2 != nil {
 		return nil, err2
@@ -136,8 +135,12 @@ func viewPage(link string) (*ClickResult, error) {
 	})
 	completion, err := client.Completion(context.TODO(), []ai.Message{
 		{
+			Role:    types.RoleSystem,
+			Content: fmt.Sprintf("根据内容回答问题，500字以内：\n%s", text),
+		},
+		{
 			Role:    types.RoleUser,
-			Content: fmt.Sprintf("总结以下内容, 500字以内：\n%s", text),
+			Content: ask,
 		},
 	})
 	if err != nil {
