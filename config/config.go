@@ -1,8 +1,11 @@
 package config
 
 import (
+	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"html/template"
 	"os"
 	"qq/util"
 	"strconv"
@@ -171,6 +174,13 @@ func TgAppHash() string {
 func Birthday() string {
 	return c.Load().(KV)["birthday"]
 }
+func OKey() string {
+	return c.Load().(KV)["o_key"]
+}
+
+func OSecret() string {
+	return c.Load().(KV)["o_secret"]
+}
 
 type Task struct {
 	ID      int    `json:"id"`
@@ -209,12 +219,80 @@ func TgAppID() int32 {
 func BarkUrls() []string {
 	return strings.Split(c.Load().(KV)["bark_url"], ",")
 }
+func TaobaoBarkUrls() []string {
+	return strings.Split(c.Load().(KV)["taobao_bark_url"], ",")
+}
+
+func TaobaoSkus() Skus {
+	data := Skus{}
+	json.Unmarshal([]byte(c.Load().(KV)["taobao_skus"]), &data)
+	return data
+}
+
+type Skus map[int64]map[int64]Sku
+
+func (s Skus) Add(sku Sku) {
+	var mm = make(map[int64]Sku)
+	if m, ok := s[sku.NumIID]; ok {
+		mm = m
+	}
+	mm[sku.SkuID] = sku
+	s[sku.NumIID] = mm
+}
+
+func (s Skus) HasDiff(sku Sku) (bool, error) {
+	if m, ok := s[sku.NumIID]; ok {
+		if v, ok := m[sku.SkuID]; ok {
+			return !(v.Price == sku.Price && v.OriginalPrice == sku.OriginalPrice), nil
+		}
+	}
+	return false, errors.New("sku 不存在")
+}
+
+func (s Skus) String() string {
+	parse, err := template.New("").Parse(`
+{{- range $k,$v := .}}
+numIID: {{ $k }}
+{{- range $kk,$vv := $v }}
+{{$vv.Title}} sku({{ $kk }}): 价格是 ¥{{ $vv.Price }} ，原价是 ¥{{ $vv.OriginalPrice }} {{$vv.Op}}
+{{- end }}
+{{"\n"}}
+{{- end }}
+`)
+	if err != nil {
+		panic(err)
+	}
+	bf := bytes.Buffer{}
+	parse.Execute(&bf, s)
+	return bf.String()
+}
+
+type Sku struct {
+	NumIID        int64   `json:"num_iid"`
+	Title         string  `json:"title"`
+	SkuID         int64   `json:"sku_id"`
+	Price         float64 `json:"price"`
+	OriginalPrice float64 `json:"original_price"`
+
+	Op string
+}
+
+func TaobaoIDs() []string {
+	return strings.Split(c.Load().(KV)["taobao_ids"], ",")
+}
 
 var mappingKV = KV{
+	// onebound
+	"o_key": "",
+	// onebound
+	"o_secret":    "",
+	"taobao_skus": "",
+	"taobao_ids":  "",
 	// https://api.day.app/xxxxxx/标题/内容
-	"bark_url":    "",
-	"bili_cookie": "",
-	"user_id":     "",
+	"bark_url":        "",
+	"taobao_bark_url": "",
+	"bili_cookie":     "",
+	"user_id":         "",
 	// QQ 号码，"," 分隔，无法使用 config 设置
 	"admin_id":       os.Getenv("ADMIN_USER_ID"),
 	"ai_token":       "",

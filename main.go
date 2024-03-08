@@ -22,6 +22,7 @@ import (
 	_ "qq/cronjob/autoupdate"
 	_ "qq/cronjob/ddys"
 	_ "qq/cronjob/lpr"
+	_ "qq/cronjob/taobao"
 
 	// _ "qq/cronjob/btc"
 	_ "qq/cronjob/comic"
@@ -61,6 +62,7 @@ import (
 	_ "qq/features/star"
 	_ "qq/features/stock"
 	_ "qq/features/sysupdate"
+	_ "qq/features/taobaoprice"
 	_ "qq/features/task"
 	_ "qq/features/telegram"
 	_ "qq/features/trainticket"
