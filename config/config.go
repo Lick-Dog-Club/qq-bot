@@ -274,7 +274,7 @@ type Sku struct {
 	Price         float64 `json:"price"`
 	OriginalPrice float64 `json:"original_price"`
 
-	Op string
+	Op string `json:"-"`
 }
 
 func TaobaoIDs() []string {
