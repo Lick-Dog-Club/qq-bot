@@ -18,12 +18,16 @@ func init() {
 			return nil
 		}
 		if len(watch) > 0 {
+			var to config.Skus
 			for _, m := range watch {
 				for _, sku := range m {
-					if sku.Op != OpAdd {
-						util.Bark("价格发生变化", watch.String(), append(config.TaobaoBarkUrls(), config.BarkUrls()...)...)
+					if sku.Op == OpUpdate {
+						to.Add(sku)
 					}
 				}
+			}
+			if len(to) > 0 {
+				util.Bark("价格发生变化", watch.String(), append(config.TaobaoBarkUrls(), config.BarkUrls()...)...)
 			}
 			bot.SendToUser(config.UserID(), watch.String())
 		}
