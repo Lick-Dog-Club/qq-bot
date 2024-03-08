@@ -39,11 +39,6 @@ const (
 func Watch() (config.Skus, error) {
 	var changes = config.Skus{}
 	prev := config.TaobaoSkus()
-	var storeOnly bool
-	if len(prev) == 0 {
-		storeOnly = true
-		fmt.Println("storeOnly")
-	}
 	var newMap = config.Skus{}
 	for _, id := range config.TaobaoIDs() {
 		search, err := taobaoprice.Search(id)
@@ -70,8 +65,5 @@ func Watch() (config.Skus, error) {
 	}
 	marshal, _ := json.Marshal(newMap)
 	config.Set(map[string]string{"taobao_skus": string(marshal)})
-	if storeOnly {
-		return nil, nil
-	}
 	return changes, nil
 }
