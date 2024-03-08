@@ -28,7 +28,7 @@ func init() {
 			bot.SendToUser(config.UserID(), watch.String())
 		}
 		return nil
-	}).DailyAt("0-3,8-23").HourlyAt([]int{10})
+	}).DailyAt("0-3,8-23").HourlyAt([]int{15})
 }
 
 const (
