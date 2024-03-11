@@ -22,7 +22,7 @@ import (
 	_ "qq/cronjob/autoupdate"
 	_ "qq/cronjob/ddys"
 	_ "qq/cronjob/lpr"
-	_ "qq/cronjob/taobao"
+	//_ "qq/cronjob/taobao"
 
 	// _ "qq/cronjob/btc"
 	_ "qq/cronjob/comic"
