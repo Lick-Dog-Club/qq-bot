@@ -146,6 +146,9 @@ func AddTask(t time.Time, c string, b bot.Bot) string {
 		result = fmt.Sprintf("已设置:\n时间: %s, 命令: %s\n取消任务请执行: canceltask %v", t.Format(time.DateTime), k, name)
 	} else {
 		tid = cronjob.Manager().NewOnceCommand(name, t, func(bot.Bot) error {
+			if config.AdminIDs().Contains(b.UserID()) {
+				util.Bark("任务提醒", c, config.BarkUrls()...)
+			}
 			b.Send(c)
 			return nil
 		})

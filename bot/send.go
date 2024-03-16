@@ -322,8 +322,10 @@ func send(message *Message, msg string) string {
 		return ""
 	}
 	defer do.Body.Close()
+	all, _ := io.ReadAll(do.Body)
+	fmt.Println(string(all))
 	var res sendResponse
-	json.NewDecoder(do.Body).Decode(&res)
+	json.NewDecoder(bytes.NewReader(all)).Decode(&res)
 	return fmt.Sprintf("%d", res.Data.MessageID)
 }
 

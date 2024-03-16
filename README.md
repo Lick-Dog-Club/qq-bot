@@ -38,15 +38,15 @@
 @bot	(y)kfc          	KFC 骚话, 返回肯德基疯狂星期四文案
 @bot	(y)lpr          	获取当前贷款市场报价利率(lpr)数值
 @bot	(y)weather      	<+城市> 获取天气信息, 默认杭州
+@bot	(y)geo          	<+地址>: geo 地理位置查询
 @bot	(y)dx           	股票新债/打新，查询今日是否有新债
 @bot	(y)weibo        	获取今日实时的微博热搜榜单
 @bot	(y)zuan         	返回一句祖安/骂人的话
-@bot	(y)geo          	geo 地理位置查询
-@bot	(x)webot        	微信机器人扫码登录
 @bot	(y)tip          	获取一个生活小窍门
+@bot	(x)webot        	微信机器人扫码登录
 @bot	(y)zhihu        	获取知乎热搜榜单
-@bot	(y)pic          	返回动漫图片~
 @bot	(y)rkl          	获取一个绕口令
+@bot	(y)pic          	返回动漫图片~
 @bot	(y)stock        	分析股票
 @bot	(x)gm           	早上好
 @bot	(x)default      	ai 自动回答
