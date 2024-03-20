@@ -108,7 +108,7 @@ func init() {
 			bot.DeleteMsg(tID)
 		}
 		return nil
-	}, features.WithHidden(), features.WithGroup("pixiv"))
+	}, features.WithGroup("pixiv"))
 }
 
 func Search(content string, yell bool) (string, error) {
