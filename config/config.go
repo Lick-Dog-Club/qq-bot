@@ -24,6 +24,7 @@ var c atomic.Value
 
 var ConfigFile = "/data/qq-bot.json"
 var ForceStoreConfig = false
+var AdminID = os.Getenv("ADMIN_USER_ID")
 
 func init() {
 	c.Store(mappingKV)
@@ -309,7 +310,7 @@ var mappingKV = KV{
 	"user_id":         "",
 	"run_webot":       "0",
 	// QQ 号码，"," 分隔，无法使用 config 设置
-	"admin_id":       os.Getenv("ADMIN_USER_ID"),
+	"admin_id":       AdminID,
 	"ai_token":       "",
 	"chatgpt_model":  openai.GPT3Dot5Turbo16K0613,
 	"pixiv_mode":     "daily",
