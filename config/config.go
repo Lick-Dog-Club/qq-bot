@@ -25,7 +25,7 @@ var c atomic.Value
 
 var DataDir = "/data"
 var ImageDir = filepath.Join(DataDir, "images")
-var ConfigFile = DataDir + "qq-bot.json"
+var ConfigFile = filepath.Join(DataDir, "qq-bot.json")
 var ForceStoreConfig = false
 var AdminID = os.Getenv("ADMIN_USER_ID")
 
