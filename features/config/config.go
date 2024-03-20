@@ -71,12 +71,7 @@ func init() {
 			bot.Send("必须是管理员才能操作！")
 			return nil
 		}
-		path, err := bot.SendTextImage(config.Configs().String())
-		fmt.Println(config.Configs().String())
-		if err != nil {
-			log.Println(err)
-		}
-		log.Println("cgall: " + path)
+		bot.Send(config.Configs().String())
 		return nil
 	}, features.WithSysCmd(), features.WithHidden(), features.WithGroup("config"))
 }
