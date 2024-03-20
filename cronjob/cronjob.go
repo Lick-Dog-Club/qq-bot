@@ -93,7 +93,7 @@ func (m *manager) LoadOnceTasks() {
 func (m *manager) NewCommand(name string, fn func(bot bot.CronBot) error) CommandImp {
 	if config.DisabledCrons().Contains(name) {
 		log.Println("filter disabled cron: ", name)
-		return &command{}
+		return &command{expression: expression, name: name, fn: func() {}}
 	}
 	m.Lock()
 	defer m.Unlock()
