@@ -226,6 +226,9 @@ func downloadImage(ctx context.Context, a artwork.Artwork) (string, error) {
 		return i.Fetch(ctx)
 	})
 	img := getImage(i.Image)
+	if img == "" {
+		return "", errors.New("图片地址为空")
+	}
 	var get *http.Response
 	c := httpClient()
 	if err := retry.Times(20, func() error {
