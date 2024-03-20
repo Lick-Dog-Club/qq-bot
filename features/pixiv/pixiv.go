@@ -90,6 +90,11 @@ func init() {
 	}))
 
 	features.AddKeyword("lsp", "<+query> 搜索 pixiv 的图片", func(bot bot.Bot, content string) error {
+		if content == "" {
+			bot.Send("请输入搜索内容")
+			return nil
+		}
+		bot.Send(fmt.Sprintf("正在搜索 %s", content))
 		search, err := Search(content, true)
 		if err != nil {
 			bot.Send(err.Error())
