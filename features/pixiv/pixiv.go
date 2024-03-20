@@ -99,7 +99,14 @@ func init() {
 		if err != nil {
 			bot.Send(err.Error())
 		}
-		bot.Send(fmt.Sprintf("[CQ:image,file=file://%s]", search))
+		msgID := bot.Send(fmt.Sprintf("[CQ:image,file=file://%s]", search))
+		os.Remove(search)
+		if bot.IsGroupMessage() {
+			tID := bot.Send("图片即将在 30s 之后撤回，要保存的赶紧了~")
+			time.Sleep(30 * time.Second)
+			bot.DeleteMsg(msgID)
+			bot.DeleteMsg(tID)
+		}
 		return nil
 	}, features.WithHidden(), features.WithGroup("pixiv"))
 }
