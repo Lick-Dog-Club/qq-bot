@@ -76,10 +76,13 @@ import (
 	_ "qq/features/zuan"
 )
 
-var genDoc bool
-var forceStoreConfig bool
-var configFilePath string
-var adminID string
+var (
+	genDoc           bool
+	forceStoreConfig bool
+	configFilePath   string
+	adminID          string
+	dataDir          string
+)
 
 func init() {
 	log.SetReportCaller(true)
@@ -87,6 +90,7 @@ func init() {
 	flag.BoolVar(&forceStoreConfig, "fc", false, "-fc")
 	flag.StringVar(&configFilePath, "c", "/data/qq-bot.json", "-c")
 	flag.StringVar(&adminID, "admin", "", "-admin")
+	flag.StringVar(&dataDir, "data-dir", "", "-data-dir /tmp/qq-bot")
 }
 
 func main() {
@@ -99,6 +103,9 @@ func main() {
 	config.ConfigFile = configFilePath
 	if adminID != "" {
 		config.AdminID = adminID
+	}
+	if dataDir != "" {
+		config.DataDir = dataDir
 	}
 	log.Printf("forceStoreConfig: %v configFilePath: %v adminID: %v", forceStoreConfig, configFilePath, adminID)
 

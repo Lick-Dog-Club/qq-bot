@@ -1,7 +1,9 @@
 package help
 
 import (
+	"encoding/base64"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"qq/bot"
@@ -46,6 +48,10 @@ func showHelp(bot bot.Bot, hidden bool) {
 		defer open.Close()
 		bot.Message().WeSendImg(open)
 	} else {
-		bot.Send(fmt.Sprintf("[CQ:image,file=file://%s]", p))
+		open, _ := os.Open(p)
+		defer open.Close()
+		all, _ := io.ReadAll(open)
+		toString := base64.StdEncoding.EncodeToString(all)
+		bot.Send(fmt.Sprintf("[CQ:image,file=base64://%s]", toString))
 	}
 }

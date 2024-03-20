@@ -23,7 +23,7 @@ import (
 
 var c atomic.Value
 
-var DataDir = "/data/"
+var DataDir = "/data"
 var ImageDir = filepath.Join(DataDir, "images")
 var ConfigFile = DataDir + "qq-bot.json"
 var ForceStoreConfig = false
