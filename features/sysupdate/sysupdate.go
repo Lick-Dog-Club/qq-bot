@@ -21,7 +21,12 @@ func init() {
 	features.AddKeyword("up", "更新至最新版本", func(bot bot.Bot, content string) error {
 		UpdateVersion(bot)
 		return nil
-	}, features.WithSysCmd(), features.WithHidden())
+	}, features.WithSysCmd(), features.WithHidden(), features.WithGroup("system"))
+	features.AddKeyword("restart", "重启服务", func(bot bot.Bot, content string) error {
+		restart()
+		bot.Send("系统现在重启")
+		return nil
+	}, features.WithSysCmd(), features.WithHidden(), features.WithGroup("system"))
 }
 
 type response []struct {
@@ -95,17 +100,24 @@ func UpdateVersion(bot upBotImp) {
 			return
 		}
 
-		config, _ := rest.InClusterConfig()
-		clientset, _ := kubernetes.NewForConfig(config)
-		ns := cfg.Namespace()
-		pod := cfg.Pod()
-		if ns != "" && pod != "" {
+		if restart() {
 			bot.Send(fmt.Sprintf("更新到最新版本\n%s %s: %s\n%v", data[0].Commit.Committer.Name, data[0].Commit.Committer.Date.Local().Format("2006-01-02 15:04:05"), data[0].Commit.Message, data[0].HTMLURL))
-			clientset.CoreV1().Pods(ns).Delete(context.TODO(), pod, v1.DeleteOptions{})
 		}
 		return
 	}
 	bot.Send("当前已经是最新版本~")
+}
+
+func restart() bool {
+	config, _ := rest.InClusterConfig()
+	clientset, _ := kubernetes.NewForConfig(config)
+	ns := cfg.Namespace()
+	pod := cfg.Pod()
+	if ns != "" && pod != "" {
+		clientset.CoreV1().Pods(ns).Delete(context.TODO(), pod, v1.DeleteOptions{})
+		return true
+	}
+	return false
 }
 
 type workflowRuns struct {
