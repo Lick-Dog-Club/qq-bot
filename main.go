@@ -77,10 +77,14 @@ import (
 )
 
 var genDoc bool
+var forceStoreConfig bool
+var configFilePath string
 
 func init() {
 	log.SetReportCaller(true)
 	flag.BoolVar(&genDoc, "doc", false, "-doc")
+	flag.BoolVar(&forceStoreConfig, "fc", false, "-fc")
+	flag.StringVar(&configFilePath, "c", "/data/qq-bot.json", "-c")
 }
 
 func main() {
@@ -89,6 +93,9 @@ func main() {
 		printREADME()
 		return
 	}
+	config.ForceStoreConfig = forceStoreConfig
+	config.ConfigFile = configFilePath
+	log.Printf("forceStoreConfig: %v configFilePath: %v", forceStoreConfig, configFilePath)
 
 	if config.CronEnabled() {
 		log.Println("[Cron]: start...")

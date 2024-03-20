@@ -22,12 +22,13 @@ import (
 
 var c atomic.Value
 
-const configFile = "/data/qq-bot.json"
+var ConfigFile = "/data/qq-bot.json"
+var ForceStoreConfig = false
 
 func init() {
 	c.Store(mappingKV)
-	if Pod() != "" {
-		file, err := os.ReadFile(configFile)
+	if Pod() != "" || ForceStoreConfig {
+		file, err := os.ReadFile(ConfigFile)
 		if err == nil {
 			v := KV{}
 			json.Unmarshal(file, &v)
@@ -444,9 +445,9 @@ func Set(m map[string]string) (sets KV) {
 		newKv[k] = newv
 	}
 	c.Store(newKv)
-	if Pod() != "" {
+	if Pod() != "" || ForceStoreConfig {
 		marshal, _ := json.Marshal(newKv)
-		os.WriteFile(configFile, marshal, 0644)
+		os.WriteFile(ConfigFile, marshal, 0644)
 	}
 	return sets
 }

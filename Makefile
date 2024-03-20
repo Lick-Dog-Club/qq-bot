@@ -12,6 +12,10 @@ build-push:
 build-linux-amd64:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="${LDFLAGS}" -o app-linux-amd64 .
 
+.PHONY: build-windows
+build-windows:
+	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags="${LDFLAGS}" -o app-win-amd64 .
+
 .PHONY: build
 build:
 	go build -ldflags="${LDFLAGS}" -o app .
