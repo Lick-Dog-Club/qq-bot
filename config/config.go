@@ -45,6 +45,17 @@ func Configs() KV {
 
 type KV map[string]string
 
+func (k KV) Marshal() []byte {
+	var kv = KV{}
+	for key, v := range k {
+		if v != "" {
+			kv[key] = v
+		}
+	}
+	marshal, _ := json.Marshal(kv)
+	return marshal
+}
+
 func (k KV) String() string {
 	var s string
 	for key, value := range k {
@@ -448,8 +459,7 @@ func Set(m map[string]string) (sets KV) {
 	}
 	c.Store(newKv)
 	if Pod() != "" || ForceStoreConfig {
-		marshal, _ := json.Marshal(newKv)
-		os.WriteFile(ConfigFile, marshal, 0644)
+		os.WriteFile(ConfigFile, newKv.Marshal(), 0644)
 	}
 	return sets
 }
