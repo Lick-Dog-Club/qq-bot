@@ -2,7 +2,6 @@ package pixiv
 
 import (
 	"context"
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
@@ -75,11 +74,7 @@ func init() {
 			img, _ := bot.Message().WeSendImg(open)
 			msgID = img.MsgId
 		} else {
-			open, _ := os.Open(image)
-			defer open.Close()
-			all, _ := io.ReadAll(open)
-			toString := base64.StdEncoding.EncodeToString(all)
-			msgID = bot.Send(fmt.Sprintf("[CQ:image,file=base64://%s]", toString))
+			msgID = bot.Send(fmt.Sprintf("[CQ:image,file=file://%s]", image))
 		}
 		os.Remove(image)
 		if bot.IsGroupMessage() {
@@ -105,11 +100,7 @@ func init() {
 		if err != nil {
 			bot.Send(err.Error())
 		}
-		open, _ := os.Open(search)
-		defer open.Close()
-		all, _ := io.ReadAll(open)
-		toString := base64.StdEncoding.EncodeToString(all)
-		msgID := bot.Send(fmt.Sprintf("[CQ:image,file=base64://%s]", toString))
+		msgID := bot.Send(fmt.Sprintf("[CQ:image,file=file://%s]", search))
 		os.Remove(search)
 		if bot.IsGroupMessage() {
 			tID := bot.Send("图片即将在 30s 之后撤回，要保存的赶紧了~")
