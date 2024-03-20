@@ -287,9 +287,14 @@ func RunWebotOnSysStart() bool {
 	return c.Load().(KV)["run_webot"] == "1"
 }
 
+func CronEnabled() bool {
+	return c.Load().(KV)["cron_enabled"] == "1"
+}
+
 var mappingKV = KV{
 	// onebound
-	"o_key": "",
+	"o_key":        "",
+	"cron_enabled": "1",
 	// onebound
 	"o_secret":    "",
 	"taobao_skus": "",

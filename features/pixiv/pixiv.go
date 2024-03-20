@@ -6,6 +6,7 @@ import (
 	"io"
 	"math/rand"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"qq/bot"
@@ -15,6 +16,8 @@ import (
 	"qq/util/retry"
 	"strings"
 	"time"
+
+	"github.com/NateScarlet/pixiv/pkg/image"
 
 	"github.com/NateScarlet/pixiv/pkg/artwork"
 	log "github.com/sirupsen/logrus"
@@ -86,7 +89,49 @@ func init() {
 		},
 	}))
 
+	features.AddKeyword("lsp", "<+query> 搜索 pixiv 的图片", func(bot bot.Bot, content string) error {
+		search, err := Search(content, true)
+		if err != nil {
+			bot.Send(err.Error())
+		}
+		bot.Send(fmt.Sprintf("[CQ:image,file=file://%s]", search))
+		return nil
+	}, features.WithHidden(), features.WithGroup("pixiv"))
 }
+
+func Search(content string, yell bool) (string, error) {
+	// 搜索画作
+	var res artwork.SearchResult
+	ctx, e := newClientCtx()
+	if e != nil {
+		return "", e
+	}
+	var opts = []artwork.SearchOption{
+		artwork.SearchOptionOrder(artwork.OrderDateDSC),
+	}
+	if yell {
+		opts = append(opts, artwork.SearchOptionContentRating(artwork.ContentRatingR18))
+	}
+	if err := retry.Times(3, func() error {
+		var err error
+		res, err = artwork.Search(
+			ctx,
+			content,
+			opts...,
+		)
+
+		return err
+	}); err != nil {
+		return "", err
+	}
+	if len(res.Artworks()) > 0 {
+		items := res.Artworks()
+		log.Println(len(items))
+		return downloadImage(ctx, items[rand.Intn(len(items))])
+	}
+	return "", nil
+}
+
 func Image(content string) (string, error) {
 	//daily_r18_ai
 	//daily_r18
@@ -129,36 +174,58 @@ func Image(content string) (string, error) {
 		log.Println(err)
 		return "", err
 	}
-	image := rank.Items[rand.Intn(len(rank.Items))]
-	a := artwork.Artwork{
-		ID: image.ID,
+	return downloadImage(ctx, rank.Items[rand.Intn(len(rank.Items))].Artwork)
+}
+
+var DIR = "/data/images"
+
+func getImage(img image.URLs) string {
+	if img.Original != "" {
+		return img.Original
 	}
-	err = retry.Times(20, func() error {
-		return a.Fetch(ctx)
+	if img.Regular != "" {
+		return img.Regular
+	}
+	if img.Small != "" {
+		return img.Small
+	}
+	if img.Thumb != "" {
+		return img.Thumb
+	}
+	if img.Mini != "" {
+		return img.Mini
+	}
+	return ""
+}
+
+func downloadImage(ctx context.Context, a artwork.Artwork) (string, error) {
+	i := &artwork.Artwork{ID: a.ID}
+	retry.Times(3, func() error {
+		return i.Fetch(ctx)
 	})
-	if err != nil {
-		log.Println(err)
-		return "", err
-	}
+	img := getImage(i.Image)
 	var get *http.Response
 	c := httpClient()
-	err = retry.Times(20, func() error {
+	if err := retry.Times(20, func() error {
 		var err error
-		request, _ := http.NewRequest("GET", a.Image.Original, nil)
+		request, _ := http.NewRequest("GET", img, nil)
 		request.Header.Add("Referer", "https://www.pixiv.net/")
 		get, err = c.Do(request)
+		if err != nil {
+			log.Println(err, img)
+		}
 		return err
-	})
-	if err != nil {
+	}); err != nil {
 		log.Println(err)
 		return "", err
 	}
 	defer get.Body.Close()
-	base := filepath.Base(a.Image.Original)
-	fpath := filepath.Join("/data", "images", base)
+	parse, _ := url.Parse(img)
+	base := filepath.Base(parse.Path)
+	fpath := filepath.Join(DIR, base)
 
-	os.MkdirAll(filepath.Join("/data", "images"), 0755)
-	err = func() error {
+	os.MkdirAll(filepath.Join(DIR), 0755)
+	if err := func() error {
 		file, err := os.OpenFile(fpath, os.O_TRUNC|os.O_RDWR|os.O_CREATE, 0644)
 		if err != nil {
 			log.Println(err)
@@ -167,11 +234,10 @@ func Image(content string) (string, error) {
 		defer file.Close()
 		_, err = io.Copy(file, get.Body)
 		return err
-	}()
-	if err != nil {
+	}(); err != nil {
 		log.Println(err)
 		return "", err
 	}
 
-	return fpath, err
+	return fpath, nil
 }

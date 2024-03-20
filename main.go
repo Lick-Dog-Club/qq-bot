@@ -90,10 +90,13 @@ func main() {
 		return
 	}
 
-	cm := cronjob.Manager()
-	cm.Run(context.TODO())
-	cm.LoadOnceTasks()
-	defer cm.Shutdown(context.TODO())
+	if config.CronEnabled() {
+		log.Println("[Cron]: start...")
+		cm := cronjob.Manager()
+		cm.Run(context.TODO())
+		cm.LoadOnceTasks()
+		defer cm.Shutdown(context.TODO())
+	}
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		var message *bot.QQMessage
