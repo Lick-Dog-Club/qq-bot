@@ -190,7 +190,7 @@ func Image(content string) (string, error) {
 	return downloadImage(ctx, rank.Items[rand.Intn(len(rank.Items))].Artwork)
 }
 
-var DIR = "/data/images"
+var DIR = config.ImageDir
 
 func getImage(img image.URLs) string {
 	if img.Original != "" {

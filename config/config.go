@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"html/template"
 	"os"
+	"path/filepath"
 	"qq/util"
 	"strconv"
 	"strings"
@@ -22,7 +23,9 @@ import (
 
 var c atomic.Value
 
-var ConfigFile = "/data/qq-bot.json"
+var DataDir = "/data/"
+var ImageDir = filepath.Join(DataDir, "images")
+var ConfigFile = DataDir + "qq-bot.json"
 var ForceStoreConfig = false
 var AdminID = os.Getenv("ADMIN_USER_ID")
 
@@ -457,6 +460,7 @@ func Set(m map[string]string) (sets KV) {
 		}
 		newKv[k] = newv
 	}
+	newKv["admin_id"] = AdminID
 	c.Store(newKv)
 	if Pod() != "" || ForceStoreConfig {
 		os.WriteFile(ConfigFile, newKv.Marshal(), 0644)

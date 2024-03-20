@@ -16,7 +16,7 @@ import (
 
 func init() {
 	features.AddKeyword("weibo", "获取今日实时的微博热搜榜单", func(bot bot.Bot, s string) error {
-		p := filepath.Join("/data", "images", "weibo50.png")
+		p := filepath.Join(config.ImageDir, "weibo50.png")
 		text2png.Draw([]string{Top()}, p)
 		if bot.Message().WeSendImg != nil {
 			open, _ := os.Open(p)

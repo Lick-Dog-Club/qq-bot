@@ -238,7 +238,7 @@ func fetchDetail(url string) (m *movie) {
 					if resp.StatusCode != 200 {
 						return ""
 					}
-					savePath := filepath.Join("/data", "images", fmt.Sprintf("tmp-%s-%s%s", time.Now().Format("2006-01-02"), random.String(10), filepath.Ext(attribute.Val)))
+					savePath := filepath.Join(config.ImageDir, fmt.Sprintf("tmp-%s-%s%s", time.Now().Format("2006-01-02"), random.String(10), filepath.Ext(attribute.Val)))
 					create, err := os.Create(savePath)
 					defer create.Close()
 					io.Copy(create, resp.Body)

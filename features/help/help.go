@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"qq/bot"
+	"qq/config"
 	"qq/features"
 	"qq/util/text2png"
 	"sync"
@@ -25,9 +26,9 @@ func init() {
 }
 
 func showHelp(bot bot.Bot, hidden bool) {
-	os.MkdirAll("/data/images", 0755)
-	helpPpath := filepath.Join("/data", "images", "help.png")
-	hhelpPath := filepath.Join("/data", "images", "hhelp.png")
+	os.MkdirAll(config.ImageDir, 0755)
+	helpPpath := filepath.Join(config.ImageDir, "help.png")
+	hhelpPath := filepath.Join(config.ImageDir, "hhelp.png")
 	hideOnce.Do(func() {
 		text2png.Draw(features.BeautifulOutputLines(false, true), hhelpPath)
 	})

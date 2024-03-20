@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"qq/bot"
+	"qq/config"
 	"qq/features"
 	"qq/util/text2png"
 
@@ -15,7 +16,7 @@ import (
 
 func init() {
 	features.AddKeyword("zhihu", "获取知乎热搜榜单", func(bot bot.Bot, s string) error {
-		p := filepath.Join("/data", "images", "zhihu50.png")
+		p := filepath.Join(config.ImageDir, "zhihu50.png")
 		text2png.Draw([]string{Top()}, p)
 		if bot.Message().WeSendImg != nil {
 			open, _ := os.Open(p)

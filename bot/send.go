@@ -191,7 +191,7 @@ func (m *qqBot) sendImage(msg *Message, text string) (string, error) {
 }
 
 func tmpPath() string {
-	return filepath.Join("/data", "images", fmt.Sprintf("tmp-%s-%s.png", time.Now().Format("2006-01-02"), random.String(10)))
+	return filepath.Join(config.ImageDir, fmt.Sprintf("tmp-%s-%s.png", time.Now().Format("2006-01-02"), random.String(10)))
 }
 
 func (m *qqBot) SendGroup(gid string, s string) string {
