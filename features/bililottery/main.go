@@ -28,11 +28,7 @@ func init() {
 				Cookie string `json:"cookie"`
 			}{}
 			json.Unmarshal([]byte(args), &input)
-			str := ""
-			Run(func(s string) {
-				str += s
-			}, input.Cookie)
-			return str, nil
+			return Run(func(s string) {}, input.Cookie), nil
 		},
 	}))
 }
