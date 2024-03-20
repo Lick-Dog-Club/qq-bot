@@ -280,6 +280,9 @@ type Sku struct {
 func TaobaoIDs() []string {
 	return strings.Split(c.Load().(KV)["taobao_ids"], ",")
 }
+func DisabledCrons() Cmd {
+	return Cmd(c.Load().(KV)["disabled_crons"])
+}
 
 var mappingKV = KV{
 	// onebound
@@ -292,6 +295,7 @@ var mappingKV = KV{
 	"bark_url":        "",
 	"taobao_bark_url": "",
 	"bili_cookie":     "",
+	"disabled_crons":  "",
 	"user_id":         "",
 	// QQ 号码，"," 分隔，无法使用 config 设置
 	"admin_id":       os.Getenv("ADMIN_USER_ID"),

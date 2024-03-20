@@ -91,6 +91,10 @@ func (m *manager) LoadOnceTasks() {
 }
 
 func (m *manager) NewCommand(name string, fn func(bot bot.CronBot) error) CommandImp {
+	if config.DisabledCrons().Contains(name) {
+		log.Println("filter disabled cron: ", name)
+		return &command{}
+	}
 	m.Lock()
 	defer m.Unlock()
 	if _, ok := m.commands[name]; ok {

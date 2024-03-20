@@ -3,6 +3,7 @@ package lottery
 import (
 	"encoding/json"
 	"qq/bot"
+	"qq/config"
 	"qq/features"
 	"strings"
 
@@ -42,6 +43,8 @@ func Run(send func(string), cookie string) string {
 	}
 	_, err := user.info()
 	if err != nil {
+		// 登录失败清除 cookie
+		config.Set(map[string]string{"bili_cookie": ""})
 		return err.Error()
 	}
 	send(user.me.Data.Uname + " 登录成功，现在开始处理抽奖请求~")

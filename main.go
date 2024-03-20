@@ -45,6 +45,7 @@ import (
 	_ "qq/features/bitget"
 	_ "qq/features/comic"
 	_ "qq/features/config"
+	_ "qq/features/cron"
 	_ "qq/features/daxin"
 	_ "qq/features/ddys"
 	_ "qq/features/geo"
@@ -97,7 +98,9 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		var message *bot.QQMessage
 		json.NewDecoder(r.Body).Decode(&message)
-		if message.PostType == "meta_event" {
+		unix := time.Unix(int64(message.Time), 0)
+		log.Println(unix.Format(time.DateTime))
+		if message.PostType == "meta_event" || unix.Add(8*time.Second).Before(time.Now()) {
 			return
 		}
 		fmt.Printf("receive %d: %v\n", message.UserID, message.Message)
