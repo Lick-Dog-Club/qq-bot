@@ -35,6 +35,7 @@ func init() {
 			Set(v)
 		}
 	}
+	log.Println(c.Load().(KV))
 }
 
 func Configs() KV {
