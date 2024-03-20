@@ -2,6 +2,7 @@ package pixiv
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"math/rand"
@@ -141,7 +142,7 @@ func Search(content string, yell bool) (string, error) {
 		log.Println(len(items))
 		return downloadImage(ctx, items[rand.Intn(len(items))])
 	}
-	return "", nil
+	return "", errors.New("没搜索到相关图片")
 }
 
 func Image(content string) (string, error) {
