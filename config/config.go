@@ -283,6 +283,9 @@ func TaobaoIDs() []string {
 func DisabledCrons() Cmd {
 	return Cmd(c.Load().(KV)["disabled_crons"])
 }
+func RunWebotOnSysStart() bool {
+	return c.Load().(KV)["run_webot"] == "1"
+}
 
 var mappingKV = KV{
 	// onebound
@@ -297,6 +300,7 @@ var mappingKV = KV{
 	"bili_cookie":     "",
 	"disabled_crons":  "",
 	"user_id":         "",
+	"run_webot":       "0",
 	// QQ 号码，"," 分隔，无法使用 config 设置
 	"admin_id":       os.Getenv("ADMIN_USER_ID"),
 	"ai_token":       "",

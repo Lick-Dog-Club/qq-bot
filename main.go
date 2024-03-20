@@ -99,7 +99,6 @@ func main() {
 		var message *bot.QQMessage
 		json.NewDecoder(r.Body).Decode(&message)
 		unix := time.Unix(int64(message.Time), 0)
-		log.Println(unix.Format(time.DateTime))
 		if message.PostType == "meta_event" || unix.Add(8*time.Second).Before(time.Now()) {
 			return
 		}
@@ -140,7 +139,9 @@ func brithCry() {
 		time.Sleep(15 * time.Second)
 		for _, s := range config.AdminIDs().List() {
 			bot.NewQQBot(&bot.Message{}).SendToUser(s, fmt.Sprintf("%s 系统已启动", time.Now().Format(time.DateTime)))
-			webot.Run(bot.NewQQBot(&bot.Message{SenderUserID: config.UserID()}))
+			if config.RunWebotOnSysStart() {
+				webot.Run(bot.NewQQBot(&bot.Message{SenderUserID: config.UserID()}))
+			}
 		}
 	}()
 }
