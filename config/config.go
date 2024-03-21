@@ -22,7 +22,14 @@ import (
 var c atomic.Value
 
 var (
-	DataDir          = os.Getenv("DATA_DIR")
+	DataDir = func() string {
+		dir := "/data"
+		en := os.Getenv("DATA_DIR")
+		if en != "" {
+			dir = en
+		}
+		return dir
+	}()
 	adminID          = os.Getenv("ADMIN_USER_ID")
 	ForceStoreConfig = os.Getenv("FORCE_STORE_CONFIG") == "1"
 )
