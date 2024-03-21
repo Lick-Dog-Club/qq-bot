@@ -30,7 +30,6 @@ jobs:
         run: |
           sudo apt update && sudo apt install upx
           make build-linux-amd64
-          make build-windows
           upx -9 app-linux-amd64
       -
         name: artifacts-app-amd64
@@ -39,6 +38,30 @@ jobs:
           name: app-linux-amd64
           path: |
             app-linux-amd64
+
+  build-windows:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+      -
+        uses: actions/setup-go@v3
+        with:
+          go-version: '^1.20'
+      -
+        name: Setup Golang caches
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-golang-
+      -
+        run: |
+          make build-windows
       -
         name: artifacts-app-win-amd64
         uses: actions/upload-artifact@v3
