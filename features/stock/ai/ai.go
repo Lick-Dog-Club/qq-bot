@@ -4,10 +4,16 @@ import (
 	"context"
 	"errors"
 	"io"
-	"qq/features/ai/api"
+	"qq/bot"
 	"qq/features/stock/types"
+	"regexp"
+	"strings"
 	"sync"
 	"time"
+	"unicode/utf8"
+
+	"github.com/pkoukk/tiktoken-go"
+	"github.com/samber/lo"
 
 	"github.com/sashabaranov/go-openai"
 )
@@ -59,13 +65,60 @@ func (h *History) SetSysPrompt(prompt string) {
 	}
 }
 
+var imageRegex = regexp.MustCompile(`\[\w+:image,file=(.*?),.*?]`)
+
+func ContentHasImage(content string) bool {
+	return imageRegex.MatchString(content)
+}
+func FormatImageContent(content string) string {
+	submatch := imageRegex.FindAllStringSubmatch(content, -1)
+	for _, i := range submatch {
+		content = strings.ReplaceAll(content, i[0], bot.GetCQImage(i[1])+" ")
+	}
+	return content
+}
+
+func LastConversationsByLimitTokens(cs []openai.ChatCompletionMessage, limitTokenCount int64) []openai.ChatCompletionMessage {
+	var (
+		res        []openai.ChatCompletionMessage
+		totalToken int
+	)
+	for _, conversation := range lo.Reverse(cs) {
+		totalToken = totalToken + WordToToken(conversation.Content)
+		if totalToken > int(limitTokenCount) {
+			break
+		}
+		res = append(res, openai.ChatCompletionMessage{
+			Role:    conversation.Role,
+			Content: conversation.Content,
+		})
+	}
+	return lo.Reverse(res)
+}
+
+// WordToToken 4,096 tokens
+func WordToToken(s string) int {
+	tkm, err := tiktoken.GetEncoding(tiktoken.MODEL_CL100K_BASE)
+	if err != nil {
+		return int(float64(utf8.RuneCountInString(s)) / 0.75)
+	}
+	return len(tkm.Encode(s, nil, nil))
+}
+
 func (h *History) Add(message openai.ChatCompletionMessage) {
 	h.Lock()
 	defer h.Unlock()
-	if api.ContentHasImage(message.Content) {
-		message.Content = api.FormatImageContent(message.Content)
+	if ContentHasImage(message.Content) {
+		message.Content = FormatImageContent(message.Content)
 	}
 	h.list = append(h.list, message)
+	tokens := LastConversationsByLimitTokens(h.list, 4096)
+	for len(tokens) > 0 {
+		if tokens[0].Role == openai.ChatMessageRoleTool {
+			tokens = tokens[1:]
+		}
+	}
+	h.list = tokens
 }
 
 type Message struct {

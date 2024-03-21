@@ -6,20 +6,14 @@ import (
 	"fmt"
 	"html/template"
 	"log"
-	"qq/bot"
 	"qq/config"
 	"qq/features/ai/api/client"
 	"qq/features/ai/api/types"
 	"qq/features/stock/ai"
 	"qq/util/retry"
-	"regexp"
 	"strings"
 	"sync"
 	"time"
-	"unicode/utf8"
-
-	"github.com/pkoukk/tiktoken-go"
-	"github.com/samber/lo"
 
 	"github.com/sashabaranov/go-openai"
 )
@@ -265,48 +259,4 @@ func (gpt *chatGPTClient) BuildPrompt(messages types.UserMessageList, parentMess
 	}
 
 	return
-}
-
-func lastConversationsByLimitTokens(cs []openai.ChatCompletionMessage, limitTokenCount int64) []openai.ChatCompletionMessage {
-	var (
-		res        []openai.ChatCompletionMessage
-		totalToken int
-	)
-	for _, conversation := range lo.Reverse(cs) {
-		totalToken = totalToken + WordToToken(conversation.Content)
-		if totalToken > int(limitTokenCount) {
-			break
-		}
-		content := conversation.Content
-		if ContentHasImage(content) {
-			content = FormatImageContent(content)
-		}
-		res = append(res, openai.ChatCompletionMessage{
-			Role:    conversation.Role,
-			Content: content,
-		})
-	}
-	return lo.Reverse(res)
-}
-
-var imageRegex = regexp.MustCompile(`\[\w+:image,file=(.*?),.*?]`)
-
-func ContentHasImage(content string) bool {
-	return imageRegex.MatchString(content)
-}
-func FormatImageContent(content string) string {
-	submatch := imageRegex.FindAllStringSubmatch(content, -1)
-	for _, i := range submatch {
-		content = strings.ReplaceAll(content, i[0], bot.GetCQImage(i[1])+" ")
-	}
-	return content
-}
-
-// WordToToken 4,096 tokens
-func WordToToken(s string) int {
-	tkm, err := tiktoken.GetEncoding(tiktoken.MODEL_CL100K_BASE)
-	if err != nil {
-		return int(float64(utf8.RuneCountInString(s)) / 0.75)
-	}
-	return len(tkm.Encode(s, nil, nil))
 }
