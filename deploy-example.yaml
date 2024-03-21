@@ -234,7 +234,7 @@ spec:
             - --host
             - "0.0.0.0"
             - --port
-            - 8081
+            - "8081"
         - name: clash
           image: dreamacro/clash
           imagePullPolicy: IfNotPresent
