@@ -30,6 +30,7 @@ jobs:
         run: |
           sudo apt update && sudo apt install upx
           make build-linux-amd64
+          make build-windows
           upx -9 app-linux-amd64
       -
         name: artifacts
@@ -38,6 +39,7 @@ jobs:
           name: app-amd64
           path: |
             app-linux-amd64
+            app-win-amd64
 
   docker:
     needs: build
