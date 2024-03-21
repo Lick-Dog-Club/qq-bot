@@ -1,16 +1,15 @@
 package types
 
 import (
+	"qq/features/stock/ai"
 	"sync"
 	"time"
 
 	"github.com/sashabaranov/go-openai"
-
-	"github.com/google/uuid"
 )
 
 type GptClientImpl interface {
-	GetCompletion(messages []openai.ChatCompletionMessage) (string, error)
+	GetCompletion(his *ai.History, current openai.ChatCompletionMessage) (string, error)
 	Platform() string
 }
 
@@ -37,56 +36,11 @@ func (l UserMessageList) Find(id string) *UserMessage {
 	return nil
 }
 
-type KeyValue struct {
-	kv map[string]any
-	sync.RWMutex
-}
-
-func NewKV(kv map[string]any) *KeyValue {
-	return &KeyValue{kv: kv}
-}
-
-func (kv *KeyValue) Get(k string) any {
-	kv.RLock()
-	defer kv.RUnlock()
-	return kv.kv[k]
-}
-
-func (kv *KeyValue) Set(k string, v any) {
-	kv.Lock()
-	defer kv.Unlock()
-	kv.kv[k] = v
-}
-
 type Status struct {
 	sync.RWMutex
 	isAsking    bool
-	opts        *SendOpts
 	msg         string
 	lastAskTime time.Time
-}
-
-func (s *Status) GetOpts(noConversationId bool) *SendOpts {
-	s.RLock()
-	defer s.RUnlock()
-	if s.opts == nil {
-		s.opts = &SendOpts{
-			ParentMessageId: uuid.NewString(),
-		}
-		if !noConversationId {
-			s.opts.ConversationId = uuid.NewString()
-		}
-	}
-	return s.opts
-}
-
-func (s *Status) SetOpts(opts *SendOpts) {
-	s.Lock()
-	defer s.Unlock()
-	s.opts = &SendOpts{
-		ConversationId:  opts.ConversationId,
-		ParentMessageId: opts.ParentMessageId,
-	}
 }
 
 func (s *Status) IsAsking() bool {

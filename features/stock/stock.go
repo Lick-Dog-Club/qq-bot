@@ -10,9 +10,10 @@ import (
 	"qq/features/stock/impl"
 	openai2 "qq/features/stock/openai"
 	"qq/features/stock/tools"
-	"qq/features/stock/types"
 	"qq/util/proxy"
 	"time"
+
+	"github.com/sashabaranov/go-openai"
 
 	"github.com/sashabaranov/go-openai/jsonschema"
 )
@@ -90,10 +91,12 @@ func Analyze(content string) string {
 		},
 		ToolCall: impl.CallTool,
 	})
-	completion, _ := client.StreamCompletion(context.TODO(), []ai.Message{
-		{
-			Role: types.RoleSystem,
-			Content: fmt.Sprintf(`当前时间: %s.
+	h := &ai.History{}
+	h.Add(openai.ChatCompletionMessage{
+		Role:    openai.ChatMessageRoleUser,
+		Content: content,
+	})
+	h.SetSysPrompt(fmt.Sprintf(`当前时间: %s.
 你是短线炒股专家，拥有丰富的炒股经验，请你从多个方面分析股票适不适合短线投资, 时间范围是距今(包括今天)近一个月或三个月的数据
 
 ## 你需要从以下角度逐个分析
@@ -111,13 +114,8 @@ func Analyze(content string) string {
 市场情绪：极度悲观的情绪往往预示着潜在的反弹机会，但需要结合其他因素综合判断。
 监管公告或新闻：没有重大负面新闻或公告影响股票基本面，短期内的价格下跌可能仅仅是市场情绪的反应。
 给出止盈止损的点位, 并且说出你分析的思路，并且做一个总结。
-`, time.Now().Format(time.DateTime)),
-		},
-		{
-			Role:    types.RoleUser,
-			Content: content,
-		},
-	})
+`, time.Now().Format(time.DateTime)))
+	completion, _ := client.StreamCompletion(context.TODO(), h)
 	str := ""
 	for resp := range completion {
 		if resp.IsEnd() {

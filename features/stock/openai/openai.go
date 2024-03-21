@@ -129,7 +129,7 @@ func (o *openaiClient) CreateEmbeddings(ctx context.Context, texts []string) (ai
 	}, nil
 }
 
-func (o *openaiClient) StreamCompletion(ctx context.Context, messages []ai.Message) (<-chan ai.CompletionResponse, error) {
+func (o *openaiClient) StreamCompletion(ctx context.Context, messages *ai.History) (<-chan ai.CompletionResponse, error) {
 	return (&toolCallChatWrapper{openaiClient: o}).StreamCompletion(ctx, messages)
 }
 

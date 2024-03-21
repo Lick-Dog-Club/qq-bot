@@ -2,12 +2,10 @@ package client
 
 import (
 	"context"
-	"fmt"
 	"qq/features"
 	"qq/features/ai/api/types"
 	"qq/features/stock/ai"
 	openai2 "qq/features/stock/openai"
-	types2 "qq/features/stock/types"
 	"qq/util/proxy"
 	"time"
 
@@ -46,19 +44,11 @@ func (gpt *openaiClientV2) Platform() string {
 	return "chatgpt-v2"
 }
 
-func (gpt *openaiClientV2) GetCompletion(messages []openai.ChatCompletionMessage) (string, error) {
+func (gpt *openaiClientV2) GetCompletion(his *ai.History, current openai.ChatCompletionMessage) (string, error) {
 	timeout, cancelFunc := context.WithTimeout(context.TODO(), 120*time.Second)
 	defer cancelFunc()
-	var aimsgs []ai.Message
-	for _, msg := range messages {
-		aimsgs = append(aimsgs, ai.Message{
-			Role:         types2.Role(msg.Role),
-			Content:      msg.Content,
-			MultiContent: msg.MultiContent,
-		})
-	}
-	fmt.Println(aimsgs)
-	completion, err := gpt.cli.StreamCompletion(timeout, aimsgs)
+	his.Add(current)
+	completion, err := gpt.cli.StreamCompletion(timeout, his)
 	if err != nil {
 		return err.Error(), nil
 	}

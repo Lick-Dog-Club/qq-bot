@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"qq/features/stock/types"
+	"sync"
 	"time"
 
 	"github.com/sashabaranov/go-openai"
@@ -18,9 +19,49 @@ var (
 
 type Chat interface {
 	Completion(ctx context.Context, messages []Message) (CompletionResponse, error)
-	StreamCompletion(ctx context.Context, messages []Message) (<-chan CompletionResponse, error)
+	StreamCompletion(ctx context.Context, messages *History) (<-chan CompletionResponse, error)
 	CreateImage(ctx context.Context, prompt string, quality string, size string) (res ImageResponse, err error)
 	CreateEmbeddings(context.Context, []string) (EmbeddingResponse, error)
+}
+
+type History struct {
+	sync.RWMutex
+	list      []openai.ChatCompletionMessage
+	sysPrompt openai.ChatCompletionMessage
+}
+
+func (h *History) Messages() (resu []Message) {
+	h.RLock()
+	defer h.RUnlock()
+	n := []openai.ChatCompletionMessage{}
+	if h.sysPrompt.Role != "" {
+		n = append(n, h.sysPrompt)
+	}
+	res := append(n, h.list...)
+	for _, re := range res {
+		resu = append(resu, Message{
+			Role:       types.Role(re.Role),
+			Content:    re.Content,
+			ToolCall:   re.ToolCalls,
+			ToolCallID: re.ToolCallID,
+		})
+	}
+	return resu
+}
+
+func (h *History) SetSysPrompt(prompt string) {
+	h.Lock()
+	defer h.Unlock()
+	h.sysPrompt = openai.ChatCompletionMessage{
+		Role:    openai.ChatMessageRoleSystem,
+		Content: prompt,
+	}
+}
+
+func (h *History) Add(message openai.ChatCompletionMessage) {
+	h.Lock()
+	defer h.Unlock()
+	h.list = append(h.list, message)
 }
 
 type Message struct {

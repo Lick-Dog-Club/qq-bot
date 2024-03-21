@@ -9,6 +9,7 @@ import (
 	"qq/config"
 	"qq/features/ai/api/client"
 	"qq/features/ai/api/types"
+	"qq/features/stock/ai"
 	"qq/util/retry"
 	"regexp"
 	"strings"
@@ -19,7 +20,6 @@ import (
 	"github.com/pkoukk/tiktoken-go"
 	"github.com/samber/lo"
 
-	"github.com/google/uuid"
 	"github.com/sashabaranov/go-openai"
 )
 
@@ -148,9 +148,9 @@ func (m *gptManager[T]) getByUser(userID, from string) userImp {
 }
 
 type chatGPTClient struct {
-	uid    string
-	cache  *types.KeyValue
-	status *types.Status
+	uid     string
+	status  *types.Status
+	history *ai.History
 
 	client func() types.GptClientImpl
 	from   string
@@ -158,10 +158,9 @@ type chatGPTClient struct {
 
 func newChatGPTClient(uid, from string) *chatGPTClient {
 	return &chatGPTClient{
-		uid:    uid,
-		cache:  types.NewKV(map[string]any{"namespace": "chatgpt"}),
-		status: &types.Status{},
-		from:   from,
+		uid:     uid,
+		status:  &types.Status{},
+		history: &ai.History{},
 		client: func() types.GptClientImpl {
 			return client.NewOpenaiClientV2(config.AiToken(), config.ChatGPTApiModel(), openai.ChatCompletionRequest{
 				Temperature:     0.8,
@@ -169,6 +168,7 @@ func newChatGPTClient(uid, from string) *chatGPTClient {
 				TopP:            1,
 			})
 		},
+		from: from,
 	}
 }
 
@@ -203,40 +203,23 @@ func (gpt *chatGPTClient) send(msg string, userid, gid string) string {
 	}
 	gpt.status.Asking()
 	gpt.status.SetMsg(msg)
-	var opts *types.SendOpts = gpt.status.GetOpts(false)
-	var conversation []types.UserMessage
-	get := gpt.cache.Get(opts.ConversationId)
-	if get == nil {
-		conversation = []types.UserMessage{}
-	} else {
-		conversation = get.([]types.UserMessage)
-	}
-	um := types.UserMessage{
-		ID:              uuid.NewString(),
-		ParentMessageId: opts.ParentMessageId,
-		Role:            openai.ChatMessageRoleUser,
-		Message:         msg,
-	}
-	conversation = append(conversation, um)
-	prompt := gpt.BuildPrompt(conversation, um.ID)
-	prompt = append([]openai.ChatCompletionMessage{
-		{
-			Role: openai.ChatMessageRoleSystem,
-			Content: fmt.Sprintf(`当前时间是：%s
+	sysPrompt := fmt.Sprintf(`当前时间是：%s
 %s
 `, time.Now().Format(time.DateTime), buildSysPrompt(SysPrompt{
-				From:       gpt.from,
-				Today:      time.Now(),
-				UserID:     userid,
-				GroupID:    gid,
-				OnlySearch: config.GPTOnlySearch(),
-			})),
-		},
-	}, lastConversationsByLimitTokens(prompt, config.AIMaxToken())...)
+		From:       gpt.from,
+		Today:      time.Now(),
+		UserID:     userid,
+		GroupID:    gid,
+		OnlySearch: config.GPTOnlySearch(),
+	}))
+	gpt.history.SetSysPrompt(sysPrompt)
 	var result string
-	err := retry.Times(10, func() error {
+	err := retry.Times(3, func() error {
 		var err error
-		result, err = gpt.client().GetCompletion(prompt)
+		result, err = gpt.client().GetCompletion(gpt.history, openai.ChatCompletionMessage{
+			Role:    openai.ChatMessageRoleUser,
+			Content: msg,
+		})
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -250,21 +233,13 @@ func (gpt *chatGPTClient) send(msg string, userid, gid string) string {
 		log.Println(err.Error())
 		return "前方拥挤，请稍后再试~"
 	}
-	reply := types.UserMessage{
-		ID:              uuid.NewString(),
-		ParentMessageId: um.ID,
-		Role:            openai.ChatMessageRoleAssistant,
-		Message:         result,
-	}
-	conversation = append(conversation, reply)
-	gpt.cache.Set(opts.ConversationId, conversation)
-	gpt.status.SetOpts(&types.SendOpts{
-		ConversationId:  opts.ConversationId,
-		ParentMessageId: reply.ID,
+	gpt.history.Add(openai.ChatCompletionMessage{
+		Role:    openai.ChatMessageRoleAssistant,
+		Content: result,
 	})
 	gpt.status.Asked()
 
-	return reply.Message
+	return result
 }
 
 func (gpt *chatGPTClient) BuildPrompt(messages types.UserMessageList, parentMessageId string) (res []openai.ChatCompletionMessage) {

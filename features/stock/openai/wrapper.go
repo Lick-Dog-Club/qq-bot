@@ -11,8 +11,8 @@ type toolCallChatWrapper struct {
 	openaiClient *openaiClient
 }
 
-func (t *toolCallChatWrapper) StreamCompletion(ctx context.Context, messages []ai.Message) (<-chan ai.CompletionResponse, error) {
-	completion, err := t.openaiClient.streamCompletion(ctx, messages)
+func (t *toolCallChatWrapper) StreamCompletion(ctx context.Context, tm *ai.History) (<-chan ai.CompletionResponse, error) {
+	completion, err := t.openaiClient.streamCompletion(ctx, tm.Messages())
 	if err != nil {
 		return nil, err
 	}
@@ -33,12 +33,10 @@ func (t *toolCallChatWrapper) StreamCompletion(ctx context.Context, messages []a
 		}
 
 		if isToolCall {
-			messages = append(messages,
-				ai.Message{
-					Role:     openai.ChatMessageRoleAssistant,
-					ToolCall: toolCalls,
-				},
-			)
+			tm.Add(openai.ChatCompletionMessage{
+				Role:      openai.ChatMessageRoleAssistant,
+				ToolCalls: toolCalls,
+			})
 			for _, call := range toolCalls {
 				callResult, err := t.openaiClient.toolCall(call.Function.Name, call.Function.Arguments)
 				if err != nil {
@@ -46,13 +44,13 @@ func (t *toolCallChatWrapper) StreamCompletion(ctx context.Context, messages []a
 					return
 				}
 
-				messages = append(messages, ai.Message{
+				tm.Add(openai.ChatCompletionMessage{
 					Role:       openai.ChatMessageRoleTool,
 					Content:    callResult,
 					ToolCallID: call.ID,
 				})
 			}
-			streamCompletion, err := t.StreamCompletion(ctx, messages)
+			streamCompletion, err := t.StreamCompletion(ctx, tm)
 			if err != nil {
 				resCh <- &ai.CompletionResponseImpl{Error: err}
 				return
@@ -62,5 +60,6 @@ func (t *toolCallChatWrapper) StreamCompletion(ctx context.Context, messages []a
 			}
 		}
 	}()
+
 	return resCh, nil
 }
