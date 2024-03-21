@@ -72,14 +72,14 @@ func (h *History) Add(message openai.ChatCompletionMessage) {
 		message.Content = FormatImageContent(message.Content)
 	}
 	h.list = append(h.list, message)
-	//tokens := LastConversationsByLimitTokens(h.list, 4096)
-	//for len(tokens) > 0 {
-	//	if tokens[0].Role != openai.ChatMessageRoleTool {
-	//		break
-	//	}
-	//	tokens = tokens[1:]
-	//}
-	//h.list = tokens
+	tokens := LastConversationsByLimitTokens(h.list, 4096)
+	for len(tokens) > 0 {
+		if tokens[0].Role != openai.ChatMessageRoleTool {
+			break
+		}
+		tokens = tokens[1:]
+	}
+	h.list = tokens
 }
 
 var imageRegex = regexp.MustCompile(`\[\w+:image,file=(.*?),.*?]`)
@@ -101,14 +101,19 @@ func LastConversationsByLimitTokens(cs []openai.ChatCompletionMessage, limitToke
 		res        []openai.ChatCompletionMessage
 		totalToken int
 	)
-	for _, conversation := range lo.Reverse(cs) {
-		totalToken = totalToken + WordToToken(conversation.Content)
+	for _, item := range lo.Reverse(cs) {
+		totalToken = totalToken + WordToToken(item.Content)
 		if totalToken > int(limitTokenCount) {
 			break
 		}
 		res = append(res, openai.ChatCompletionMessage{
-			Role:    conversation.Role,
-			Content: conversation.Content,
+			Role:         item.Role,
+			Content:      item.Content,
+			MultiContent: item.MultiContent,
+			Name:         item.Name,
+			FunctionCall: item.FunctionCall,
+			ToolCalls:    item.ToolCalls,
+			ToolCallID:   item.ToolCallID,
 		})
 	}
 	return lo.Reverse(res)
