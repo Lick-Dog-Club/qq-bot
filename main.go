@@ -102,6 +102,8 @@ func main() {
 		var message *bot.QQMessage
 		json.NewDecoder(r.Body).Decode(&message)
 		unix := time.Unix(int64(message.Time), 0)
+		indent, _ := json.MarshalIndent(message, "", "  ")
+		fmt.Printf("receive: %v\n", string(indent))
 		if message.PostType == "meta_event" || unix.Add(8*time.Second).Before(time.Now()) {
 			return
 		}
