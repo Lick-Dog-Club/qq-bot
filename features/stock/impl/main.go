@@ -148,7 +148,7 @@ var (
 	}
 )
 
-const ApiAddrPrefix = "http://localhost:8080/api/public"
+const ApiAddrPrefix = "http://localhost:8081/api/public"
 
 func CallTool(name string, args string) (string, error) {
 	switch name {

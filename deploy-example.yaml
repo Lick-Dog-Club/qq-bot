@@ -53,6 +53,7 @@ data:
     # go-cqhttp 默认配置文件
 
     account: # 账号相关
+      sign-server: 'http://127.0.0.1:8080'
       uin: <your-qq-number> # QQ账号
       password: '' # 密码为空时使用扫码登录
       encrypt: false  # 是否开启密码加密
@@ -164,7 +165,7 @@ data:
               secret: ''                  # 密钥
               max-retries: 0             # 最大重试，0 时禁用
               retries-interval: 0      # 重试时间，单位毫秒，0 时立即
-
+              
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -212,17 +213,28 @@ spec:
               wget https://ghproxy.com/https://github.com/Dreamacro/clash-dashboard/archive/gh-pages.zip &&
               unzip gh-pages.zip -d /ui/
       containers:
-        - name: aktools
-          image: registry.cn-shanghai.aliyuncs.com/akfamily/aktools:jupyter
+        - name: signserver
+          image: xzhouqd/qsign:8.9.63
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
+              name: sk-http
+              protocol: TCP
+        - name: aktools
+          imagePullPolicy: IfNotPresent
+          image: registry.cn-shanghai.aliyuncs.com/akfamily/aktools:jupyter
+          ports:
+            - containerPort: 8081
               name: aktools-http
               protocol: TCP
           command:
             - python
             - -m
             - aktools
+            - --host
+            - "0.0.0.0"
+            - --port
+            - 8081
         - name: clash
           image: dreamacro/clash
           imagePullPolicy: IfNotPresent

@@ -65,11 +65,28 @@ func (h *History) SetSysPrompt(prompt string) {
 	}
 }
 
+func (h *History) Add(message openai.ChatCompletionMessage) {
+	h.Lock()
+	defer h.Unlock()
+	if ContentHasImage(message.Content) {
+		message.Content = FormatImageContent(message.Content)
+	}
+	h.list = append(h.list, message)
+	tokens := LastConversationsByLimitTokens(h.list, 4096)
+	for len(tokens) > 0 {
+		if tokens[0].Role == openai.ChatMessageRoleTool {
+			tokens = tokens[1:]
+		}
+	}
+	h.list = tokens
+}
+
 var imageRegex = regexp.MustCompile(`\[\w+:image,file=(.*?),.*?]`)
 
 func ContentHasImage(content string) bool {
 	return imageRegex.MatchString(content)
 }
+
 func FormatImageContent(content string) string {
 	submatch := imageRegex.FindAllStringSubmatch(content, -1)
 	for _, i := range submatch {
@@ -103,22 +120,6 @@ func WordToToken(s string) int {
 		return int(float64(utf8.RuneCountInString(s)) / 0.75)
 	}
 	return len(tkm.Encode(s, nil, nil))
-}
-
-func (h *History) Add(message openai.ChatCompletionMessage) {
-	h.Lock()
-	defer h.Unlock()
-	if ContentHasImage(message.Content) {
-		message.Content = FormatImageContent(message.Content)
-	}
-	h.list = append(h.list, message)
-	tokens := LastConversationsByLimitTokens(h.list, 4096)
-	for len(tokens) > 0 {
-		if tokens[0].Role == openai.ChatMessageRoleTool {
-			tokens = tokens[1:]
-		}
-	}
-	h.list = tokens
 }
 
 type Message struct {
