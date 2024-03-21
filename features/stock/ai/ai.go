@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"io"
+	"qq/features/ai/api"
 	"qq/features/stock/types"
 	"sync"
 	"time"
@@ -61,6 +62,9 @@ func (h *History) SetSysPrompt(prompt string) {
 func (h *History) Add(message openai.ChatCompletionMessage) {
 	h.Lock()
 	defer h.Unlock()
+	if api.ContentHasImage(message.Content) {
+		message.Content = api.FormatImageContent(message.content)
+	}
 	h.list = append(h.list, message)
 }
 
