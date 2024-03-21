@@ -72,14 +72,14 @@ func (h *History) Add(message openai.ChatCompletionMessage) {
 		message.Content = FormatImageContent(message.Content)
 	}
 	h.list = append(h.list, message)
-	tokens := LastConversationsByLimitTokens(h.list, 4096)
-	for len(tokens) > 0 {
-		if tokens[0].Role != openai.ChatMessageRoleTool {
-			break
-		}
-		tokens = tokens[1:]
-	}
-	h.list = tokens
+	//tokens := LastConversationsByLimitTokens(h.list, 4096)
+	//for len(tokens) > 0 {
+	//	if tokens[0].Role != openai.ChatMessageRoleTool {
+	//		break
+	//	}
+	//	tokens = tokens[1:]
+	//}
+	//h.list = tokens
 }
 
 var imageRegex = regexp.MustCompile(`\[\w+:image,file=(.*?),.*?]`)
