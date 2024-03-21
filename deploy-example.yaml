@@ -220,6 +220,9 @@ spec:
             - containerPort: 8080
               name: sk-http
               protocol: TCP
+          env:
+            - name: ANDROID_ID
+              value: ""
         - name: aktools
           imagePullPolicy: IfNotPresent
           image: registry.cn-shanghai.aliyuncs.com/akfamily/aktools:jupyter
