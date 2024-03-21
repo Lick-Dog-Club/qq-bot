@@ -308,7 +308,7 @@ func lastConversationsByLimitTokens(cs []openai.ChatCompletionMessage, limitToke
 	return lo.Reverse(res)
 }
 
-var imageRegex = regexp.MustCompile(`\[(cq|CQ):image,file=(.*?),.*?]`)
+var imageRegex = regexp.MustCompile(`\[\w+:image,file=(.*?),.*?]`)
 
 func ContentHasImage(content string) bool {
 	return imageRegex.MatchString(content)

@@ -73,6 +73,9 @@ func init() {
 				Images []string `json:"images"`
 			}{}
 			json.Unmarshal([]byte(args), &input)
+			if len(input.Images) < 1 {
+				return "", fmt.Errorf("图片地址不能为空")
+			}
 			return See(input.Images), nil
 		},
 	}), features.WithGroup("ai"))
