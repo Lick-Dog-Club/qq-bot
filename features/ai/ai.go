@@ -44,12 +44,39 @@ func init() {
 				Type:        jsonschema.String,
 				Description: "图片的描述，鼓励创造力，同时确保有效的互动。当用户请求不明确时，它将根据经验做出推测来解释用户的请求。GPT将表现为执行命令的工具，专注于高效地生成与用户指令相符的图像。",
 			},
+			"UID": {
+				Type:        jsonschema.String,
+				Description: "用户的 UID",
+			},
+			"FromGroup": {
+				Type:        jsonschema.Boolean,
+				Description: "是否来自群聊",
+			},
+			"GroupID": {
+				Type:        jsonschema.String,
+				Description: "群组 ID",
+			},
+			"From": {
+				Type:        jsonschema.String,
+				Description: "消息来源",
+			},
 		},
 		Call: func(args string) (string, error) {
 			var input = struct {
-				Prompt string `json:"prompt"`
+				Prompt    string `json:"prompt"`
+				UID       string `json:"UID"`
+				FromGroup bool   `json:"FromGroup"`
+				Group     string `json:"GroupID"`
+				From      string `json:"From"`
 			}{}
 			json.Unmarshal([]byte(args), &input)
+			if input.From == "QQ" {
+				bot.NewQQBot(&bot.Message{
+					SenderUserID:  input.UID,
+					IsSendByGroup: input.FromGroup,
+					GroupID:       input.Group,
+				}).SendToUser(input.UID, "正在绘制图片，请稍等~")
+			}
 			draw, _ := Draw(input.Prompt)
 			return draw, nil
 		},
@@ -67,14 +94,41 @@ func init() {
 					Description: "图片url地址",
 				},
 			},
+			"UID": {
+				Type:        jsonschema.String,
+				Description: "用户的 UID",
+			},
+			"FromGroup": {
+				Type:        jsonschema.Boolean,
+				Description: "是否来自群聊",
+			},
+			"GroupID": {
+				Type:        jsonschema.String,
+				Description: "群组 ID",
+			},
+			"From": {
+				Type:        jsonschema.String,
+				Description: "消息来源",
+			},
 		},
 		Call: func(args string) (string, error) {
 			var input = struct {
-				Images []string `json:"images"`
+				Images    []string `json:"images"`
+				UID       string   `json:"UID"`
+				FromGroup bool     `json:"FromGroup"`
+				Group     string   `json:"GroupID"`
+				From      string   `json:"From"`
 			}{}
 			json.Unmarshal([]byte(args), &input)
 			if len(input.Images) < 1 {
 				return "", fmt.Errorf("图片地址不能为空")
+			}
+			if input.From == "QQ" {
+				bot.NewQQBot(&bot.Message{
+					SenderUserID:  input.UID,
+					IsSendByGroup: input.FromGroup,
+					GroupID:       input.Group,
+				}).SendToUser(input.UID, "正在识别图片，请稍等~")
 			}
 			return See(input.Images), nil
 		},

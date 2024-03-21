@@ -23,7 +23,7 @@ import (
 	"github.com/sashabaranov/go-openai"
 )
 
-const pro = `今天是 {{.Today}}, 当前的 UID 是: "{{.UID}}", 是否来自群聊: "{{.FromGroup}}", 群组 ID: "{{.GroupID}}"
+const pro = `今天是 {{.Today}}, 当前的 UID 是: "{{.UID}}", 是否来自群聊: "{{.FromGroup}}", 群组 ID: "{{.GroupID}}, From: "{{.From}}"
 {{- if .OnlySearch}}
 你是一个ai机器人, 你可以使用网络搜索答案，操作步骤为:
 
