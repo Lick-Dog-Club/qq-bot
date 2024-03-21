@@ -36,7 +36,7 @@ jobs:
         name: artifacts-app-amd64
         uses: actions/upload-artifact@v3
         with:
-          name: app-amd64
+          name: app-linux-amd64
           path: |
             app-linux-amd64
       -
