@@ -40,7 +40,7 @@ type History struct {
 func (h *History) Messages() (resu []Message) {
 	h.RLock()
 	defer h.RUnlock()
-	n := []openai.ChatCompletionMessage{}
+	var n []openai.ChatCompletionMessage
 	if h.sysPrompt.Role != "" {
 		n = append(n, h.sysPrompt)
 	}
@@ -71,7 +71,6 @@ func (h *History) Add(message openai.ChatCompletionMessage) {
 	if ContentHasImage(message.Content) {
 		message.Content = FormatImageContent(message.Content)
 	}
-	h.list = append(h.list, message)
 	tokens := LastConversationsByLimitTokens(h.list, 4096)
 	for len(tokens) > 0 {
 		if tokens[0].Role != openai.ChatMessageRoleTool {
@@ -80,6 +79,7 @@ func (h *History) Add(message openai.ChatCompletionMessage) {
 		tokens = tokens[1:]
 	}
 	h.list = tokens
+	h.list = append(h.list, message)
 }
 
 var imageRegex = regexp.MustCompile(`\[\w+:image,file=(.*?),.*?]`)

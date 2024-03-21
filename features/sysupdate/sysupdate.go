@@ -23,8 +23,10 @@ func init() {
 		return nil
 	}, features.WithSysCmd(), features.WithHidden(), features.WithGroup("system"))
 	features.AddKeyword("restart", "重启服务", func(bot bot.Bot, content string) error {
-		restart()
-		bot.Send("系统现在重启")
+		if b, f := restart(); b {
+			bot.Send("系统现在重启")
+			f()
+		}
 		return nil
 	}, features.WithSysCmd(), features.WithHidden(), features.WithGroup("system"))
 }
@@ -100,24 +102,26 @@ func UpdateVersion(bot upBotImp) {
 			return
 		}
 
-		if restart() {
+		if b, f := restart(); b {
 			bot.Send(fmt.Sprintf("更新到最新版本\n%s %s: %s\n%v", data[0].Commit.Committer.Name, data[0].Commit.Committer.Date.Local().Format("2006-01-02 15:04:05"), data[0].Commit.Message, data[0].HTMLURL))
+			f()
 		}
 		return
 	}
 	bot.Send("当前已经是最新版本~")
 }
 
-func restart() bool {
+func restart() (bool, func()) {
 	config, _ := rest.InClusterConfig()
 	clientset, _ := kubernetes.NewForConfig(config)
 	ns := cfg.Namespace()
 	pod := cfg.Pod()
 	if ns != "" && pod != "" {
-		clientset.CoreV1().Pods(ns).Delete(context.TODO(), pod, v1.DeleteOptions{})
-		return true
+		return true, func() {
+			clientset.CoreV1().Pods(ns).Delete(context.TODO(), pod, v1.DeleteOptions{})
+		}
 	}
-	return false
+	return false, func() {}
 }
 
 type workflowRuns struct {
