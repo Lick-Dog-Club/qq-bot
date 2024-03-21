@@ -2,6 +2,7 @@ package api
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
@@ -238,6 +239,9 @@ func (gpt *chatGPTClient) send(msg string, userid, gid string) string {
 		Content: result,
 	})
 	gpt.status.Asked()
+	resu := gpt.history.Messages()
+	indent, _ := json.MarshalIndent(resu, "", "  ")
+	fmt.Println(string(indent))
 
 	return result
 }
