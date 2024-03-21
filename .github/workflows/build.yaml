@@ -33,12 +33,18 @@ jobs:
           make build-windows
           upx -9 app-linux-amd64
       -
-        name: artifacts
+        name: artifacts-app-amd64
         uses: actions/upload-artifact@v3
         with:
           name: app-amd64
           path: |
             app-linux-amd64
+      -
+        name: artifacts-app-win-amd64
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-win-amd64
+          path: |
             app-win-amd64
 
   docker:
