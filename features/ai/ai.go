@@ -75,7 +75,7 @@ func init() {
 					SenderUserID:  input.UID,
 					IsSendByGroup: input.FromGroup,
 					GroupID:       input.Group,
-				}).SendToUser(input.UID, "正在绘制图片，请稍等~")
+				}).Send("正在绘制图片，请稍等~")
 			}
 			draw, _ := Draw(input.Prompt)
 			return draw, nil
@@ -128,7 +128,7 @@ func init() {
 					SenderUserID:  input.UID,
 					IsSendByGroup: input.FromGroup,
 					GroupID:       input.Group,
-				}).SendToUser(input.UID, "正在识别图片，请稍等~")
+				}).Send("正在识别图片，请稍等~")
 			}
 			return See(input.Images), nil
 		},
