@@ -339,7 +339,7 @@ func GetCQImage(file string) string {
 	do, _ := c.Do(req)
 	defer do.Body.Close()
 	all, _ := io.ReadAll(do.Body)
-	fmt.Println(all)
+	fmt.Println(string(all))
 	var res imageResponse
 	json.NewDecoder(bytes.NewReader(all)).Decode(&res)
 	return res.Data.Url
