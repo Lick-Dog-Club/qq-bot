@@ -155,7 +155,6 @@ func (m *qqBot) DeleteMsg(msgID string) {
 }
 
 func (m *qqBot) Send(msg string) string {
-	fmt.Println("send: ", msg)
 	return send(m.msg, msg)
 }
 
