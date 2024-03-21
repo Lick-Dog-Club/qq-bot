@@ -63,7 +63,7 @@ func (h *History) Add(message openai.ChatCompletionMessage) {
 	h.Lock()
 	defer h.Unlock()
 	if api.ContentHasImage(message.Content) {
-		message.Content = api.FormatImageContent(message.content)
+		message.Content = api.FormatImageContent(message.Content)
 	}
 	h.list = append(h.list, message)
 }
