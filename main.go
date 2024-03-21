@@ -102,12 +102,11 @@ func main() {
 		var message *bot.QQMessage
 		json.NewDecoder(r.Body).Decode(&message)
 		unix := time.Unix(int64(message.Time), 0)
-		indent, _ := json.MarshalIndent(message, "", "  ")
-		fmt.Printf("receive: %v\n", string(indent))
 		if message.PostType == "meta_event" || unix.Add(8*time.Second).Before(time.Now()) {
 			return
 		}
-		fmt.Printf("receive %d: %v\n", message.UserID, message.Message)
+		indent, _ := json.MarshalIndent(message, "", "  ")
+		fmt.Printf("receive: %v\n", string(indent))
 		atMsg := fmt.Sprintf("[CQ:at,qq=%v]", message.SelfID)
 		if (strings.Contains(message.Message, atMsg) && message.MessageType == "group") || message.MessageType == "private" {
 			msg := strings.ReplaceAll(message.Message, atMsg, "")
