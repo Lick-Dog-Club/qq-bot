@@ -14,20 +14,23 @@ import (
 	"sync/atomic"
 	"time"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/3bl3gamer/tgclient/mtproto"
-
 	"github.com/sashabaranov/go-openai"
+	log "github.com/sirupsen/logrus"
 )
 
 var c atomic.Value
 
-var DataDir = "/data"
-var ImageDir = filepath.Join(DataDir, "images")
-var ConfigFile = filepath.Join(DataDir, "qq-bot.json")
-var ForceStoreConfig = false
-var AdminID = os.Getenv("ADMIN_USER_ID")
+var (
+	DataDir          = os.Getenv("DATA_DIR")
+	adminID          = os.Getenv("ADMIN_USER_ID")
+	ForceStoreConfig = os.Getenv("FORCE_STORE_CONFIG") == "1"
+)
+
+var (
+	ImageDir   string = filepath.Join(DataDir, "images")
+	ConfigFile string = filepath.Join(DataDir, "qq-bot.json")
+)
 
 func init() {
 	c.Store(mappingKV)
@@ -39,7 +42,6 @@ func init() {
 			Set(v)
 		}
 	}
-	log.Println(c.Load().(KV))
 }
 
 func Configs() KV {
@@ -324,7 +326,7 @@ var mappingKV = KV{
 	"user_id":         "",
 	"run_webot":       "0",
 	// QQ 号码，"," 分隔，无法使用 config 设置
-	"admin_id":       AdminID,
+	"admin_id":       "",
 	"ai_token":       "",
 	"chatgpt_model":  openai.GPT3Dot5Turbo16K0613,
 	"pixiv_mode":     "daily",
@@ -460,7 +462,7 @@ func Set(m map[string]string) (sets KV) {
 		}
 		newKv[k] = newv
 	}
-	newKv["admin_id"] = AdminID
+	newKv["admin_id"] = adminID
 	c.Store(newKv)
 	if Pod() != "" || ForceStoreConfig {
 		os.WriteFile(ConfigFile, newKv.Marshal(), 0644)

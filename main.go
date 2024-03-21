@@ -76,21 +76,11 @@ import (
 	_ "qq/features/zuan"
 )
 
-var (
-	genDoc           bool
-	forceStoreConfig bool
-	configFilePath   string
-	adminID          string
-	dataDir          string
-)
+var genDoc bool
 
 func init() {
 	log.SetReportCaller(true)
 	flag.BoolVar(&genDoc, "doc", false, "-doc")
-	flag.BoolVar(&forceStoreConfig, "fc", false, "-fc")
-	flag.StringVar(&configFilePath, "c", "/data/qq-bot.json", "-c")
-	flag.StringVar(&adminID, "admin", "", "-admin")
-	flag.StringVar(&dataDir, "data-dir", "", "-data-dir /tmp/qq-bot")
 }
 
 func main() {
@@ -99,15 +89,6 @@ func main() {
 		printREADME()
 		return
 	}
-	config.ForceStoreConfig = forceStoreConfig
-	config.ConfigFile = configFilePath
-	if adminID != "" {
-		config.AdminID = adminID
-	}
-	if dataDir != "" {
-		config.DataDir = dataDir
-	}
-	log.Printf("forceStoreConfig: %v configFilePath: %v adminID: %v", forceStoreConfig, configFilePath, adminID)
 
 	if config.CronEnabled() {
 		log.Println("[Cron]: start...")
