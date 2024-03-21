@@ -34,7 +34,7 @@ func init() {
 		return nil
 	})
 
-	features.AddKeyword("draw", "<+prompt>: 使用 ai 画图", func(bot bot.Bot, content string) error {
+	features.AddKeyword("draw", "<+prompt>: 根据文字描述画图", func(bot bot.Bot, content string) error {
 		draw, _ := Draw(content)
 		bot.Send(fmt.Sprintf("[CQ:image,file=%s]", draw))
 		return nil
@@ -42,7 +42,7 @@ func init() {
 		Properties: map[string]jsonschema.Definition{
 			"prompt": {
 				Type:        jsonschema.String,
-				Description: "画图的提示词",
+				Description: "图片的描述，鼓励创造力，同时确保有效的互动。当用户请求不明确时，它将根据经验做出推测来解释用户的请求。GPT将表现为执行命令的工具，专注于高效地生成与用户指令相符的图像。",
 			},
 		},
 		Call: func(args string) (string, error) {
