@@ -71,7 +71,7 @@ func (h *History) Add(message openai.ChatCompletionMessage) {
 	if ContentHasImage(message.Content) {
 		message.Content = FormatImageContent(message.Content)
 	}
-	tokens := LastConversationsByLimitTokens(h.list, 4096)
+	tokens := LastConversationsByLimitTokens(h.list, 12000)
 	for len(tokens) > 0 {
 		if tokens[0].Role != openai.ChatMessageRoleTool {
 			break
