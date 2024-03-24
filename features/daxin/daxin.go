@@ -11,12 +11,14 @@ import (
 
 func init() {
 	features.AddKeyword("dx", "股票新债/打新，查询今日是否有新债", func(bot bot.Bot, content string) error {
-		bot.Send(Get())
+		get, _ := Get()
+		bot.Send(get)
 		return nil
 	}, features.WithAIFunc(features.AIFuncDef{
 		Properties: nil,
 		Call: func(args string) (string, error) {
-			return Get(), nil
+			get, _ := Get()
+			return get, nil
 		},
 	}))
 }
@@ -36,7 +38,7 @@ func init() {
 ]
 */
 
-func Get() string {
+func Get() (string, bool) {
 	request, _ := http.NewRequest("GET", "https://eq.10jqka.com.cn/mobileuserinfo/app/purchaseIcloud/data/newBondList.json", nil)
 	request.Header.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36")
 
@@ -45,14 +47,14 @@ func Get() string {
 	var data response
 	json.NewDecoder(resp.Body).Decode(&data)
 	if len(data) == 0 {
-		return "今日无新债"
+		return "今日无新债", false
 	}
 	var sli = make([]string, 0, len(data))
 	for _, item := range data {
 		sli = append(sli, item.Name)
 	}
 
-	return fmt.Sprintf("今日有新债:\n%s", strings.Join(sli, "\n"))
+	return fmt.Sprintf("今日有新债:\n%s", strings.Join(sli, "\n")), true
 }
 
 type response []struct {
