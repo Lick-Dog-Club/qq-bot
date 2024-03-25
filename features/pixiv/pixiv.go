@@ -14,6 +14,7 @@ import (
 	"qq/bot"
 	"qq/config"
 	"qq/features"
+	"qq/util"
 	"qq/util/proxy"
 	"qq/util/retry"
 	"strings"
@@ -94,6 +95,37 @@ func init() {
 			return Image("n")
 		},
 	}))
+	features.AddKeyword("px", "<+page> 返回一页 pixiv 热门图片", func(bot bot.Bot, content string) error {
+		if bot.IsGroupMessage() {
+			bot.Send("请私聊使用")
+			return nil
+		}
+		if content == "" {
+			content = "1"
+		}
+
+		ctx, _ := newClientCtx()
+		page := util.ToInt64(content)
+		items, err := Images(ctx, "rai", &page)
+		if err != nil {
+			bot.Send(err.Error())
+			return nil
+		}
+
+		for _, item := range items {
+			if s, err := downloadImage(ctx, item.Artwork); err == nil {
+				func() {
+					open, _ := os.Open(s)
+					defer open.Close()
+					all, _ := io.ReadAll(open)
+					toString := base64.StdEncoding.EncodeToString(all)
+					bot.Send(fmt.Sprintf("[CQ:image,file=base64://%s]", toString))
+					os.Remove(s)
+				}()
+			}
+		}
+		return nil
+	}, features.WithGroup("pixiv"), features.WithHidden())
 
 	features.AddKeyword("lsp", "<+query> 搜索 pixiv 的图片", func(bot bot.Bot, content string) error {
 		if content == "" {
@@ -155,6 +187,19 @@ func Search(content string, yell bool) (string, error) {
 }
 
 func Image(content string) (string, error) {
+	ctx, err := newClientCtx()
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+	items, err := Images(ctx, content, nil)
+	if err != nil {
+		return "", err
+	}
+	return downloadImage(ctx, items[rand.Intn(len(items))].Artwork)
+}
+
+func Images(ctx context.Context, content string, page *int64) ([]artwork.RankItem, error) {
 	//daily_r18_ai
 	//daily_r18
 	//daily
@@ -179,24 +224,22 @@ func Image(content string) (string, error) {
 			mode = mode + "_ai"
 		}
 	}
-	ctx, err := newClientCtx()
-	if err != nil {
-		log.Println(err)
-		return "", err
-	}
 	rank := &artwork.Rank{Mode: mode}
-	err = retry.Times(20, func() error {
+	err := retry.Times(20, func() error {
 		rank.Page = 1
 		if !isDaily() {
 			rank.Page = rand.Intn(5) + 1
+		}
+		if page != nil {
+			rank.Page = int(*page)
 		}
 		return rank.Fetch(ctx)
 	})
 	if err != nil {
 		log.Println(err)
-		return "", err
+		return nil, err
 	}
-	return downloadImage(ctx, rank.Items[rand.Intn(len(rank.Items))].Artwork)
+	return rank.Items, nil
 }
 
 var DIR = config.ImageDir
