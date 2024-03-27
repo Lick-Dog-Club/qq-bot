@@ -18,6 +18,7 @@ import (
 	"qq/util/proxy"
 	"qq/util/retry"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/NateScarlet/pixiv/pkg/image"
@@ -112,18 +113,40 @@ func init() {
 			return nil
 		}
 
-		for _, item := range items {
-			if s, err := downloadImage(ctx, item.Artwork); err == nil {
-				func() {
-					open, _ := os.Open(s)
-					defer open.Close()
-					all, _ := io.ReadAll(open)
-					toString := base64.StdEncoding.EncodeToString(all)
-					bot.Send(fmt.Sprintf("[CQ:image,file=base64://%s]", toString))
-					os.Remove(s)
-				}()
+		ch := make(chan artwork.RankItem, 5)
+		go func() {
+			for _, item := range items {
+				ch <- item
 			}
+			close(ch)
+		}()
+		wg := &sync.WaitGroup{}
+		for i := 0; i < 5; i++ {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				for {
+					select {
+					case item, ok := <-ch:
+						if !ok {
+							return
+						}
+						if s, err := downloadImage(ctx, item.Artwork); err == nil {
+							func() {
+								open, _ := os.Open(s)
+								defer open.Close()
+								all, _ := io.ReadAll(open)
+								toString := base64.StdEncoding.EncodeToString(all)
+								bot.Send(fmt.Sprintf("[CQ:image,file=base64://%s]", toString))
+								os.Remove(s)
+							}()
+						}
+					}
+				}
+			}()
 		}
+		wg.Wait()
+		bot.Send("done")
 		return nil
 	}, features.WithGroup("pixiv"), features.WithHidden())
 
