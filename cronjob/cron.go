@@ -116,7 +116,7 @@ func (c *cronLogger) Info(msg string, keysAndValues ...any) {
 }
 
 func (c *cronLogger) Error(err error, msg string, keysAndValues ...any) {
-	log.Printf("[CRON]: %v", err)
+	log.Printf("[CRON]: %v, %v=%v\n", err, msg, keysAndValues)
 }
 
 func formatString(numKeysAndValues int) string {
