@@ -23,6 +23,7 @@ func bark(barkUrl, title, body string) {
 	}
 	split := strings.Split(parse.Path, "/")
 	if len(split) < 2 {
+		log.Println("bark url error: ", split)
 		return
 	}
 	resp, _ := http.Get(fmt.Sprintf("https://api.day.app/%s/%s/%s", split[1], title, body))

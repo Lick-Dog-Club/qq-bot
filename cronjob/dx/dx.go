@@ -16,5 +16,5 @@ func init() {
 		}
 		robot.SendGroup(config.GroupID(), get)
 		return nil
-	}).Weekdays().At("10:40")
+	}).Weekdays().At("9:00")
 }
