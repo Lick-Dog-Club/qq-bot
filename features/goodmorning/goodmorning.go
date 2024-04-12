@@ -21,12 +21,24 @@ import (
 
 func init() {
 	features.AddKeyword("gm", "早上好", func(bot bot.Bot, content string) error {
-		bot.SendTextImage(Get())
+		bot.SendTextImage(Get(time.Now()))
 		return nil
 	})
 }
 
-func Get() string {
+func Get(n time.Time) string {
+	get := holiday.GetItems(time.Now().Year())
+	var ap string
+	for _, i := range get {
+		if i.Date == n.Format("2006-01-02") {
+			s := "好好休息吧"
+			if !i.IsOffDay {
+				s = "需要上班"
+			}
+			ap = fmt.Sprintf("【%s】, %s", i.Name, s)
+			break
+		}
+	}
 	content := fmt.Sprintf(`今天是 %s
 
 %s
@@ -37,9 +49,8 @@ func Get() string {
 =======================
 %s
 %s
-`, holiday.WeekDays[time.Now().Weekday()], huangli.Get(time.Now()).Tldr(), weather.Get("杭州"), strings.Join(lo.ChunkString(star.Get(config.Birthday()), 40), "\n"), GetBirthDayInfo(), holiday.GetNextHolidays().Render())
+`, n.Format("2006-01-02")+" "+holiday.WeekDays[n.Weekday()]+" "+ap, huangli.Get(n).Tldr(), weather.Get("杭州"), strings.Join(lo.ChunkString(star.Get(config.Birthday()), 40), "\n"), GetBirthDayInfo(), holiday.GetNextHolidays(n).Render())
 	return content
-
 }
 
 func GetBirthDayInfo() string {
