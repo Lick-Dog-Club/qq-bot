@@ -22,6 +22,7 @@ import (
 	_ "qq/cronjob/autoupdate"
 	_ "qq/cronjob/bitgetcoin"
 	_ "qq/cronjob/ddys"
+	_ "qq/cronjob/gold"
 	_ "qq/cronjob/lpr"
 
 	//_ "qq/cronjob/taobao"
@@ -50,6 +51,7 @@ import (
 	_ "qq/features/daxin"
 	_ "qq/features/ddys"
 	_ "qq/features/geo"
+	_ "qq/features/gold"
 	_ "qq/features/goodmorning"
 	_ "qq/features/googlesearch"
 	_ "qq/features/help"
