@@ -63,7 +63,7 @@ func DrawLineChart(input LineChartInput) string {
 			Label: charts.SeriesLabel{Show: input.ShowLabel},
 		}
 	}
-	render, err := charts.Render(charts.ChartOption{SeriesList: sl},
+	render, _ := charts.Render(charts.ChartOption{SeriesList: sl},
 		charts.XAxisDataOptionFunc(xAxisData),
 		charts.LegendLabelsOptionFunc(legendLabels, charts.PositionCenter),
 		charts.TitleTextOptionFunc(input.Title),
