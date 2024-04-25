@@ -22,7 +22,7 @@ func init() {
 		return nil
 	}).EveryThirtySeconds()
 	cronjob.Manager().NewCommand("bitget-money-goal", func(bot bot.CronBot) error {
-		err := runGoal()
+		err := runGoal(bot)
 		if err != nil {
 			return err
 		}
@@ -30,7 +30,7 @@ func init() {
 	}).EveryThirtySeconds()
 }
 
-func runGoal() error {
+func runGoal(bot bot.CronBot) error {
 	if config.BgApiSecretKey() != "" && config.BgApiKey() != "" && config.BgPassphrase() != "" {
 		goal := config.BgGoal()
 		for _, coin := range goal {
@@ -44,6 +44,7 @@ func runGoal() error {
 				if usdt <= math.Abs(coin.Price) {
 					str := fmt.Sprintf("%s 跌, 当前价格为 %v", coinName, usdt)
 					fmt.Println(str)
+					bot.SendToUser(config.UserID(), str)
 					util.Bark(fmt.Sprintf("监控 %s 价格", coinName), str, config.BarkUrls()...)
 				}
 			}
@@ -51,6 +52,7 @@ func runGoal() error {
 				if usdt >= math.Abs(coin.Price) {
 					str := fmt.Sprintf("%s 涨, 当前价格为 %v", coinName, usdt)
 					fmt.Println(str)
+					bot.SendToUser(config.UserID(), str)
 					util.Bark(fmt.Sprintf("监控 %s 价格", coinName), str, config.BarkUrls()...)
 				}
 			}
