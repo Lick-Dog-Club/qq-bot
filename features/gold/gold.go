@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"qq/bot"
+	"qq/config"
 	"qq/features"
 	"qq/util"
 	"qq/util/chart"
@@ -37,7 +38,7 @@ func init() {
 		if toInt64 == 0 {
 			toInt64 = 1
 		}
-		all := All(40)
+		all := All(int(util.ToInt64(config.GoldCount())))
 		lineChart := lineChartByLimit(all[:toInt64])
 		bot.Send(fmt.Sprintf("[CQ:image,file=base64://%s]", lineChart))
 
@@ -56,7 +57,7 @@ func init() {
 			return nil
 		}
 
-		lineChart := lineChartByLimit(GoldList{Get(code, 40)})
+		lineChart := lineChartByLimit(GoldList{Get(code, int(util.ToInt64(config.GoldCount())))})
 		bot.Send(fmt.Sprintf("[CQ:image,file=base64://%s]", lineChart))
 
 		return nil
@@ -104,7 +105,7 @@ func lineChartByLimit(all GoldList) string {
 			} else {
 				_, ok := lines[name]
 				xy = chart.XY{
-					X: time.UnixMilli(int64(key)).Format("2006-01-02"),
+					X: time.UnixMilli(int64(key)).Format("06/01/02"),
 					Y: charts.GetNullValue(),
 				}
 				if ok {
@@ -177,7 +178,7 @@ func (g GoldList) Len() int {
 }
 
 func (g GoldList) Less(i, j int) bool {
-	return g[i].Data[0].Q1 > g[j].Data[0].Q1
+	return g[i].Data[0].Q1 < g[j].Data[0].Q1
 }
 
 func (g GoldList) Swap(i, j int) {

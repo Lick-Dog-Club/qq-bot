@@ -316,6 +316,9 @@ func RunWebotOnSysStart() bool {
 func CronEnabled() bool {
 	return c.Load().(KV)["cron_enabled"] == "1"
 }
+func GoldCount() string {
+	return c.Load().(KV)["gold_count"]
+}
 
 var mappingKV = KV{
 	// onebound
@@ -367,6 +370,7 @@ var mappingKV = KV{
 	"bg_api_key":        "",
 	"bg_passphrase":     "",
 	"bg_api_secret_key": "",
+	"gold_count":        "40",
 
 	"12306_JSESSIONID": "",
 
