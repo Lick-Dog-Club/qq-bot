@@ -43,7 +43,7 @@ func init() {
 			bot.Send(err.Error())
 			return err
 		}
-		bot.Send(fmt.Sprintf("money: %.2f", usdt))
+		bot.Send(fmt.Sprintf("money: %v", usdt))
 		return nil
 	}, features.WithHidden(), features.WithGroup("bitget"))
 }
