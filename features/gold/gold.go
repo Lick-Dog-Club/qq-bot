@@ -25,6 +25,10 @@ func init() {
 		bot.SendTextImage(Get("JO_52683", 10).Render())
 		return nil
 	}, features.WithGroup("gold"))
+	features.AddKeyword("ga", "店铺今天金价", func(bot bot.Bot, content string) error {
+		bot.SendTextImage(allTodays())
+		return nil
+	}, features.WithGroup("gold"))
 	features.AddKeyword("gxx", "<+name: 模糊搜索> 金价", func(bot bot.Bot, content string) error {
 		var code string
 		for c, name := range m {
