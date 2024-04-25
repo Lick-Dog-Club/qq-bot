@@ -2,6 +2,7 @@ package bitgetcoin
 
 import (
 	"fmt"
+	"math"
 	"qq/bot"
 	"qq/config"
 	"qq/cronjob"
@@ -13,13 +14,49 @@ import (
 var money = map[string]float64{}
 
 func init() {
-	cronjob.Manager().NewCommand("bitget-money-total-watch-coin", func(bot bot.CronBot) error {
+	cronjob.Manager().NewCommand("bitget-watch-coin", func(bot bot.CronBot) error {
 		err := run()
 		if err != nil {
 			return err
 		}
 		return nil
 	}).EveryThirtySeconds()
+	cronjob.Manager().NewCommand("bitget-money-goal", func(bot bot.CronBot) error {
+		err := runGoal()
+		if err != nil {
+			return err
+		}
+		return nil
+	}).EveryThirtySeconds()
+}
+
+func runGoal() error {
+	if config.BgApiSecretKey() != "" && config.BgApiKey() != "" && config.BgPassphrase() != "" {
+		goal := config.BgGoal()
+		for _, coin := range goal {
+			fmt.Println(coin)
+			usdt, err := bitget.TransUsdt(coin.Name)
+			if err != nil {
+				return err
+			}
+			coinName := strings.TrimSuffix(coin.Name, "USDT_SPBL")
+			if coin.Price < 0 {
+				if usdt <= math.Abs(coin.Price) {
+					str := fmt.Sprintf("%s 跌, 当前价格为 %v", coinName, usdt)
+					fmt.Println(str)
+					util.Bark(fmt.Sprintf("监控 %s 价格", coinName), str, config.BarkUrls()...)
+				}
+			}
+			if coin.Price > 0 {
+				if usdt >= math.Abs(coin.Price) {
+					str := fmt.Sprintf("%s 涨, 当前价格为 %v", coinName, usdt)
+					fmt.Println(str)
+					util.Bark(fmt.Sprintf("监控 %s 价格", coinName), str, config.BarkUrls()...)
+				}
+			}
+		}
+	}
+	return nil
 }
 
 func run() error {

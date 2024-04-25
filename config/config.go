@@ -358,6 +358,7 @@ var mappingKV = KV{
 	"tg_info":        "",
 	"tg_app_id":      "",
 	"bg_coin_watch":  "",
+	"bg_goal":        "",
 	"tg_app_hash":    "",
 	"tg_phone":       "",
 	"tg_code":        "",
@@ -400,10 +401,23 @@ func BgApiKey() string {
 type WatchCoin struct {
 	Name string
 	// 价格变化率
-	Rate []float64
+	Rate  []float64
+	Price float64
 }
 
-// XRP8USDT_SPBL,30;BTCUSDT_SPBL,1
+func BgGoal() []WatchCoin {
+	s := c.Load().(KV)["bg_goal"]
+	split := strings.Split(s, ";")
+	watchCoins := make([]WatchCoin, 0, len(split))
+	for _, s2 := range split {
+		i := strings.Split(s2, ",")
+		watchCoins = append(watchCoins, WatchCoin{
+			Name:  i[0],
+			Price: util.ToFloat64(i[1]),
+		})
+	}
+	return watchCoins
+}
 func BgCoinWatch() []WatchCoin {
 	s := c.Load().(KV)["bg_coin_watch"]
 	split := strings.Split(s, ";")
