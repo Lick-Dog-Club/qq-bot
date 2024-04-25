@@ -90,14 +90,14 @@ func lineChartByLimit(all GoldList) string {
 			if ok {
 				allStores[g.CNName] = struct{}{}
 				mmv[g.CNName] = chart.XY{
-					X: time.UnixMilli(datum.Time).Format("2006-01-02"),
+					X: time.UnixMilli(datum.Time).Format("06/01/02"),
 					Y: datum.Q1,
 				}
 			} else {
 				allStores[g.CNName] = struct{}{}
 				mm[int(datum.Time)] = map[string]chart.XY{
 					g.CNName: {
-						X: time.UnixMilli(datum.Time).Format("2006-01-02"),
+						X: time.UnixMilli(datum.Time).Format("06/01/02"),
 						Y: datum.Q1,
 					},
 				}
