@@ -19,7 +19,7 @@ func init() {
 			return err
 		}
 		return nil
-	}).EveryFiveMinutes()
+	}).EveryThirtySeconds()
 }
 
 func run() error {
