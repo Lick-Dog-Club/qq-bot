@@ -319,11 +319,15 @@ func CronEnabled() bool {
 func GoldCount() string {
 	return c.Load().(KV)["gold_count"]
 }
+func GoldShowLabel() bool {
+	return c.Load().(KV)["gold_show_label"] == "1"
+}
 
 var mappingKV = KV{
 	// onebound
-	"o_key":        "",
-	"cron_enabled": "1",
+	"o_key":           "",
+	"cron_enabled":    "1",
+	"gold_show_label": "0",
 	// onebound
 	"o_secret":    "",
 	"taobao_skus": "",

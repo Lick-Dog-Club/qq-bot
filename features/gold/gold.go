@@ -133,7 +133,7 @@ func lineChartByLimit(all GoldList) string {
 	}
 	var showLabel = false
 	if len(lines) == 1 {
-		showLabel = true
+		showLabel = config.GoldShowLabel()
 	}
 	lineChart := chart.DrawLineChart(chart.LineChartInput{
 		Width:     1500,
