@@ -5,6 +5,7 @@ import (
 	"github.com/vicanso/go-charts/v2"
 	"os"
 	"qq/util/text2png"
+	"sync"
 )
 
 type XY struct {
@@ -21,10 +22,7 @@ type LineChartInput struct {
 	XLabel    string
 	YLabel    string
 	ShowLabel bool
-	Lines     []struct {
-		Name  string
-		Items []XY
-	}
+	Lines     map[string][]XY
 }
 
 func DrawLineChart(input LineChartInput) string {
@@ -39,15 +37,18 @@ func DrawLineChart(input LineChartInput) string {
 		legendLabels []string
 		xAxisData    []string
 	)
-	for idx, line := range input.Lines {
-		legendLabels = append(legendLabels, line.Name)
+	var once sync.Once
+	for name, line := range input.Lines {
+		legendLabels = append(legendLabels, name)
 		var oneValue []float64
-		for _, item := range line.Items {
+		for _, item := range line {
 			oneValue = append(oneValue, item.Y)
-			if idx == 0 {
-				xAxisData = append(xAxisData, item.X)
-			}
 		}
+		once.Do(func() {
+			for _, xy := range line {
+				xAxisData = append(xAxisData, xy.X)
+			}
+		})
 		values = append(values, oneValue)
 	}
 

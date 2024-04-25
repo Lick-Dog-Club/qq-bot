@@ -3,7 +3,9 @@ package gold
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/samber/lo"
 	log "github.com/sirupsen/logrus"
+	"github.com/vicanso/go-charts/v2"
 	"io"
 	"net/http"
 	"qq/bot"
@@ -36,34 +38,7 @@ func init() {
 			toInt64 = 1
 		}
 		all := All(40)
-		var lines []struct {
-			Name  string
-			Items []chart.XY
-		}
-		for _, g := range all[0:toInt64] {
-			var items []chart.XY
-			for _, datum := range g.Data {
-				items = append(items, chart.XY{
-					X: time.UnixMilli(datum.Time).Format("2006-01-02"),
-					Y: datum.Q1,
-				})
-			}
-			lines = append(lines, struct {
-				Name  string
-				Items []chart.XY
-			}{
-				Name:  g.CNName,
-				Items: items,
-			})
-		}
-
-		lineChart := chart.DrawLineChart(chart.LineChartInput{
-			Width:     1500,
-			Height:    500,
-			ShowLabel: false,
-			Lines:     lines,
-			Base64:    true,
-		})
+		lineChart := lineChartByLimit(all[:toInt64])
 		bot.Send(fmt.Sprintf("[CQ:image,file=base64://%s]", lineChart))
 
 		return nil
@@ -81,37 +56,77 @@ func init() {
 			return nil
 		}
 
-		g := Get(code, 30)
-		var lines []struct {
-			Name  string
-			Items []chart.XY
-		}
-		var items []chart.XY
-		for _, datum := range g.Data {
-			items = append(items, chart.XY{
-				X: time.UnixMilli(datum.Time).Format("2006-01-02"),
-				Y: datum.Q1,
-			})
-		}
-		lines = append(lines, struct {
-			Name  string
-			Items []chart.XY
-		}{
-			Name:  g.CNName,
-			Items: items,
-		})
-
-		lineChart := chart.DrawLineChart(chart.LineChartInput{
-			Width:     1500,
-			Height:    500,
-			ShowLabel: true,
-			Lines:     lines,
-			Base64:    true,
-		})
+		lineChart := lineChartByLimit(GoldList{Get(code, 40)})
 		bot.Send(fmt.Sprintf("[CQ:image,file=base64://%s]", lineChart))
 
 		return nil
 	}, features.WithGroup("gold"))
+}
+
+func lineChartByLimit(all GoldList) string {
+	var lines = map[string][]chart.XY{}
+	// 日期 => 店铺 => 金价
+	var allStores = map[string]struct{}{}
+	var mm = map[int]map[string]chart.XY{}
+	for _, g := range all {
+		for _, datum := range g.Data {
+			mmv, ok := mm[int(datum.Time)]
+			if ok {
+				allStores[g.CNName] = struct{}{}
+				mmv[g.CNName] = chart.XY{
+					X: time.UnixMilli(datum.Time).Format("2006-01-02"),
+					Y: datum.Q1,
+				}
+			} else {
+				allStores[g.CNName] = struct{}{}
+				mm[int(datum.Time)] = map[string]chart.XY{
+					g.CNName: {
+						X: time.UnixMilli(datum.Time).Format("2006-01-02"),
+						Y: datum.Q1,
+					},
+				}
+			}
+		}
+	}
+	keys := lo.Keys(mm)
+	sort.Ints(keys)
+	for _, key := range keys {
+		mdata, _ := mm[key]
+		for name := range allStores {
+			xy, ok := mdata[name]
+			if ok {
+				_, ok := lines[name]
+				if ok {
+					lines[name] = append(lines[name], xy)
+				} else {
+					lines[name] = []chart.XY{xy}
+				}
+			} else {
+				_, ok := lines[name]
+				xy = chart.XY{
+					X: time.UnixMilli(int64(key)).Format("2006-01-02"),
+					Y: charts.GetNullValue(),
+				}
+				if ok {
+					lines[name] = append(lines[name], xy)
+				} else {
+					lines[name] = []chart.XY{xy}
+				}
+			}
+		}
+	}
+	var showLabel = false
+	if len(lines) == 1 {
+		showLabel = true
+	}
+	lineChart := chart.DrawLineChart(chart.LineChartInput{
+		Width:     1500,
+		Height:    500,
+		ShowLabel: showLabel,
+		Lines:     lines,
+		Base64:    true,
+	})
+	return lineChart
 }
 
 func allTodays() string {
