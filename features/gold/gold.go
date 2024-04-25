@@ -37,7 +37,7 @@ func init() {
 			bot.Send("未找到该店铺")
 			return nil
 		}
-		bot.SendTextImage(Get("code", 10).Render())
+		bot.SendTextImage(Get(code, 10).Render())
 		return nil
 	}, features.WithGroup("gold"))
 	features.AddKeyword("glist", "金价店铺列表", func(bot bot.Bot, content string) error {
