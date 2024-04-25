@@ -357,6 +357,7 @@ var mappingKV = KV{
 	"maotai":         "",
 	"tg_info":        "",
 	"tg_app_id":      "",
+	"bg_coin_watch":  "",
 	"tg_app_hash":    "",
 	"tg_phone":       "",
 	"tg_code":        "",
@@ -394,6 +395,35 @@ func T12306JSESSIONID() string {
 
 func BgApiKey() string {
 	return c.Load().(KV)["bg_api_key"]
+}
+
+type WatchCoin struct {
+	Name string
+	// 价格变化率
+	Rate []float64
+}
+
+// XRP8USDT_SPBL,30;BTCUSDT_SPBL,1
+func BgCoinWatch() []WatchCoin {
+	s := c.Load().(KV)["bg_coin_watch"]
+	split := strings.Split(s, ";")
+	watchCoins := make([]WatchCoin, 0, len(split))
+	for _, s2 := range split {
+		i := strings.Split(s2, ",")
+		var rates []float64
+		for _, s3 := range i[1:] {
+			f := util.ToFloat64(s3)
+			if f > 1 || f < -1 {
+				f = f / 100
+			}
+			rates = append(rates, f)
+		}
+		watchCoins = append(watchCoins, WatchCoin{
+			Name: i[0],
+			Rate: rates,
+		})
+	}
+	return watchCoins
 }
 
 func BgMoneyDiff() string {

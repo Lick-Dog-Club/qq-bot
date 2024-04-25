@@ -26,7 +26,7 @@ func bark(barkUrl, title, body string) {
 		log.Println("bark url error: ", split)
 		return
 	}
-	resp, err := http.Get(fmt.Sprintf("https://api.day.app/%s/%s/%s", split[1], title, body))
+	resp, err := http.Get(fmt.Sprintf("https://api.day.app/%s/%s/%s", split[1], url.QueryEscape(title), url.QueryEscape(body)))
 	if err != nil {
 		log.Println(err)
 		return

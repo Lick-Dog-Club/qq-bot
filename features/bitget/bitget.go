@@ -34,6 +34,18 @@ func init() {
 		bot.Send(fmt.Sprintf("money: %.2f", total))
 		return nil
 	}, features.WithHidden(), features.WithGroup("bitget"))
+	features.AddKeyword("bg-info", "获取当前价格", func(bot bot.Bot, content string) error {
+		if !strings.HasSuffix(content, "USDT_SPBL") {
+			content += "USDT_SPBL"
+		}
+		usdt, err := TransUsdt(content)
+		if err != nil {
+			bot.Send(err.Error())
+			return err
+		}
+		bot.Send(fmt.Sprintf("money: %.2f", usdt))
+		return nil
+	}, features.WithHidden(), features.WithGroup("bitget"))
 }
 
 type Coin struct {
