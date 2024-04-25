@@ -25,6 +25,21 @@ func init() {
 		bot.SendTextImage(Get("JO_52683", 10).Render())
 		return nil
 	}, features.WithGroup("gold"))
+	features.AddKeyword("gxx", "<+name: 模糊搜索> 金价", func(bot bot.Bot, content string) error {
+		var code string
+		for c, name := range m {
+			if strings.Contains(name, content) {
+				code = c
+				break
+			}
+		}
+		if code == "" {
+			bot.Send("未找到该店铺")
+			return nil
+		}
+		bot.SendTextImage(Get("code", 10).Render())
+		return nil
+	}, features.WithGroup("gold"))
 	features.AddKeyword("glist", "金价店铺列表", func(bot bot.Bot, content string) error {
 		var names []string
 		for _, s := range m {
