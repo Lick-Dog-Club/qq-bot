@@ -110,7 +110,7 @@ func (d *dummyBot) SendGroup(gid string, s string) string {
 }
 
 func (d *dummyBot) SendToUser(uid string, s string) string {
-	fmt.Printf("Send:\nuid:%v\ncontent: %s", uid, s)
+	fmt.Printf("Send:\nuid:%v\ncontent: %s\n", uid, s)
 	return ""
 }
 
