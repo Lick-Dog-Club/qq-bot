@@ -53,13 +53,10 @@ func DrawLineChart(input LineChartInput) string {
 
 	var sl charts.SeriesList = make(charts.SeriesList, len(values))
 	for idx, value := range values {
-		showLabel := input.ShowLabel && idx%2 == 0
 		sl[idx] = charts.Series{
-			Type: "line",
-			Data: charts.NewSeriesDataFromValues(value),
-			Label: charts.SeriesLabel{
-				Show: showLabel,
-			},
+			Type:  "line",
+			Data:  charts.NewSeriesDataFromValues(value),
+			Label: charts.SeriesLabel{Show: input.ShowLabel},
 		}
 	}
 	render, err := charts.Render(charts.ChartOption{SeriesList: sl},

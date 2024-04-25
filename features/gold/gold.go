@@ -345,8 +345,7 @@ var temp, _ = template.New("").Funcs(map[string]any{
 {{.ProductName}}
 
 {{range .Data}}
-{{- millTime .Time}}
-{{.Q1}} 元/克，
+{{- millTime .Time -}}: {{.Q1}} 元/克，
 {{- if gt .Q70 0.0 -}}
 涨了 {{.Q70}} 元/克
 {{- else if eq .Q70 0.0  -}}
@@ -355,5 +354,5 @@ var temp, _ = template.New("").Funcs(map[string]any{
 跌了 {{.Q70}} 元/克
 {{- end -}}
 {{"\n"}}
-{{end}}
+{{- end}}
 `)
