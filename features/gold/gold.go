@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"qq/bot"
 	"qq/features"
+	"qq/util/chart"
 	"sort"
 	"strings"
 	"sync"
@@ -19,21 +20,97 @@ func init() {
 	features.AddKeyword("gold", "金价", func(bot bot.Bot, content string) error {
 		bot.SendTextImage(Get("JO_52683", 10).Render())
 		return nil
-	})
-	features.AddKeyword("gall", "所有店铺的金价", func(bot bot.Bot, content string) error {
-		bot.SendTextImage(allTodays())
+	}, features.WithGroup("gold"))
+	features.AddKeyword("glist", "金价店铺列表", func(bot bot.Bot, content string) error {
+		var names []string
+		for _, s := range m {
+			names = append(names, s)
+		}
+		bot.SendTextImage(strings.Join(names, "\n"))
 		return nil
-	})
+	}, features.WithGroup("gold"))
+	features.AddKeyword("gtop5", "前五便宜的店铺的金价", func(bot bot.Bot, content string) error {
+		all := All(40)
+		var lines []struct {
+			Name  string
+			Items []chart.XY
+		}
+		for _, g := range all[0:5] {
+			var items []chart.XY
+			for _, datum := range g.Data {
+				items = append(items, chart.XY{
+					X: time.UnixMilli(datum.Time).Format("2006-01-02"),
+					Y: datum.Q1,
+				})
+			}
+			lines = append(lines, struct {
+				Name  string
+				Items []chart.XY
+			}{
+				Name:  g.CNName,
+				Items: items,
+			})
+		}
+
+		lineChart := chart.DrawLineChart(chart.LineChartInput{
+			Width:     1500,
+			Height:    500,
+			ShowLabel: false,
+			Lines:     lines,
+			Base64:    true,
+		})
+		bot.Send(fmt.Sprintf("[CQ:image,file=base64://%s]", lineChart))
+
+		return nil
+	}, features.WithGroup("gold"))
+	features.AddKeyword("gx", "<+name: 模糊匹配店铺> 店铺金价", func(bot bot.Bot, content string) error {
+		var code string
+		for c, name := range m {
+			if strings.Contains(name, content) {
+				code = c
+				break
+			}
+		}
+		if code == "" {
+			bot.Send("未找到该店铺")
+			return nil
+		}
+
+		g := Get(code, 30)
+		var lines []struct {
+			Name  string
+			Items []chart.XY
+		}
+		var items []chart.XY
+		for _, datum := range g.Data {
+			items = append(items, chart.XY{
+				X: time.UnixMilli(datum.Time).Format("2006-01-02"),
+				Y: datum.Q1,
+			})
+		}
+		lines = append(lines, struct {
+			Name  string
+			Items []chart.XY
+		}{
+			Name:  g.CNName,
+			Items: items,
+		})
+
+		lineChart := chart.DrawLineChart(chart.LineChartInput{
+			Width:     1500,
+			Height:    500,
+			ShowLabel: true,
+			Lines:     lines,
+			Base64:    true,
+		})
+		bot.Send(fmt.Sprintf("[CQ:image,file=base64://%s]", lineChart))
+
+		return nil
+	}, features.WithGroup("gold"))
 }
 
 func allTodays() string {
 	wg := sync.WaitGroup{}
-	type Data struct {
-		Name  string
-		Code  string
-		Price float64
-		Diff  float64
-	}
 	ch := make(chan Data, len(m))
 	for code, name := range m {
 		wg.Add(1)
@@ -64,6 +141,49 @@ func allTodays() string {
 	var bf strings.Builder
 	temp2.Execute(&bf, items)
 	return bf.String()
+}
+
+type Data struct {
+	Name  string
+	Code  string
+	Price float64
+	Diff  float64
+}
+
+type GoldList []*Gold
+
+func (g GoldList) Len() int {
+	return len(g)
+}
+
+func (g GoldList) Less(i, j int) bool {
+	return g[i].Data[0].Q1 > g[j].Data[0].Q1
+}
+
+func (g GoldList) Swap(i, j int) {
+	g[i], g[j] = g[j], g[i]
+}
+
+func All(pageSize int) GoldList {
+	wg := sync.WaitGroup{}
+	ch := make(chan *Gold, len(m))
+	for code, name := range m {
+		wg.Add(1)
+		go func(code, name string) {
+			defer wg.Done()
+			ch <- Get(code, pageSize)
+		}(code, name)
+	}
+	go func() {
+		wg.Wait()
+		close(ch)
+	}()
+	var items GoldList
+	for data := range ch {
+		items = append(items, data)
+	}
+	sort.Sort(items)
+	return items
 }
 
 var temp2, _ = template.New("").Funcs(map[string]any{
@@ -97,6 +217,7 @@ type Gold struct {
 	ProductName string `json:"productName"`
 	NextEndTime string `json:"nextEndTime"`
 	Data        Items  `json:"data"`
+	CNName      string
 }
 
 type Items []Item
@@ -164,7 +285,7 @@ var m = map[string]string{
 	"JO_335546": "九龙福珠宝",
 }
 
-func Get(code string, size int) Gold {
+func Get(code string, size int) *Gold {
 	if size <= 0 {
 		size = 10
 	}
@@ -197,9 +318,11 @@ func Get(code string, size int) Gold {
 	defer resp.Body.Close()
 	bodyText, _ := io.ReadAll(resp.Body)
 	index := strings.Index(string(bodyText), "{")
-	var data Gold
+	var data *Gold
 	json.NewDecoder(strings.NewReader(string(bodyText)[index:])).Decode(&data)
+	data.CNName = m[code]
 	sort.Sort(data.Data)
+
 	return data
 }
 

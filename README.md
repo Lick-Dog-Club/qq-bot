@@ -30,8 +30,12 @@
 @bot	(y)p            	<+n/r/rai> 返回 pixiv 热门图片
 @bot	(x)lsp          	<+query> 搜索 pixiv 的图片
 @bot	(y)see          	<+图片url>: 根据 url 识别图片内容
-@bot	(y)draw         	<+prompt>: 使用 ai 画图
+@bot	(y)draw         	<+prompt>: 根据文字描述画图
 @bot	(x)clear        	清除 ai 历史对话记录
+@bot	(x)gx           	<+name: 模糊匹配店铺> 店铺金价
+@bot	(x)gtop5        	前五便宜的店铺的金价
+@bot	(x)glist        	金价店铺列表
+@bot	(x)gold         	金价
 @bot	(y)GetCodeByName	根据名称获取股票代码
 @bot	(x)list-cron    	列出所有定时任务
 @bot	(x)help         	帮助信息
@@ -44,11 +48,11 @@
 @bot	(y)geo          	<+地址>: geo 地理位置查询
 @bot	(y)weibo        	获取今日实时的微博热搜榜单
 @bot	(y)zuan         	返回一句祖安/骂人的话
-@bot	(x)webot        	微信机器人扫码登录
 @bot	(y)tip          	获取一个生活小窍门
+@bot	(x)webot        	微信机器人扫码登录
 @bot	(y)zhihu        	获取知乎热搜榜单
-@bot	(y)pic          	返回动漫图片~
 @bot	(y)rkl          	获取一个绕口令
+@bot	(y)pic          	返回动漫图片~
 @bot	(y)stock        	分析股票
 @bot	(x)gm           	早上好
 @bot	(x)default      	ai 自动回答

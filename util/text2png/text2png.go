@@ -11,7 +11,7 @@ import (
 )
 
 //go:embed FangZhengShuSongJianTi-1.ttf
-var fontBytes []byte
+var FontBytes []byte
 
 func handleLines(lines []string) (res []string) {
 	var newLines []string
@@ -42,7 +42,7 @@ func Draw(lines []string, out string) error {
 	for _, ll := range lines {
 		max = math.Max(max, float64(CharCount(ll)))
 	}
-	f, _ := truetype.Parse(fontBytes)
+	f, _ := truetype.Parse(FontBytes)
 	face := truetype.NewFace(f, &truetype.Options{
 		Size: fontSize,
 	})
