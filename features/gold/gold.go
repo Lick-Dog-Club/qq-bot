@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"qq/bot"
 	"qq/features"
+	"qq/util"
 	"qq/util/chart"
 	"sort"
 	"strings"
@@ -29,13 +30,17 @@ func init() {
 		bot.SendTextImage(strings.Join(names, "\n"))
 		return nil
 	}, features.WithGroup("gold"))
-	features.AddKeyword("gtop5", "前五便宜的店铺的金价", func(bot bot.Bot, content string) error {
+	features.AddKeyword("gtop5", "<+num: 数量> 前 {num} 便宜的店铺的金价", func(bot bot.Bot, content string) error {
+		toInt64 := util.ToInt64(content)
+		if toInt64 == 0 {
+			toInt64 = 1
+		}
 		all := All(40)
 		var lines []struct {
 			Name  string
 			Items []chart.XY
 		}
-		for _, g := range all[0:5] {
+		for _, g := range all[0:toInt64] {
 			var items []chart.XY
 			for _, datum := range g.Data {
 				items = append(items, chart.XY{
