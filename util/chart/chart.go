@@ -25,13 +25,16 @@ type LineChartInput struct {
 	Lines     map[string][]XY
 }
 
-func DrawLineChart(input LineChartInput) string {
+func init() {
 	err := charts.InstallFont("font", text2png.FontBytes)
 	if err != nil {
 		panic(err)
 	}
 	font, _ := charts.GetFont("font")
 	charts.SetDefaultFont(font)
+}
+
+func DrawLineChart(input LineChartInput) string {
 	var (
 		values       [][]float64
 		legendLabels []string
