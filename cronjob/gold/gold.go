@@ -15,7 +15,7 @@ func init() {
 			bot.SendToUser(config.UserID(), s)
 		}
 		return nil
-	}).DailyAt("09:10")
+	}).DailyAt("12:00")
 }
 
 func run() string {
