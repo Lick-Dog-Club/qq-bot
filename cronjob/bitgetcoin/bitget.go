@@ -1,6 +1,7 @@
 package bitgetcoin
 
 import (
+	"encoding/json"
 	"fmt"
 	"math"
 	"qq/bot"
@@ -15,7 +16,7 @@ var money = map[string]float64{}
 
 func init() {
 	cronjob.Manager().NewCommand("bitget-watch-coin", func(bot bot.CronBot) error {
-		err := run()
+		err := run(bot)
 		if err != nil {
 			return err
 		}
@@ -61,10 +62,10 @@ func runGoal(bot bot.CronBot) error {
 	return nil
 }
 
-func run() error {
+func run(bot bot.CronBot) error {
 	if config.BgApiSecretKey() != "" && config.BgApiKey() != "" && config.BgPassphrase() != "" {
 		for _, coin := range config.BgCoinWatch() {
-			fmt.Println(coin)
+			//fmt.Println(coin)
 			usdt, err := bitget.TransUsdt(coin.Name)
 			if err != nil {
 				return err
@@ -82,6 +83,14 @@ func run() error {
 						str := fmt.Sprintf("%s 跌幅超过 %v%%, 当前价格为 %v", coinName, f2*100, usdt)
 						fmt.Println(str)
 						util.Bark(fmt.Sprintf("监控 %s 价格下跌", coinName), str, config.BarkUrls()...)
+						for _, buy := range config.BgBuyCoin() {
+							if buy.Coin == coin.Name && buy.PriceBelow >= usdt {
+								buyPrice := usdt * 0.99
+								spot, err := bitget.BuySpot(coinName, fmt.Sprintf("%v", buyPrice), config.BgOneHandUSDT())
+								marshal, _ := json.Marshal(spot)
+								bot.SendToUser(config.UserID(), fmt.Sprintf("购买 %s\n价格 %v\n结果: %v\nerror: %v", coinName, buyPrice, string(marshal), err))
+							}
+						}
 					}
 				}
 				if f2 > 0 {

@@ -8,6 +8,8 @@ require (
 	github.com/adshao/go-binance/v2 v2.4.2
 	github.com/antchfx/htmlquery v1.3.0
 	github.com/cenkalti/backoff/v4 v4.2.1
+	github.com/chromedp/cdproto v0.0.0-20240426225625-909263490071
+	github.com/chromedp/chromedp v0.9.5
 	github.com/duc-cnzj/when-rules v0.0.0-20230427085034-04cfb63088f8
 	github.com/eatmoreapple/openwechat v1.4.6
 	github.com/fogleman/gg v1.3.0
@@ -25,37 +27,33 @@ require (
 	github.com/vicanso/go-charts/v2 v2.6.5
 	github.com/wangluozhe/requests v1.2.4
 	golang.org/x/exp v0.0.0-20240103183307-be819d1f06fc
-	golang.org/x/image v0.11.0
 	golang.org/x/net v0.17.0
-	gonum.org/v1/plot v0.14.0
 	k8s.io/apimachinery v0.26.1
 	k8s.io/client-go v0.26.1
 )
 
 require (
-	git.sr.ht/~sbinet/gg v0.5.0 // indirect
 	github.com/AlekSi/pointer v1.2.0 // indirect
 	github.com/PuerkitoBio/goquery v1.8.1 // indirect
-	github.com/ajstarks/svgo v0.0.0-20211024235047-1546f124cd8b // indirect
 	github.com/andybalholm/brotli v1.0.6 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/ansel1/merry/v2 v2.1.1 // indirect
 	github.com/antchfx/xpath v1.2.3 // indirect
 	github.com/bitly/go-simplejson v0.5.0 // indirect
-	github.com/campoy/embedmd v1.0.0 // indirect
+	github.com/chromedp/sysutil v1.0.0 // indirect
 	github.com/cloudflare/circl v1.3.7 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dlclark/regexp2 v1.10.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/emicklei/go-restful/v3 v3.9.0 // indirect
 	github.com/fatih/color v1.15.0 // indirect
-	github.com/go-fonts/liberation v0.3.1 // indirect
-	github.com/go-latex/latex v0.0.0-20230307184459-12ec69307ad9 // indirect
 	github.com/go-logr/logr v1.2.4 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/jsonreference v0.20.0 // indirect
 	github.com/go-openapi/swag v0.19.14 // indirect
-	github.com/go-pdf/fpdf v0.8.0 // indirect
+	github.com/gobwas/httphead v0.1.0 // indirect
+	github.com/gobwas/pool v0.2.1 // indirect
+	github.com/gobwas/ws v1.3.2 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
@@ -75,7 +73,6 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/phpdave11/gofpdi v1.0.14-0.20211212211723-1f10f9844311 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/quic-go/quic-go v0.40.1 // indirect
 	github.com/refraction-networking/utls v1.6.1 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
@@ -86,9 +83,10 @@ require (
 	github.com/wangluozhe/chttp v0.0.4 // indirect
 	github.com/wcharczuk/go-chart/v2 v2.1.0 // indirect
 	golang.org/x/crypto v0.18.0 // indirect
+	golang.org/x/image v0.11.0 // indirect
 	golang.org/x/oauth2 v0.5.0 // indirect
 	golang.org/x/sync v0.4.0 // indirect
-	golang.org/x/sys v0.16.0 // indirect
+	golang.org/x/sys v0.19.0 // indirect
 	golang.org/x/term v0.16.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.3.0 // indirect

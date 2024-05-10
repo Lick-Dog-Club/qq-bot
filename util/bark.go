@@ -2,11 +2,9 @@ package util
 
 import (
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 	"net/url"
-	"strings"
-
-	log "github.com/sirupsen/logrus"
 )
 
 func Bark(title, body string, barkUrls ...string) {
@@ -16,17 +14,7 @@ func Bark(title, body string, barkUrls ...string) {
 }
 
 func bark(barkUrl, title, body string) {
-	parse, err := url.Parse(barkUrl)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	split := strings.Split(parse.Path, "/")
-	if len(split) < 2 {
-		log.Println("bark url error: ", split)
-		return
-	}
-	resp, err := http.Get(fmt.Sprintf("https://api.day.app/%s/%s/%s", split[1], url.QueryEscape(title), url.QueryEscape(body)))
+	resp, err := http.Get(fmt.Sprintf("https://api.day.app/%s/%s/%s", barkUrl, url.QueryEscape(title), url.QueryEscape(body)))
 	if err != nil {
 		log.Println(err)
 		return

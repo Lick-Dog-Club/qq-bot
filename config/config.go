@@ -243,7 +243,7 @@ func TgAppID() int32 {
 }
 
 func BarkUrls() []string {
-	return strings.Split(c.Load().(KV)["bark_url"], ",")
+	return strings.Split(c.Load().(KV)["bark_token"], ",")
 }
 func TaobaoBarkUrls() []string {
 	return strings.Split(c.Load().(KV)["taobao_bark_url"], ",")
@@ -319,11 +319,40 @@ func CronEnabled() bool {
 func GoldCount() string {
 	return c.Load().(KV)["gold_count"]
 }
+
+func BgOneHandUSDT() float64 {
+	return util.ToFloat64(c.Load().(KV)["bg_one_hand"])
+}
+
 func GoldShowLabel() bool {
 	return c.Load().(KV)["gold_show_label"] == "1"
 }
 
+type BgBuy struct {
+	Coin       string
+	PriceBelow float64
+}
+
+func BgBuyCoin() []BgBuy {
+	s := c.Load().(KV)["bg_buy"]
+	split := strings.Split(s, ";")
+	buys := make([]BgBuy, 0, len(split))
+	for _, s2 := range split {
+		i := strings.Split(s2, ",")
+		if len(i) != 2 {
+			continue
+		}
+		buys = append(buys, BgBuy{
+			Coin:       i[0],
+			PriceBelow: util.ToFloat64(i[1]),
+		})
+	}
+	return buys
+}
+
 var mappingKV = KV{
+	"bg_one_hand": "",
+	"bg_buy":      "",
 	// onebound
 	"o_key":           "",
 	"cron_enabled":    "1",
@@ -334,6 +363,7 @@ var mappingKV = KV{
 	"taobao_ids":  "",
 	// https://api.day.app/xxxxxx/标题/内容
 	"bark_url":        "",
+	"bark_token":      "",
 	"taobao_bark_url": "",
 	"bili_cookie":     "",
 	"disabled_crons":  "",

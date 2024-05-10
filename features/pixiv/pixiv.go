@@ -33,7 +33,7 @@ var (
 	httpClient = proxy.NewHttpProxyClient
 )
 
-func newClientCtx() (context.Context, error) {
+func NewClientCtx() (context.Context, error) {
 	var s string = config.PixivSession()
 	// 使用 PHPSESSID Cookie 登录 (推荐)。
 	c := &client.Client{
@@ -105,7 +105,7 @@ func init() {
 			content = "1"
 		}
 
-		ctx, _ := newClientCtx()
+		ctx, _ := NewClientCtx()
 		page := util.ToInt64(content)
 		items, err := Images(ctx, "rai", &page)
 		if err != nil {
@@ -179,7 +179,7 @@ func init() {
 func Search(content string, yell bool) (string, error) {
 	// 搜索画作
 	var res artwork.SearchResult
-	ctx, e := newClientCtx()
+	ctx, e := NewClientCtx()
 	if e != nil {
 		return "", e
 	}
@@ -210,7 +210,7 @@ func Search(content string, yell bool) (string, error) {
 }
 
 func Image(content string) (string, error) {
-	ctx, err := newClientCtx()
+	ctx, err := NewClientCtx()
 	if err != nil {
 		log.Println(err)
 		return "", err
