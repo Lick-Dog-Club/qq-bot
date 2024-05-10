@@ -142,8 +142,8 @@ func BuySpot(symbol string, price string, totalUsdt float64) (usdt *BuySpotRespo
 	p := util.ToFloat64(price)
 	if p > 100 {
 		p = math.Floor(p)
+		price = fmt.Sprintf("%.0f", p)
 	}
-	price = fmt.Sprintf("%.0f", p)
 
 	params["price"] = price
 	params["size"] = fmt.Sprintf("%.6f", totalUsdt/util.ToFloat64(price))
