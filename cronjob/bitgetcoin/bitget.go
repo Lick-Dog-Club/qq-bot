@@ -88,7 +88,7 @@ func run(bot bot.CronBot) error {
 								buyPrice := usdt * 0.99
 								spot, err := bitget.BuySpot(coinName, fmt.Sprintf("%v", buyPrice), config.BgOneHandUSDT())
 								marshal, _ := json.Marshal(spot)
-								bot.SendToUser(config.UserID(), fmt.Sprintf("购买 %s\n价格 %v\n结果: %v\nerror: %v", coinName, buyPrice, string(marshal), err))
+								bot.SendToUser(config.UserID(), fmt.Sprintf("购买 %s\n当前价格 %v\n买入价格 %v\n结果: %v\nerror: %v", coinName, usdt, buyPrice, string(marshal), err))
 							}
 						}
 					}
