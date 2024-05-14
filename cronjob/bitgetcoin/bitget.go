@@ -84,7 +84,7 @@ func run(bot bot.CronBot) error {
 						fmt.Println(str)
 						util.Bark(fmt.Sprintf("监控 %s 价格下跌", coinName), str, config.BarkUrls()...)
 						for _, buy := range config.BgBuyCoin() {
-							if buy.Coin == coin.Name && buy.PriceBelow >= usdt {
+							if buy.Coin == coin.Name && buy.PriceBelow >= usdt && usdt > 0 {
 								buyPrice := usdt * 0.99
 								spot, err := bitget.BuySpot(coinName, fmt.Sprintf("%v", buyPrice), config.BgOneHandUSDT())
 								marshal, _ := json.Marshal(spot)
