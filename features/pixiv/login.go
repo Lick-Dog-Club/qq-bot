@@ -3,13 +3,14 @@ package pixiv
 import (
 	"context"
 	"fmt"
-	"github.com/chromedp/cdproto/network"
-	"github.com/chromedp/chromedp"
-	log "github.com/sirupsen/logrus"
 	"math/rand"
 	"qq/config"
 	"strings"
 	"time"
+
+	"github.com/chromedp/cdproto/network"
+	"github.com/chromedp/chromedp"
+	log "github.com/sirupsen/logrus"
 )
 
 func login(user, pass string) error {

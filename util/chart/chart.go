@@ -2,10 +2,11 @@ package chart
 
 import (
 	"encoding/base64"
-	"github.com/vicanso/go-charts/v2"
 	"os"
 	"qq/util/text2png"
 	"sync"
+
+	"github.com/vicanso/go-charts/v2"
 )
 
 type XY struct {

@@ -2,9 +2,10 @@ package util
 
 import (
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"net/http"
 	"net/url"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func Bark(title, body string, barkUrls ...string) {

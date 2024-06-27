@@ -3,9 +3,6 @@ package gold
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/samber/lo"
-	log "github.com/sirupsen/logrus"
-	"github.com/vicanso/go-charts/v2"
 	"io"
 	"net/http"
 	"qq/bot"
@@ -18,6 +15,10 @@ import (
 	"sync"
 	"text/template"
 	"time"
+
+	"github.com/samber/lo"
+	log "github.com/sirupsen/logrus"
+	"github.com/vicanso/go-charts/v2"
 )
 
 func init() {

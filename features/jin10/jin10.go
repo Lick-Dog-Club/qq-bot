@@ -143,8 +143,9 @@ func (i *EventItem) AffectStr() string {
 		B = 0
 	}
 
-	fmt.Printf("影响描述: %s\n", l)
-	fmt.Printf("影响等级: %d\n", B)
+	//fmt.Printf("影响描述: %s\n", l)
+	_ = B
+	//fmt.Printf("影响等级: %d\n", B)
 	return l
 }
 
