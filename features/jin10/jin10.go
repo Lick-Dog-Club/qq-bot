@@ -8,6 +8,7 @@ import (
 	"qq/bot"
 	"qq/features"
 	"qq/util"
+	"strconv"
 	"strings"
 	"text/template"
 	"time"
@@ -24,7 +25,7 @@ type EventItem struct {
 	Actual      *string     `json:"actual"`
 	Affect      int         `json:"affect"`
 	ShowAffect  int         `json:"show_affect"`
-	Consensus   string      `json:"consensus"`
+	Consensus   *string     `json:"consensus"`
 	Country     string      `json:"country"`
 	ID          int         `json:"id"`
 	IndicatorID int         `json:"indicator_id"`
@@ -71,11 +72,80 @@ func (i *EventItem) AffectStr() string {
 		return "未公布"
 	}
 
-	if util.ToFloat64(*i.Actual) > util.ToFloat64(i.Consensus) {
-		return "利空"
+	var (
+		r   string
+		rOk bool
+	)
+	if i.Consensus == nil {
+		rOk = false
+	} else {
+		rOk = true
+		r = *i.Consensus
 	}
 
-	return "利多"
+	t := i.Affect
+	n, _ := strconv.ParseFloat(*i.Actual, 64)
+	o, _ := strconv.ParseFloat(i.Previous, 64)
+	c := i.Star
+	l := ""
+	B := 5
+
+	var f float64
+	if rOk {
+		f, _ = strconv.ParseFloat(r, 64)
+	} else {
+		f = o
+	}
+
+	if n != 0 {
+		if (f == 0 && rOk) || n == f {
+			l = "影响较小"
+			if c >= 3 {
+				B = 6
+			} else {
+				B = 5
+			}
+		} else if t == 0 {
+			if n > f {
+				l = "利多"
+				if c >= 3 {
+					B = 3
+				} else {
+					B = 1
+				}
+			} else {
+				l = "利空"
+				if c >= 3 {
+					B = 4
+				} else {
+					B = 2
+				}
+			}
+		} else {
+			if n > f {
+				l = "利空"
+				if c >= 3 {
+					B = 4
+				} else {
+					B = 2
+				}
+			} else {
+				l = "利多"
+				if c >= 3 {
+					B = 3
+				} else {
+					B = 1
+				}
+			}
+		}
+	} else {
+		l = "未公布"
+		B = 0
+	}
+
+	fmt.Printf("影响描述: %s\n", l)
+	fmt.Printf("影响等级: %d\n", B)
+	return l
 }
 
 func (i *EventItem) Render() string {

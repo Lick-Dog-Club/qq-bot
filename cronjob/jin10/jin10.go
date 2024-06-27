@@ -1,4 +1,4 @@
-package btc
+package jin10
 
 import (
 	"fmt"
@@ -33,7 +33,7 @@ func init() {
 				bot.SendToUser(config.UserID(), item.Render())
 				util.Bark(
 					item.AffectStr(),
-					fmt.Sprintf("%s%s, 预测值: %s, 公布值: %s", item.Country, item.Name, item.Consensus, *item.Actual),
+					fmt.Sprintf("%s%s, 预测值: %v, 公布值: %s", item.Country, item.Name, item.Consensus, *item.Actual),
 					config.BarkUrls()...,
 				)
 			}

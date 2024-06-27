@@ -26,10 +26,11 @@ import (
 	_ "qq/cronjob/lpr"
 
 	//_ "qq/cronjob/taobao"
+	//_ "qq/cronjob/btc"
 
-	// _ "qq/cronjob/btc"
 	_ "qq/cronjob/comic"
 	_ "qq/cronjob/dx"
+	_ "qq/cronjob/jin10"
 	_ "qq/cronjob/lottery"
 	_ "qq/cronjob/maotai"
 
