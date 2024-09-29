@@ -24,7 +24,6 @@ import (
 	_ "qq/cronjob/ddys"
 	_ "qq/cronjob/gold"
 	_ "qq/cronjob/lpr"
-	_ "qq/cronjob/x"
 
 	//_ "qq/cronjob/taobao"
 	//_ "qq/cronjob/btc"
@@ -45,6 +44,7 @@ import (
 	//_ "qq/cronjob/trainticketleft"
 	_ "qq/cronjob/xiaofeiquan"
 
+	_ "qq/cronjob/x"
 	_ "qq/features/ai"
 	_ "qq/features/bililottery"
 	_ "qq/features/bitget"
@@ -78,9 +78,10 @@ import (
 	_ "qq/features/weather"
 	_ "qq/features/webot"
 	_ "qq/features/weibo"
-	_ "qq/features/x"
 	_ "qq/features/zhihu"
 	_ "qq/features/zuan"
+
+	_ "qq/features/x"
 )
 
 var genDoc bool
