@@ -2,6 +2,7 @@ package x
 
 import (
 	"context"
+	"fmt"
 	"qq/bot"
 	"qq/config"
 	"qq/cronjob"
@@ -31,7 +32,7 @@ func init() {
 		for _, s := range config.XUsers() {
 			tweets, err := m.GetTweets(context.TODO(), s, 1)
 			if err != nil {
-				e.Add(err)
+				e.Add(fmt.Errorf("get tweets for %s: %w", s, err))
 			}
 			for _, tweet := range tweets {
 				func() {
