@@ -3,10 +3,17 @@ package x
 import (
 	"context"
 	"errors"
+	"fmt"
+	"io"
 	"log"
+	"os"
+	"path/filepath"
 	"qq/bot"
 	"qq/config"
+	"qq/features/stock/httpproxy"
+	"qq/util/random"
 	"text/template"
+	"time"
 
 	"github.com/samber/lo"
 
@@ -36,7 +43,11 @@ func init() {
 			bot.Send(err.Error())
 		}
 		for _, tweet := range tweets {
-			bot.Send(RenderTweetResult(tweet))
+			func() {
+				result, f := RenderTweetResult(tweet)
+				defer f()
+				bot.Send(result)
+			}()
 		}
 
 		return nil
@@ -60,27 +71,52 @@ type manager struct {
 	proxy  string
 }
 
-func RenderTweetResult(r *twitterscraper.TweetResult) string {
+func downloadPic(Photos []string) []string {
+	return lo.Map(Photos, func(item string, index int) string {
+		client := httpproxy.NewHttpProxyClient(config.HttpProxy())
+		resp, err := client.Get(item)
+		if err != nil {
+			return ""
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode != 200 {
+			return ""
+		}
+		savePath := filepath.Join(config.ImageDir, fmt.Sprintf("tmp-%s-%s%s", time.Now().Format("2006-01-02"), random.String(10), filepath.Ext(item)))
+		create, err := os.Create(savePath)
+		defer create.Close()
+		io.Copy(create, resp.Body)
+		return savePath
+	})
+}
+
+func RenderTweetResult(r *twitterscraper.TweetResult) (string, func()) {
 	var b strings.Builder
 	var Quoted map[string]any
+	var removeImages []string
 	if r.QuotedStatus != nil {
+		localImages := downloadPic(lo.Map(r.QuotedStatus.Photos, func(item twitterscraper.Photo, index int) string { return item.URL }))
 		Quoted = map[string]any{
-			"Text": r.QuotedStatus.Text,
-			"Photos": lo.Map(r.QuotedStatus.Photos, func(item twitterscraper.Photo, index int) string {
-				return item.URL
-			}),
+			"Text":   r.QuotedStatus.Text,
+			"Photos": localImages,
 		}
+		removeImages = append(removeImages, localImages...)
 	}
+	p := downloadPic(lo.Map(r.Photos, func(item twitterscraper.Photo, index int) string { return item.URL }))
+	removeImages = append(removeImages, p...)
 	tweetTemplate.Execute(&b, map[string]any{
 		"DateString": r.TimeParsed.Local().Format("2006-01-02 15:04:05"),
 		"Name":       r.Username,
 		"Text":       r.Text,
-		"Photos": lo.Map(r.Photos, func(item twitterscraper.Photo, index int) string {
-			return item.URL
-		}),
-		"Quoted": Quoted,
+		"Photos":     p,
+		"Quoted":     Quoted,
 	})
-	return b.String()
+	return b.String(), func() {
+		for _, img := range removeImages {
+			os.Remove(img)
+			log.Println("[RenderTweetResult] 删除图片: ", img)
+		}
+	}
 }
 
 func NewManager(tokens []config.Token, proxy string) Manager {

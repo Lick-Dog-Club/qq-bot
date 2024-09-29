@@ -23,7 +23,11 @@ func init() {
 				bot.SendGroup(config.XGroupID(), err.Error())
 			}
 			for _, tweet := range tweets {
-				bot.SendGroup(config.XGroupID(), x.RenderTweetResult(tweet))
+				func() {
+					result, f := x.RenderTweetResult(tweet)
+					defer f()
+					bot.SendGroup(config.XGroupID(), result)
+				}()
 			}
 		}
 		return nil
