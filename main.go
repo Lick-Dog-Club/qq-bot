@@ -76,6 +76,7 @@ import (
 	_ "qq/features/weather"
 	_ "qq/features/webot"
 	_ "qq/features/weibo"
+	_ "qq/features/x"
 	_ "qq/features/zhihu"
 	_ "qq/features/zuan"
 )
