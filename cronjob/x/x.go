@@ -13,7 +13,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var lastTime time.Time
+var lastTime time.Time = time.Now()
 
 func init() {
 	cronjob.Manager().NewCommand("x-users", func(bot bot.CronBot) error {
