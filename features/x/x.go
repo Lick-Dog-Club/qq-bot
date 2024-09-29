@@ -196,6 +196,9 @@ var tweetTemplate, _ = template.New("").Funcs(map[string]any{
 		return carbon.Parse(s).DiffForHumans()
 	},
 	"translate": func(s string) string {
+		if config.YDKey() == "" || config.YDSecret() == "" {
+			return ""
+		}
 		return translate.EnToZh(config.YDKey(), config.YDSecret(), s)
 	},
 }).Parse(`
