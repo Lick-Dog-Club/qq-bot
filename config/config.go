@@ -409,6 +409,27 @@ var mappingKV = KV{
 	"12306_JSESSIONID": "",
 
 	"disabled_cmds": "",
+
+	"x_tokens": "",
+}
+
+type Token struct {
+	Token string
+	CSRF  string
+}
+
+func XTokens() (res []Token) {
+	split := strings.Split(c.Load().(KV)["x_tokens"], ";")
+	for _, s := range split {
+		i := strings.Split(s, ",")
+		if len(i) == 2 {
+			res = append(res, Token{
+				Token: i[0],
+				CSRF:  i[1],
+			})
+		}
+	}
+	return
 }
 
 type Cmd string
