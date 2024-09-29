@@ -44,7 +44,7 @@ func init() {
 			}
 		}
 		r := res.String()
-		if r == "" {
+		if r != "" {
 			bot.SendGroup(config.XGroupID(), r)
 		}
 
