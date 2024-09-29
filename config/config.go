@@ -411,11 +411,22 @@ var mappingKV = KV{
 	"disabled_cmds": "",
 
 	"x_tokens": "",
+	// x 推文发送到哪个群里
+	"x_group_id": "",
+	"x_users":    "",
 }
 
 type Token struct {
 	Token string
 	CSRF  string
+}
+
+func XGroupID() string {
+	return c.Load().(KV)["x_group_id"]
+}
+
+func XUsers() []string {
+	return strings.Split(c.Load().(KV)["x_users"], ",")
 }
 
 func XTokens() (res []Token) {

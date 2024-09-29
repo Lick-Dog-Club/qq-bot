@@ -3,6 +3,7 @@ package x
 import (
 	"context"
 	"errors"
+	"github.com/samber/lo"
 	"log"
 	"qq/bot"
 	"qq/config"
@@ -22,7 +23,7 @@ func init() {
 			bot.Send("查询格式不正确, eg: x user 5")
 			return nil
 		}
-		m := newManager(config.XTokens(), config.HttpProxy())
+		m := NewManager(config.XTokens(), config.HttpProxy())
 		user := split[0]
 		limit := 1
 		if len(split) > 1 {
@@ -33,9 +34,7 @@ func init() {
 			bot.Send(err.Error())
 		}
 		for _, tweet := range tweets {
-			var b strings.Builder
-			tweetTemplate.Execute(&b, tweet)
-			bot.Send(b.String())
+			bot.Send(RenderTweetResult(tweet))
 		}
 
 		return nil
@@ -59,7 +58,30 @@ type manager struct {
 	proxy  string
 }
 
-func newManager(tokens []config.Token, proxy string) Manager {
+func RenderTweetResult(r *twitterscraper.TweetResult) string {
+	var b strings.Builder
+	var Quoted map[string]any
+	if r.QuotedStatus != nil {
+		Quoted = map[string]any{
+			"Text": r.QuotedStatus.Text,
+			"Photos": lo.Map(r.QuotedStatus.Photos, func(item twitterscraper.Photo, index int) string {
+				return item.URL
+			}),
+		}
+	}
+	tweetTemplate.Execute(&b, map[string]any{
+		"DateString": r.TimeParsed.Local().Format("2006-01-02 15:04:05"),
+		"Name":       r.Username,
+		"Text":       r.Text,
+		"Photos": lo.Map(r.Photos, func(item twitterscraper.Photo, index int) string {
+			return item.URL
+		}),
+		"Quoted": Quoted,
+	})
+	return b.String()
+}
+
+func NewManager(tokens []config.Token, proxy string) Manager {
 	return &manager{tokens: tokens, proxy: proxy}
 }
 
