@@ -193,14 +193,14 @@ var tweetTemplate, _ = template.New("").Funcs(map[string]any{
 {{.Text}}
 
 {{- range .Photos}}
-[CQ:image,file=//{{.}}]
+[CQ:image,file=file://{{.}}]
 {{- end}}
 {{- if .Quoted}}
 
 转发了:
 {{.Quoted.Text}}
 {{- range .Quoted.Photos}}
-[CQ:image,file=//{{.}}]
+[CQ:image,file=file://{{.}}]
 {{- end}}
 {{- end }}
 `)
