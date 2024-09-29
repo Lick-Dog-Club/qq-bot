@@ -144,7 +144,7 @@ func (m *manager) login(ctx context.Context, account *Account) (*twitterscraper.
 }
 
 func (m *manager) GetTweets(ctx context.Context, user string, maxTweets int) ([]*twitterscraper.TweetResult, error) {
-	var aggerr = newAggregateError()
+	var aggerr = NewAggregateError()
 	for _, token := range m.tokens {
 		scraper, err := m.login(ctx, &Account{Token: token.Token, CSRFToken: token.CSRF})
 		if err != nil {
@@ -164,15 +164,15 @@ func (m *manager) GetTweets(ctx context.Context, user string, maxTweets int) ([]
 	return nil, errors.New("没设置token")
 }
 
-type aggregateError struct {
+type AggregateError struct {
 	e []error
 }
 
-func newAggregateError() *aggregateError {
-	return &aggregateError{}
+func NewAggregateError() *AggregateError {
+	return &AggregateError{}
 }
 
-func (a *aggregateError) ToError() error {
+func (a *AggregateError) ToError() error {
 	if len(a.e) == 0 {
 		return nil
 	}
@@ -184,7 +184,7 @@ func (a *aggregateError) ToError() error {
 	return errors.New(b.String())
 }
 
-func (a *aggregateError) Add(err error) {
+func (a *AggregateError) Add(err error) {
 	if err != nil {
 		a.e = append(a.e, err)
 	}

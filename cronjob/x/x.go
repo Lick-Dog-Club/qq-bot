@@ -27,10 +27,11 @@ func init() {
 			log.Println("x-users done", lastTime)
 		}()
 		res := strings.Builder{}
+		var e = x.NewAggregateError()
 		for _, s := range config.XUsers() {
 			tweets, err := m.GetTweets(context.TODO(), s, 1)
 			if err != nil {
-				bot.SendToUser(config.UserID(), err.Error())
+				e.Add(err)
 			}
 			for _, tweet := range tweets {
 				func() {
@@ -49,6 +50,9 @@ func init() {
 		if r != "" {
 			bot.SendGroup(config.XGroupID(), r)
 			bot.SendToUser(config.UserID(), r)
+		}
+		if e.ToError() != nil {
+			bot.SendToUser(config.UserID(), e.ToError().Error())
 		}
 
 		return nil
