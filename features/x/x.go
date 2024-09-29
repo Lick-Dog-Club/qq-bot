@@ -97,6 +97,7 @@ func RenderTweetResult(r *twitterscraper.TweetResult) (string, func()) {
 	if r.QuotedStatus != nil {
 		localImages := downloadPic(lo.Map(r.QuotedStatus.Photos, func(item twitterscraper.Photo, index int) string { return item.URL }))
 		Quoted = map[string]any{
+			"Name":   r.QuotedStatus.Username,
 			"Text":   r.QuotedStatus.Text,
 			"Photos": localImages,
 		}
@@ -197,7 +198,7 @@ var tweetTemplate, _ = template.New("").Funcs(map[string]any{
 {{- end}}
 {{- if .Quoted}}
 
-转发了:
+转发了 {{.Quoted.Name}}:
 {{.Quoted.Text}}
 {{- range .Quoted.Photos}}
 [CQ:image,file=file://{{.}}]
