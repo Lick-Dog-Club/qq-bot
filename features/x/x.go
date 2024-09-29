@@ -192,8 +192,7 @@ var tweetTemplate, _ = template.New("").Funcs(map[string]any{
 }).Parse(`
 {{.Name}} 发推了！ {{ .DateString }} {{ humanize .DateString }}
 
-> {{.Link}}
->
+👉 {{.Link}}
 
 {{.Text}}
 
