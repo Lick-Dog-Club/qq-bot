@@ -37,7 +37,7 @@ func init() {
 			for _, tweet := range tweets {
 				func() {
 					if tweet.TimeParsed.Before(lastTime) {
-						log.Println("skip old tweet", tweet.TimeParsed, lastTime, tweet.PermanentURL, tweet.Username)
+						log.Println("skip old tweet", tweet.TimeParsed, tweet.PermanentURL, tweet.Username)
 						return
 					}
 					result, f := x.RenderTweetResult(tweet)
