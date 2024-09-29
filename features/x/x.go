@@ -3,17 +3,19 @@ package x
 import (
 	"context"
 	"errors"
-	"github.com/samber/lo"
 	"log"
 	"qq/bot"
 	"qq/config"
 	"text/template"
 
+	"github.com/samber/lo"
+
+	"qq/features"
+	"strings"
+
 	"github.com/golang-module/carbon/v2"
 	twitterscraper "github.com/imperatrona/twitter-scraper"
 	"github.com/spf13/cast"
-	"qq/features"
-	"strings"
 )
 
 func init() {
