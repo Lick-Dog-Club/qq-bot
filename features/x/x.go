@@ -143,7 +143,7 @@ func (m *manager) GetTweets(ctx context.Context, user string, maxTweets int) ([]
 	for _, token := range m.tokens {
 		scraper, err := m.login(ctx, &Account{Token: token.Token, CSRFToken: token.CSRF})
 		if err != nil {
-			aggerr.Add(err)
+			aggerr.Add(fmt.Errorf("token: %v, 登录失败: %v", token.Token, err))
 			log.Printf("%s 登录失败: %v\n", token.Token, err)
 			continue
 		}
