@@ -6,9 +6,12 @@ import (
 	"qq/config"
 	"qq/cronjob"
 	"qq/features/x"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 )
+
+var lastTime time.Time
 
 func init() {
 	cronjob.Manager().NewCommand("x-users", func(bot bot.CronBot) error {
@@ -17,6 +20,11 @@ func init() {
 			return nil
 		}
 		m := x.NewManager(config.XTokens(), config.HttpProxy())
+		startAt := time.Now()
+		defer func() {
+			lastTime = startAt
+			log.Println("x-users done", lastTime)
+		}()
 		for _, s := range config.XUsers() {
 			tweets, err := m.GetTweets(context.TODO(), s, 1)
 			if err != nil {
@@ -24,6 +32,9 @@ func init() {
 			}
 			for _, tweet := range tweets {
 				func() {
+					if tweet.TimeParsed.Before(lastTime) {
+						return
+					}
 					result, f := x.RenderTweetResult(tweet)
 					defer f()
 					bot.SendGroup(config.XGroupID(), result)
