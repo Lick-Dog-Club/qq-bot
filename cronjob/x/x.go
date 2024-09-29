@@ -46,6 +46,7 @@ func init() {
 		r := res.String()
 		if r != "" {
 			bot.SendGroup(config.XGroupID(), r)
+			bot.SendToUser(config.UserID(), r)
 		}
 
 		return nil
