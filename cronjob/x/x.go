@@ -30,7 +30,7 @@ func init() {
 		for _, s := range config.XUsers() {
 			tweets, err := m.GetTweets(context.TODO(), s, 1)
 			if err != nil {
-				bot.SendGroup(config.XGroupID(), err.Error())
+				bot.SendToUser(config.UserID(), err.Error())
 			}
 			for _, tweet := range tweets {
 				func() {
