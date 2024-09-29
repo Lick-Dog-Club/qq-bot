@@ -415,6 +415,10 @@ var mappingKV = KV{
 	// x 推文发送到哪个群里
 	"x_group_id": "",
 	"x_users":    "",
+
+	// 有道翻译
+	"yd_secret": "",
+	"yd_key":    "",
 }
 
 type Token struct {
@@ -495,6 +499,14 @@ func BgGoal() []WatchCoin {
 	}
 	return watchCoins
 }
+
+func YDKey() string {
+	return c.Load().(KV)["yd_key"]
+}
+func YDSecret() string {
+	return c.Load().(KV)["yd_secret"]
+}
+
 func BgCoinWatch() []WatchCoin {
 	s := c.Load().(KV)["bg_coin_watch"]
 	split := strings.Split(s, ";")

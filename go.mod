@@ -13,6 +13,7 @@ require (
 	github.com/duc-cnzj/when-rules v0.0.0-20230427085034-04cfb63088f8
 	github.com/eatmoreapple/openwechat v1.4.6
 	github.com/fogleman/gg v1.3.0
+	github.com/forPelevin/gomoji v1.2.0
 	github.com/forgoer/openssl v1.6.0
 	github.com/golang-module/carbon/v2 v2.3.12
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
@@ -81,6 +82,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/quic-go/quic-go v0.40.1 // indirect
 	github.com/refraction-networking/utls v1.6.1 // indirect
+	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
 	github.com/tidwall/gjson v1.14.3 // indirect
 	github.com/tidwall/match v1.1.1 // indirect

@@ -12,6 +12,7 @@ import (
 	"qq/config"
 	"qq/features/stock/httpproxy"
 	"qq/util/random"
+	"qq/util/translate"
 	"text/template"
 	"time"
 
@@ -194,6 +195,9 @@ var tweetTemplate, _ = template.New("").Funcs(map[string]any{
 	"humanize": func(s string) string {
 		return carbon.Parse(s).DiffForHumans()
 	},
+	"translate": func(s string) string {
+		return translate.EnToZh(config.YDKey(), config.YDSecret(), s)
+	},
 }).Parse(`
 {{.Name}} 发推了！ {{ .DateString }} {{ humanize .DateString }}
 
@@ -212,4 +216,7 @@ var tweetTemplate, _ = template.New("").Funcs(map[string]any{
 [CQ:image,file=file://{{.}}]
 {{- end}}
 {{- end }}
+
+翻译:
+{{ translate .Text }}
 `)

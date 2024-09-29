@@ -489,6 +489,8 @@ github.com/fatih/color v1.15.0 h1:kOqh6YHBtK8aywxGerMG2Eq3H6Qgoqeo13Bk2Mv/nBs=
 github.com/fatih/color v1.15.0/go.mod h1:0h5ZqXfHYED7Bhv2ZJamyIOUej9KtShiJESRwBDUSsw=
 github.com/fogleman/gg v1.3.0 h1:/7zJX8F6AaYQc57WQCyN9cAIz+4bCJGO9B+dyW29am8=
 github.com/fogleman/gg v1.3.0/go.mod h1:R/bRT+9gY/C5z7JzPU0zXsXHKM4/ayA+zqcVNZzPa1k=
+github.com/forPelevin/gomoji v1.2.0 h1:9k4WVSSkE1ARO/BWywxgEUBvR/jMnao6EZzrql5nxJ8=
+github.com/forPelevin/gomoji v1.2.0/go.mod h1:8+Z3KNGkdslmeGZBC3tCrwMrcPy5GRzAD+gL9NAwMXg=
 github.com/forgoer/openssl v1.6.0 h1:IueL+UfH0hKo99xFPojHLlO3QzRBQqFY+Cht0WwtOC0=
 github.com/forgoer/openssl v1.6.0/go.mod h1:9DZ4yOsQmveP0aXC/BpQ++Y5TKaz5yR9+emcxmIZNZs=
 github.com/frankban/quicktest v1.14.6 h1:7Xjx+VpznH+oBnejlPUj8oUpdxnVs4f8XU8WnHkI4W8=
@@ -713,6 +715,8 @@ github.com/quic-go/quic-go v0.40.1 h1:X3AGzUNFs0jVuO3esAGnTfvdgvL4fq655WaOi1snv1
 github.com/quic-go/quic-go v0.40.1/go.mod h1:PeN7kuVJ4xZbxSv/4OX6S1USOX8MJvydwpTx31vx60c=
 github.com/refraction-networking/utls v1.6.1 h1:n1JG5karzdGWsI6iZmGrOv3SNzR4c+4M8J6KWGsk3lA=
 github.com/refraction-networking/utls v1.6.1/go.mod h1:+EbcQOvQvXoFV9AEKbuGlljt1doLRKAVY1jJHe9EtDo=
+github.com/rivo/uniseg v0.4.7 h1:WUdvkW8uEhrYfLC4ZzdpI2ztxP1I582+49Oc5Mq64VQ=
+github.com/rivo/uniseg v0.4.7/go.mod h1:FN3SvrM+Zdj16jyLfmOkMNblXMcoc8DfTHruCPUcx88=
 github.com/robfig/cron/v3 v3.0.1 h1:WdRxkvbJztn8LMz/QEvLN5sBU+xKpSqwwUO1Pjr4qDs=
 github.com/robfig/cron/v3 v3.0.1/go.mod h1:eQICP3HwyT7UooqI/z+Ov+PtYAWygg1TEWWzGIFLtro=
 github.com/rogpeppe/fastuuid v1.2.0/go.mod h1:jVj6XXZzXRy/MSR5jhDC/2q6DgLz+nrA6LYCDYWNEvQ=
