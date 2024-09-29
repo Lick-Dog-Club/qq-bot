@@ -28,6 +28,7 @@ func init() {
 			log.Println("x-users done", lastTime)
 		}()
 		res := strings.Builder{}
+		var fns []func()
 		var e = x.NewAggregateError()
 		for _, s := range config.XUsers() {
 			tweets, err := m.GetTweets(context.TODO(), s, 1)
@@ -41,7 +42,7 @@ func init() {
 						return
 					}
 					result, f := x.RenderTweetResult(tweet)
-					defer f()
+					fns = append(fns, f)
 					if result != "" {
 						res.WriteString(result + "\n")
 					}
@@ -57,6 +58,9 @@ func init() {
 			bot.SendToUser(config.UserID(), e.ToError().Error())
 		}
 
+		for _, f := range fns {
+			f()
+		}
 		return nil
 	}).EveryMinute()
 }
