@@ -486,10 +486,12 @@ func BgGoal() []WatchCoin {
 	watchCoins := make([]WatchCoin, 0, len(split))
 	for _, s2 := range split {
 		i := strings.Split(s2, ",")
-		watchCoins = append(watchCoins, WatchCoin{
-			Name:  i[0],
-			Price: util.ToFloat64(i[1]),
-		})
+		if len(i) == 2 {
+			watchCoins = append(watchCoins, WatchCoin{
+				Name:  i[0],
+				Price: util.ToFloat64(i[1]),
+			})
+		}
 	}
 	return watchCoins
 }
