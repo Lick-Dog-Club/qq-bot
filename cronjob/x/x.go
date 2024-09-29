@@ -39,7 +39,9 @@ func init() {
 					}
 					result, f := x.RenderTweetResult(tweet)
 					defer f()
-					res.WriteString(result + "\n")
+					if result != "" {
+						res.WriteString(result + "\n")
+					}
 				}()
 			}
 		}

@@ -46,7 +46,9 @@ func init() {
 			func() {
 				result, f := RenderTweetResult(tweet)
 				defer f()
-				bot.Send(result)
+				if result != "" {
+					bot.Send(result)
+				}
 			}()
 		}
 
@@ -91,6 +93,9 @@ func downloadPic(Photos []string) []string {
 }
 
 func RenderTweetResult(r *twitterscraper.TweetResult) (string, func()) {
+	if r.Username == "" {
+		return "", func() {}
+	}
 	var b strings.Builder
 	var Quoted map[string]any
 	var removeImages []string
