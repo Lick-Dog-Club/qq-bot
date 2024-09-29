@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"qq/util"
@@ -440,6 +441,10 @@ func XTokens() (res []Token) {
 			})
 		}
 	}
+	rand.Shuffle(len(res), func(i, j int) {
+		res[i], res[j] = res[j], res[i]
+	})
+
 	return
 }
 
