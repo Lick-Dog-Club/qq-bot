@@ -111,6 +111,7 @@ func RenderTweetResult(r *twitterscraper.TweetResult) (string, func()) {
 		"Text":       r.Text,
 		"Photos":     p,
 		"Quoted":     Quoted,
+		"Link":       r.PermanentURL,
 	})
 	return b.String(), func() {
 		for _, img := range removeImages {
@@ -190,6 +191,9 @@ var tweetTemplate, _ = template.New("").Funcs(map[string]any{
 	},
 }).Parse(`
 {{.Name}} 发推了！ {{ .DateString }} {{ humanize .DateString }}
+
+> {{.Link}}
+>
 
 {{.Text}}
 
