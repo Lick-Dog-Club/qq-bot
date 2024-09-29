@@ -6,6 +6,7 @@ import (
 	"qq/config"
 	"qq/cronjob"
 	"qq/features/x"
+	"strings"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -25,6 +26,7 @@ func init() {
 			lastTime = startAt
 			log.Println("x-users done", lastTime)
 		}()
+		res := strings.Builder{}
 		for _, s := range config.XUsers() {
 			tweets, err := m.GetTweets(context.TODO(), s, 1)
 			if err != nil {
@@ -37,10 +39,15 @@ func init() {
 					}
 					result, f := x.RenderTweetResult(tweet)
 					defer f()
-					bot.SendGroup(config.XGroupID(), result)
+					res.WriteString(result + "\n")
 				}()
 			}
 		}
+		r := res.String()
+		if r == "" {
+			bot.SendGroup(config.XGroupID(), r)
+		}
+
 		return nil
 	}).EveryMinute()
 }
