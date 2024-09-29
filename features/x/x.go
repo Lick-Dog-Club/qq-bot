@@ -26,7 +26,7 @@ import (
 )
 
 func init() {
-	features.AddKeyword("x", "<+user> <+maxLimit: 1> 获取用户最近推文", func(bot bot.Bot, content string) error {
+	features.AddKeyword("xapi", "<+user> <+maxLimit: 1> 获取用户最近推文", func(bot bot.Bot, content string) error {
 		split := strings.Split(content, " ")
 		if len(split) < 1 {
 			bot.Send("查询格式不正确, eg: x user 5")
