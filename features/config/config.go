@@ -55,7 +55,7 @@ func init() {
 		}
 
 		if content != "" {
-			bot.Send(config.Configs()[content])
+			bot.Send(fmt.Sprintf("%s=%s", content, config.Configs()[content]))
 			return nil
 		}
 
