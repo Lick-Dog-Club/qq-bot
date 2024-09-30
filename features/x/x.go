@@ -223,6 +223,5 @@ var tweetTemplate, _ = template.New("").Funcs(map[string]any{
 {{- if .Quoted}}
 ===== 转发内容 =====
 {{translate .Quoted.Text}}
-{{- end}}
 {{- end }}
 `)
