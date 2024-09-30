@@ -9,7 +9,7 @@ import (
 )
 
 func init() {
-	cronjob.Manager().NewCommand("Good morning", func(robot bot.CronBot) error {
+	cronjob.NewCommand("Good morning", func(robot bot.CronBot) error {
 		robot.SendTextImageToUser(config.UserID(), goodmorning.Get(time.Now()))
 		return nil
 	}).DailyAt("8")

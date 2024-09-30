@@ -25,7 +25,7 @@ func get() string {
 }
 
 func init() {
-	cronjob.Manager().NewCommand("zaoan", func(robot bot.CronBot) error {
+	cronjob.NewCommand("zaoan", func(robot bot.CronBot) error {
 		robot.SendToUser(config.UserID(), get())
 		return nil
 	}).DailyAt("9")

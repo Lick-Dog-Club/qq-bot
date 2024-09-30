@@ -11,7 +11,7 @@ import (
 )
 
 //func init() {
-//	cronjob.Manager().NewCommand("bitget", func(bot bot.CronBot) error {
+//	cronjob.NewCommand("bitget", func(bot bot.CronBot) error {
 //		if config.BgApiSecretKey() != "" && config.BgApiKey() != "" && config.BgPassphrase() != "" {
 //			if v := bitget.Get(false); v != "" {
 //				bot.SendToUser(config.UserID(), v)
@@ -25,7 +25,7 @@ import (
 var money float64
 
 func init() {
-	cronjob.Manager().NewCommand("bitget-money-total", func(bot bot.CronBot) error {
+	cronjob.NewCommand("bitget-money-total", func(bot bot.CronBot) error {
 		if config.BgApiSecretKey() != "" && config.BgApiKey() != "" && config.BgPassphrase() != "" {
 			total, err := bitget.MoneyTotal()
 			if err != nil {

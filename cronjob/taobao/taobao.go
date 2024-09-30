@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	cronjob.Manager().NewCommand("taobao", func(bot bot.CronBot) error {
+	cronjob.NewCommand("taobao", func(bot bot.CronBot) error {
 		watch, err := Watch()
 		if err != nil {
 			bot.SendToUser(config.UserID(), err.Error())

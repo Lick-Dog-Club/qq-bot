@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	cronjob.Manager().NewCommand("haizeiwang", func(bot bot.CronBot) error {
+	cronjob.NewCommand("haizeiwang", func(bot bot.CronBot) error {
 		c := comic.Get("haizeiwang", -1)
 		if c.TodayUpdated() {
 			bot.SendGroup(config.GroupID(), c.Render())

@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	cronjob.Manager().NewCommand("trainticketleft-taimushan-shangzhoudong", func(bot bot.CronBot) error {
+	cronjob.NewCommand("trainticketleft-taimushan-shangzhoudong", func(bot bot.CronBot) error {
 		parse, _ := time.Parse("2006-01-02", "2024-02-18")
 		if time.Now().After(parse) {
 			return nil

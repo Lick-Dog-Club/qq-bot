@@ -188,3 +188,5 @@ func (s sortCommand) Less(i, j int) bool {
 func (s sortCommand) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
+
+var NewCommand = Manager().NewCommand

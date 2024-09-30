@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	cronjob.Manager().NewCommand("jin10", func(bot bot.CronBot) error {
+	cronjob.NewCommand("jin10", func(bot bot.CronBot) error {
 		bot.SendToUser(config.UserID(), fmt.Sprintf(`
 今日大事件: %s
 %s
@@ -26,7 +26,7 @@ func init() {
 		)
 		return nil
 	}).DailyAt("09:30")
-	cronjob.Manager().NewCommand("jin10-watch", func(bot bot.CronBot) error {
+	cronjob.NewCommand("jin10-watch", func(bot bot.CronBot) error {
 		for _, item := range jin10.BigEvents(time.Now()) {
 			if item.PubTime.Local().Format("2006-01-02 15:04") == time.Now().Add(-1*time.Minute).Format("2006-01-02 15:04") &&
 				item.Actual != nil {

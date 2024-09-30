@@ -25,7 +25,7 @@ func newUpBot(bot bot.CronBot, uid string) *upBot {
 }
 
 func init() {
-	cronjob.Manager().NewCommand("auto-update", func(bot bot.CronBot) error {
+	cronjob.NewCommand("auto-update", func(bot bot.CronBot) error {
 		sysupdate.UpdateVersion(newUpBot(bot, config.UserID()))
 		return nil
 	}).Hourly()

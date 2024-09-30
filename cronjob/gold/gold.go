@@ -9,7 +9,7 @@ import (
 )
 
 func init() {
-	cronjob.Manager().NewCommand("gold", func(bot bot.CronBot) error {
+	cronjob.NewCommand("gold", func(bot bot.CronBot) error {
 		s := run()
 		if s != "" {
 			bot.SendToUser(config.UserID(), s)

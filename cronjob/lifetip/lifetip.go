@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	cronjob.Manager().NewCommand("lifetip", func(robot bot.CronBot) error {
+	cronjob.NewCommand("lifetip", func(robot bot.CronBot) error {
 		robot.SendGroup(config.GroupID(), lifetip.Tip())
 		return nil
 	}).Weekdays().DailyAt("9:20")

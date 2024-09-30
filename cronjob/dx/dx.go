@@ -9,7 +9,7 @@ import (
 )
 
 func init() {
-	cronjob.Manager().NewCommand("daxin", func(robot bot.CronBot) error {
+	cronjob.NewCommand("daxin", func(robot bot.CronBot) error {
 		get, b := daxin.Get()
 		if b {
 			util.Bark("今日有新债", get, config.BarkUrls()...)

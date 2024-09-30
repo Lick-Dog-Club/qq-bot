@@ -16,7 +16,7 @@ import (
 var lastTime time.Time = time.Now()
 
 func init() {
-	cronjob.Manager().NewCommand("x-users", func(bot bot.CronBot) error {
+	cronjob.NewCommand("x-users", func(bot bot.CronBot) error {
 		if config.XGroupID() == "" || len(config.XUsers()) == 0 {
 			log.Println("XGroupID/x-users not set, skip")
 			return nil

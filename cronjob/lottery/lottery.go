@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	cronjob.Manager().NewCommand("lottery", func(robot bot.CronBot) error {
+	cronjob.NewCommand("lottery", func(robot bot.CronBot) error {
 		cookie := config.BiliCookie()
 		uid := config.UserID()
 		//log.Printf("开始处理抽奖: uid: %s\n", config.UserID())

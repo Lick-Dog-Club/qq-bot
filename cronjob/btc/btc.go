@@ -18,7 +18,7 @@ import (
 var cn = &ContractNotifier{}
 
 func init() {
-	cronjob.Manager().NewCommand("btc notify", func(bot bot.CronBot) error {
+	cronjob.NewCommand("btc notify", func(bot bot.CronBot) error {
 		if config.BinanceKey() != "" && config.BinanceSecret() != "" {
 			cn.client = binance.NewFuturesClient(config.BinanceKey(), config.BinanceSecret())
 			cn.client.HTTPClient = proxy.NewHttpProxyClient()

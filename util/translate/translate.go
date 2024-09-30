@@ -6,14 +6,15 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/forPelevin/gomoji"
-	log "github.com/sirupsen/logrus"
 	"io"
 	"net/http"
 	neturl "net/url"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/forPelevin/gomoji"
+	log "github.com/sirupsen/logrus"
 )
 
 type TResponse struct {

@@ -14,14 +14,14 @@ import (
 )
 
 func init() {
-	cronjob.Manager().NewCommand("hangzhou-xiaofeiquan", func(bot bot.CronBot) error {
+	cronjob.NewCommand("hangzhou-xiaofeiquan", func(bot bot.CronBot) error {
 		res := Fetch("杭州消费券")
 		if len(res) > 0 {
 			bot.SendGroup(config.GroupID(), res)
 		}
 		return nil
 	}).DailyAt("9:40")
-	cronjob.Manager().NewCommand("shaoxin-xiaofeiquan", func(bot bot.CronBot) error {
+	cronjob.NewCommand("shaoxin-xiaofeiquan", func(bot bot.CronBot) error {
 		res := Fetch("绍兴消费券")
 		if len(res) > 0 {
 			bot.SendToUser(config.UserID(), res)

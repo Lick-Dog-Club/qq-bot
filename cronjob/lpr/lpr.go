@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	cronjob.Manager().NewCommand("lpr", func(robot bot.CronBot) error {
+	cronjob.NewCommand("lpr", func(robot bot.CronBot) error {
 		lprs := lpr.Get()
 		if len(lprs) > 0 && time.Now().Format("2006-01-02") == lprs[0].Date.Format("2006-01-02") {
 			robot.SendGroup(

@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	cronjob.Manager().NewCommand("kfc", func(robot bot.CronBot) error {
+	cronjob.NewCommand("kfc", func(robot bot.CronBot) error {
 		robot.SendGroup(config.GroupID(), kfc.Get())
 		return nil
 	}).Thursdays().At("17")

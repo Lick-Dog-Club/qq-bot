@@ -10,19 +10,17 @@ import (
 	"path/filepath"
 	"qq/bot"
 	"qq/config"
+	"qq/features"
 	"qq/features/stock/httpproxy"
 	"qq/util/random"
 	"qq/util/translate"
+	"strings"
 	"text/template"
 	"time"
 
-	"github.com/samber/lo"
-
-	"qq/features"
-	"strings"
-
 	"github.com/golang-module/carbon/v2"
 	twitterscraper "github.com/imperatrona/twitter-scraper"
+	"github.com/samber/lo"
 	"github.com/spf13/cast"
 )
 
@@ -103,7 +101,7 @@ func RenderTweetResult(r *twitterscraper.TweetResult) (string, func()) {
 	if r.QuotedStatus != nil {
 		localImages := downloadPic(lo.Map(r.QuotedStatus.Photos, func(item twitterscraper.Photo, index int) string { return item.URL }))
 		Quoted = map[string]any{
-			"Name":   r.QuotedStatus.Username,
+			"Name":   r.QuotedStatus.Name,
 			"Text":   r.QuotedStatus.Text,
 			"Photos": localImages,
 		}
@@ -113,7 +111,7 @@ func RenderTweetResult(r *twitterscraper.TweetResult) (string, func()) {
 	removeImages = append(removeImages, p...)
 	tweetTemplate.Execute(&b, map[string]any{
 		"DateString": r.TimeParsed.Local().Format("2006-01-02 15:04:05"),
-		"Name":       r.Username,
+		"Name":       r.Name,
 		"Text":       r.Text,
 		"Photos":     p,
 		"Quoted":     Quoted,
@@ -222,4 +220,9 @@ var tweetTemplate, _ = template.New("").Funcs(map[string]any{
 
 翻译:
 {{ translate .Text }}
+{{- if .Quoted}}
+===== 转发内容 =====
+{{translate .Quoted.Text}}
+{{- end}}
+{{- end }}
 `)

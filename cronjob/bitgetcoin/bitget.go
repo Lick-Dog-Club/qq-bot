@@ -15,14 +15,14 @@ import (
 var money = map[string]float64{}
 
 func init() {
-	cronjob.Manager().NewCommand("bitget-watch-coin", func(bot bot.CronBot) error {
+	cronjob.NewCommand("bitget-watch-coin", func(bot bot.CronBot) error {
 		err := run(bot)
 		if err != nil {
 			return err
 		}
 		return nil
 	}).EveryThirtySeconds()
-	cronjob.Manager().NewCommand("bitget-money-goal", func(bot bot.CronBot) error {
+	cronjob.NewCommand("bitget-money-goal", func(bot bot.CronBot) error {
 		err := runGoal(bot)
 		if err != nil {
 			return err
