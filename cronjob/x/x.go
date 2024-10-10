@@ -22,9 +22,8 @@ func init() {
 			return nil
 		}
 		m := x.NewManager(config.XTokens(), config.HttpProxy())
-		startAt := time.Now()
 		defer func() {
-			lastTime = startAt
+			lastTime = time.Now()
 			log.Println("x-users done", lastTime)
 		}()
 		res := strings.Builder{}
