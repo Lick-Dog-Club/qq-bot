@@ -206,6 +206,8 @@ var tweetTemplate, _ = template.New("").Funcs(map[string]any{
 
 {{.Text}}
 
+{{ translate .Text }}
+
 {{- range .Photos}}
 [CQ:image,file=file://{{.}}]
 {{- end}}
@@ -213,15 +215,11 @@ var tweetTemplate, _ = template.New("").Funcs(map[string]any{
 
 转发了 {{.Quoted.Name}}:
 {{.Quoted.Text}}
+
+{{translate .Quoted.Text}}
+
 {{- range .Quoted.Photos}}
 [CQ:image,file=file://{{.}}]
 {{- end}}
-{{- end }}
-
-翻译:
-{{ translate .Text }}
-{{- if .Quoted}}
-===== 转发内容 =====
-{{translate .Quoted.Text}}
 {{- end }}
 `)
