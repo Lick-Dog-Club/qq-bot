@@ -86,6 +86,13 @@ func WithHidden() Option {
 	}
 }
 
+func MustAdminRole() Option {
+	return func(cmd *cmd) error {
+		cmd.adminRole = true
+		return nil
+	}
+}
+
 type AIFuncDef struct {
 	Properties map[string]jsonschema.Definition
 	Call       func(args string) (string, error)
@@ -110,6 +117,7 @@ type commandFunc func(bot bot.Bot, content string) error
 type CommandImp interface {
 	Enabled() bool
 	Hidden() bool
+	MustAdminRole() bool
 	IsSysCmd() bool
 	Keyword() string
 	Group() string
@@ -170,6 +178,11 @@ func Run(bot bot.Bot, keyword string, content string) error {
 		command = defaultCommand
 		content = keyword + " " + content
 	}()
+
+	if command.MustAdminRole() && !bot.IsFromAdmin() {
+		bot.Send("必须是管理员才能操作！")
+		return nil
+	}
 
 	if !command.Enabled() {
 		bot.Send(fmt.Sprintf("指令 '%s' 未开启", command.Keyword()))
@@ -270,16 +283,23 @@ func AllKeywordCommands(hidden bool) []CommandImp {
 	return append(cmds, defaultCommand)
 }
 
+var _ CommandImp = cmd{}
+
 type cmd struct {
-	keyword  string
-	desc     string
-	fn       commandFunc
-	sysCmd   bool
-	hidden   bool
-	group    string
-	disabled bool
-	aiDefine *AIFuncDef
-	hasAi    bool
+	keyword   string
+	desc      string
+	fn        commandFunc
+	sysCmd    bool
+	hidden    bool
+	group     string
+	disabled  bool
+	aiDefine  *AIFuncDef
+	hasAi     bool
+	adminRole bool
+}
+
+func (c cmd) MustAdminRole() bool {
+	return c.adminRole
 }
 
 func (c cmd) IsSysCmd() bool {

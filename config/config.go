@@ -351,6 +351,18 @@ func BgBuyCoin() []BgBuy {
 	return buys
 }
 
+var kvHelp = map[string]string{
+	"bg_coin_watch": "XRP8USDT_SPBL,-15;BTCUSDT_SPBL,-0.01 # 监控币种价格变化率，支持百分比 ';' 分隔",
+	"bg_buy":        "XRP8USDT_SPBL,0.003; # 买入币种价格低于多少时买入, ';' 分隔",
+	"birthday":      "2021-01-01 # 生日格式",
+	"bark_token":    "xxa,aaa # bark 推送 token，',' 分隔",
+	"x_tokens":      "token,csrf; # x 认证令牌，';' 分隔",
+}
+
+func GetHelp(key string) string {
+	return kvHelp[key]
+}
+
 var mappingKV = KV{
 	"bg_one_hand": "",
 	"bg_buy":      "",

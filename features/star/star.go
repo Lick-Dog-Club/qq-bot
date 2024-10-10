@@ -11,6 +11,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/golang-module/carbon/v2"
+
 	"github.com/sashabaranov/go-openai/jsonschema"
 )
 
@@ -53,8 +55,7 @@ func Get(day string) string {
 
 func GetStar(day string) string {
 	for star, date := range startMap {
-		parse, _ := time.Parse("2006-01-02", day)
-		if date.Between(parse) {
+		if date.Between(carbon.Parse(day).StdTime().Local()) {
 			return star
 		}
 	}

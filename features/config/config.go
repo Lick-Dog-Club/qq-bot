@@ -13,11 +13,16 @@ import (
 )
 
 func init() {
-	features.AddKeyword("cs", "设置环境变量, ex: ai_token=xxx, 多个用换行隔开", func(bot bot.Bot, content string) error {
-		if !bot.IsFromAdmin() {
-			bot.Send("必须是管理员才能操作！")
+	features.AddKeyword("cs-help", "", func(bot bot.Bot, content string) error {
+		help := config.GetHelp(content)
+		if help == "" {
+			bot.Send("未找到帮助信息")
 			return nil
 		}
+		bot.Send(help)
+		return nil
+	}, features.WithSysCmd(), features.WithHidden(), features.WithGroup("config"))
+	features.AddKeyword("cs", "设置环境变量, ex: ai_token=xxx, 多个用换行隔开", func(bot bot.Bot, content string) error {
 		if content == "me" {
 			config.Set(map[string]string{"user_id": bot.UserID()})
 			bot.Send("已设置: user_id=" + bot.UserID())
@@ -38,12 +43,8 @@ func init() {
 
 		bot.Send("已设置: \n" + config.Set(conf).String())
 		return nil
-	}, features.WithSysCmd(), features.WithHidden(), features.WithGroup("config"))
+	}, features.MustAdminRole(), features.WithSysCmd(), features.WithHidden(), features.WithGroup("config"))
 	features.AddKeyword("cg", "<+key|[keys: 全部keys]>显示环境变量", func(bot bot.Bot, content string) error {
-		if !bot.IsFromAdmin() {
-			bot.Send("必须是管理员才能操作！")
-			return nil
-		}
 		if content == "keys" {
 			var keys []string
 			for s, _ := range config.Configs() {
@@ -65,13 +66,9 @@ func init() {
 		}
 		fmt.Println(path)
 		return nil
-	}, features.WithSysCmd(), features.WithHidden(), features.WithGroup("config"))
+	}, features.WithSysCmd(), features.WithHidden(), features.WithGroup("config"), features.MustAdminRole())
 	features.AddKeyword("cgall", "显示环境变量", func(bot bot.Bot, content string) error {
-		if !bot.IsFromAdmin() {
-			bot.Send("必须是管理员才能操作！")
-			return nil
-		}
 		bot.Send(config.Configs().String())
 		return nil
-	}, features.WithSysCmd(), features.WithHidden(), features.WithGroup("config"))
+	}, features.MustAdminRole(), features.WithSysCmd(), features.WithHidden(), features.WithGroup("config"))
 }
