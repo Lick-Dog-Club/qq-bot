@@ -146,7 +146,13 @@ func (i *EventItem) AffectStr() string {
 	//fmt.Printf("影响描述: %s\n", l)
 	_ = B
 	//fmt.Printf("影响等级: %d\n", B)
-	return l
+
+	// 利多金银原油，利空美股 btc
+	return map[string]string{
+		"利多":   "利空",
+		"利空":   "利多",
+		"影响较小": "影响较小",
+	}[l]
 }
 
 func (i *EventItem) Render() string {
