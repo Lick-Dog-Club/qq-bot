@@ -7,6 +7,7 @@ import (
 	"qq/config"
 	"qq/cronjob"
 	"qq/features/x"
+	"qq/util"
 	"strings"
 	"time"
 
@@ -49,6 +50,9 @@ func init() {
 			}
 		}
 		r := res.String()
+		if strings.Contains(r, "MUMU") || strings.Contains(r, "mumu") {
+			util.Bark("MUMU", "MUMU📈", config.BarkUrls()...)
+		}
 		if r != "" {
 			bot.SendGroup(config.XGroupID(), r)
 			bot.SendToUser(config.UserID(), r)
