@@ -34,6 +34,7 @@ func init() {
 			tweets, err := m.GetTweets(context.TODO(), s, 1)
 			if err != nil {
 				e.Add(fmt.Errorf("get tweets for %s: %w", s, err))
+				continue
 			}
 			for _, tweet := range tweets {
 				func() {
