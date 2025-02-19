@@ -19,6 +19,7 @@ import (
 
 	// _ "qq/cronjob/lifetip"
 	//_ "qq/cronjob/kfc"
+	_ "qq/cronjob/autoclean"
 	_ "qq/cronjob/autoupdate"
 	_ "qq/cronjob/bitgetcoin"
 	_ "qq/cronjob/ddys"
