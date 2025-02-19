@@ -33,7 +33,7 @@ jobs:
           upx -9 app-linux-amd64
       -
         name: artifacts-app-amd64
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: app-linux-amd64
           path: |
@@ -64,7 +64,7 @@ jobs:
           make build-windows
       -
         name: artifacts-app-win-amd64
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: app-win-amd64
           path: |
