@@ -92,6 +92,9 @@ func PixivSession() string {
 func AiToken() string {
 	return c.Load().(KV)["ai_token"]
 }
+func AiAzBaseUrl() string {
+	return c.Load().(KV)["ai_az_base_url"]
+}
 
 func ChatGPTApiModel() string {
 	return c.Load().(KV)["chatgpt_model"]
@@ -385,7 +388,8 @@ var mappingKV = KV{
 	// QQ 号码，"," 分隔，无法使用 config 设置
 	"admin_id":       "",
 	"ai_token":       "",
-	"chatgpt_model":  openai.GPT3Dot5Turbo16K0613,
+	"ai_az_base_url": "",
+	"chatgpt_model":  openai.GPT4,
 	"pixiv_mode":     "daily",
 	"pixiv_session":  "",
 	"tasks":          "",

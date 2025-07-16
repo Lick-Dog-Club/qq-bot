@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"qq/config"
 	"qq/features"
 	"qq/features/ai/api/types"
 	"qq/features/stock/ai"
@@ -31,6 +32,7 @@ func NewOpenaiClientV2(apikey string, model string, opt openai.ChatCompletionReq
 		Temperature: 0.2,
 		Tools:       features.AllFuncCalls(),
 		ToolCall:    features.CallFunc,
+		AzBaseUrl:   config.AiAzBaseUrl(),
 	})
 	return &openaiClientV2{
 		apikey: apikey,

@@ -44,15 +44,23 @@ type NewClientOption struct {
 	// optional
 	Tools    []tools.Tool
 	ToolCall ToolCallFunc
+
+	AzBaseUrl string
 }
 
 // NewOpenaiClient
 //
 // openaiClient token 需要自己算： https://github.com/pkoukk/tiktoken-go
 func NewOpenaiClient(opt NewClientOption) ai.Chat {
-	config := openai.DefaultConfig(opt.Token)
+	var c = openai.DefaultConfig(opt.Token)
+	if opt.AzBaseUrl != "" {
+		c = openai.DefaultAzureConfig(
+			opt.Token,
+			opt.AzBaseUrl,
+		)
+	}
 	if opt.HttpClient != nil {
-		config.HTTPClient = opt.HttpClient
+		c.HTTPClient = opt.HttpClient
 	}
 	return &openaiClient{
 		maxToken:    opt.MaxToken,
@@ -62,7 +70,7 @@ func NewOpenaiClient(opt NewClientOption) ai.Chat {
 		httpClient:  opt.HttpClient,
 		tools:       opt.Tools,
 		toolCall:    opt.ToolCall,
-		client:      openai.NewClientWithConfig(config),
+		client:      openai.NewClientWithConfig(c),
 	}
 }
 
