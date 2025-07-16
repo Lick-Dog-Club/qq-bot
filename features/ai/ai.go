@@ -142,9 +142,10 @@ func uuid(bot bot.Bot) string {
 func SeeB64(b64 string, contentType string) string {
 	client := openai2.NewOpenaiClient(openai2.NewClientOption{
 		HttpClient: proxy.NewHttpProxyClient(),
-		MaxToken:   4096,
 		Token:      config2.AiToken(),
-		Model:      openai.GPT4VisionPreview,
+		Model:      config2.ChatGPTVisionModel(),
+		MaxToken:   4096,
+		AzBaseUrl:  config2.AiAzBaseUrl(),
 	})
 	var cnt []openai.ChatMessagePart
 	cnt = append(cnt, openai.ChatMessagePart{
@@ -182,7 +183,8 @@ func See(images []string) string {
 		HttpClient: proxy.NewHttpProxyClient(),
 		MaxToken:   4096,
 		Token:      config2.AiToken(),
-		Model:      openai.GPT4VisionPreview,
+		Model:      config2.ChatGPTVisionModel(),
+		AzBaseUrl:  config2.AiAzBaseUrl(),
 	})
 	var cnt []openai.ChatMessagePart
 	for _, image := range images {
@@ -221,6 +223,7 @@ func Draw(prompt string) (string, error) {
 	client := openai2.NewOpenaiClient(openai2.NewClientOption{
 		HttpClient: proxy.NewHttpProxyClient(),
 		Token:      config2.AiToken(),
+		AzBaseUrl:  config2.AiAzBaseUrl(),
 	})
 	res, err := client.CreateImage(context.TODO(), prompt, "", "")
 	if err != nil {

@@ -17,7 +17,6 @@ import (
 	"qq/util/proxy"
 
 	"github.com/k3a/html2text"
-	"github.com/sashabaranov/go-openai"
 	"github.com/sashabaranov/go-openai/jsonschema"
 )
 
@@ -130,9 +129,10 @@ func viewPage(link, ask string) (*ClickResult, error) {
 	client := openai2.NewOpenaiClient(openai2.NewClientOption{
 		HttpClient:  cli,
 		Token:       config.AiToken(),
-		Model:       openai.GPT3Dot5Turbo16K0613,
+		Model:       config.ChatGPTApiModel(),
 		MaxToken:    2000,
 		Temperature: 0.2,
+		AzBaseUrl:   config.AiAzBaseUrl(),
 	})
 	completion, err := client.Completion(context.TODO(), []ai.Message{
 		{

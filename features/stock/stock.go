@@ -80,6 +80,7 @@ func Analyze(content string) string {
 		Token:       config2.AiToken(),
 		Model:       config2.ChatGPTApiModel(),
 		MaxToken:    4096,
+		AzBaseUrl:   config2.AiAzBaseUrl(),
 		Temperature: 0.2,
 		Tools: []tools.Tool{
 			impl.ToolGetStockPrice,

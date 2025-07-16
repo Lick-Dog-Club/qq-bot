@@ -100,6 +100,14 @@ func ChatGPTApiModel() string {
 	return c.Load().(KV)["chatgpt_model"]
 }
 
+func ChatGPTVisionModel() string {
+	vm := c.Load().(KV)["chatgpt_vision_model"]
+	if vm == "" {
+		return ChatGPTApiModel()
+	}
+	return vm
+}
+
 func PixivMode() string {
 	return c.Load().(KV)["pixiv_mode"]
 }
@@ -386,36 +394,37 @@ var mappingKV = KV{
 	"user_id":         "",
 	"run_webot":       "0",
 	// QQ 号码，"," 分隔，无法使用 config 设置
-	"admin_id":       "",
-	"ai_token":       "",
-	"ai_az_base_url": "",
-	"chatgpt_model":  openai.GPT4,
-	"pixiv_mode":     "daily",
-	"pixiv_session":  "",
-	"tasks":          "",
-	"webot_users":    "",
-	"group_id":       os.Getenv("GROUP_ID"),
-	"namespace":      os.Getenv("APP_NAMESPACE"),
-	"pod_name":       os.Getenv("POD_NAME"),
-	"weather_key":    os.Getenv("WEATHER_KEY"),
-	"tian_api_key":   os.Getenv("TIAN_API_KEY"),
-	"http_proxy":     os.Getenv("HTTP_PROXY"),
-	"binance_key":    "",
-	"google_key":     "",
-	"google_cx":      "",
-	"only_search":    "",
-	"birthday":       "",
-	"ai_max_token":   "128000",
-	"binance_secret": "",
-	"binance_diff":   "100",
-	"maotai":         "",
-	"tg_info":        "",
-	"tg_app_id":      "",
-	"bg_coin_watch":  "",
-	"bg_goal":        "",
-	"tg_app_hash":    "",
-	"tg_phone":       "",
-	"tg_code":        "",
+	"admin_id":             "",
+	"ai_token":             "",
+	"ai_az_base_url":       "",
+	"chatgpt_model":        openai.GPT4,
+	"chatgpt_vision_model": "",
+	"pixiv_mode":           "daily",
+	"pixiv_session":        "",
+	"tasks":                "",
+	"webot_users":          "",
+	"group_id":             os.Getenv("GROUP_ID"),
+	"namespace":            os.Getenv("APP_NAMESPACE"),
+	"pod_name":             os.Getenv("POD_NAME"),
+	"weather_key":          os.Getenv("WEATHER_KEY"),
+	"tian_api_key":         os.Getenv("TIAN_API_KEY"),
+	"http_proxy":           os.Getenv("HTTP_PROXY"),
+	"binance_key":          "",
+	"google_key":           "",
+	"google_cx":            "",
+	"only_search":          "",
+	"birthday":             "",
+	"ai_max_token":         "128000",
+	"binance_secret":       "",
+	"binance_diff":         "100",
+	"maotai":               "",
+	"tg_info":              "",
+	"tg_app_id":            "",
+	"bg_coin_watch":        "",
+	"bg_goal":              "",
+	"tg_app_hash":          "",
+	"tg_phone":             "",
+	"tg_code":              "",
 
 	"bg_money_diff":     "30",
 	"bg_api_key":        "",
