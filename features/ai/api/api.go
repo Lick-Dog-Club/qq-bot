@@ -49,8 +49,8 @@ const pro = `今天是 {{.Today}}, 当前的 UID 是: "{{.UID}}", 是否来自�
 
 - 如果返回的是图片本地路径，你必须使用 "[CQ:image,file=file://{imagePath}]" 这个格式返回
 	例如:
-	  imagePath=/tmp/a.png
-	  你需要返回: [CQ:image,file=file:///tmp/a.png]
+	  imagePath=/tmp/example.png
+	  你需要返回: [CQ:image,file=file:///tmp/example.png]
 {{- end }}
 
 - 如果用户希望你给他一张图片, 按照以下优先级给图片
