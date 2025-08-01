@@ -42,7 +42,10 @@ func Get() (string, bool) {
 	request, _ := http.NewRequest("GET", "https://eq.10jqka.com.cn/mobileuserinfo/app/purchaseIcloud/data/newBondList.json", nil)
 	request.Header.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36")
 
-	resp, _ := http.DefaultClient.Do(request)
+	resp, err := http.DefaultClient.Do(request)
+	if err != nil {
+		return "", false
+	}
 	defer resp.Body.Close()
 	var data response
 	json.NewDecoder(resp.Body).Decode(&data)

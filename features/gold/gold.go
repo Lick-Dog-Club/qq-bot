@@ -112,7 +112,7 @@ func lineChartByLimit(all GoldList) string {
 	keys := lo.Keys(mm)
 	sort.Ints(keys)
 	for _, key := range keys {
-		mdata, _ := mm[key]
+		mdata := mm[key]
 		for name := range allStores {
 			xy, ok := mdata[name]
 			if ok {

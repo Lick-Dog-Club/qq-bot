@@ -93,9 +93,9 @@ func GetDayFrom(day string) int {
 	birthday := time.Date(time.Now().Year(), parse.Month(), parse.Day(), 23, 59, 59, 0, time.Local)
 	var dayG float64
 	if birthday.After(time.Now()) {
-		dayG = birthday.Sub(time.Now()).Hours() / 24
+		dayG = time.Until(birthday).Hours() / 24
 	} else {
-		dayG = birthday.AddDate(1, 0, 0).Sub(time.Now()).Hours() / 24
+		dayG = time.Until(birthday.AddDate(1, 0, 0)).Hours() / 24
 	}
 	return int(math.Floor(dayG))
 }

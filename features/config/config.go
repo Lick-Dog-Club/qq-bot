@@ -47,7 +47,7 @@ func init() {
 	features.AddKeyword("cg", "<+key|[keys: 全部keys]>显示环境变量", func(bot bot.Bot, content string) error {
 		if content == "keys" {
 			var keys []string
-			for s, _ := range config.Configs() {
+			for s := range config.Configs() {
 				keys = append(keys, s)
 			}
 			sort.Strings(keys)

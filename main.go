@@ -21,7 +21,6 @@ import (
 	//_ "qq/cronjob/kfc"
 	_ "qq/cronjob/autoclean"
 	_ "qq/cronjob/autoupdate"
-	_ "qq/cronjob/bitgetcoin"
 	_ "qq/cronjob/ddys"
 	_ "qq/cronjob/gold"
 	_ "qq/cronjob/lpr"
@@ -39,7 +38,6 @@ import (
 	//_ "qq/cronjob/zaoan"
 
 	//_ "qq/cronjob/picture"
-	_ "qq/cronjob/bitget"
 	_ "qq/cronjob/goodmorning"
 
 	//_ "qq/cronjob/trainticketleft"
@@ -48,7 +46,6 @@ import (
 	_ "qq/cronjob/x"
 	_ "qq/features/ai"
 	_ "qq/features/bililottery"
-	_ "qq/features/bitget"
 	_ "qq/features/comic"
 	_ "qq/features/config"
 	_ "qq/features/cron"

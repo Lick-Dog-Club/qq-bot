@@ -279,7 +279,7 @@ func (um *userMaps) String() (res string) {
 	um.RLock()
 	defer um.RUnlock()
 	var users []string
-	for user, _ := range config.WebotUsers() {
+	for user := range config.WebotUsers() {
 		users = append(users, user)
 	}
 

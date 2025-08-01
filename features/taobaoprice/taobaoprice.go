@@ -29,7 +29,7 @@ func Search(numIid string) (config.Skus, error) {
 		key    = config.OKey()
 		secret = config.OSecret()
 	)
-	fmt.Println(fmt.Sprintf("https://api-gw.onebound.cn/taobao/item_get/?key=%s&&num_iid=%s&is_promotion=1&&lang=zh-CN&secret=%s", key, numIid, secret))
+	fmt.Printf("https://api-gw.onebound.cn/taobao/item_get/?key=%s&&num_iid=%s&is_promotion=1&&lang=zh-CN&secret=%s", key, numIid, secret)
 	req, err := http.NewRequest("GET", fmt.Sprintf("https://api-gw.onebound.cn/taobao/item_get/?key=%s&&num_iid=%s&is_promotion=1&&lang=zh-CN&secret=%s", key, numIid, secret), nil)
 	if err != nil {
 		return nil, err

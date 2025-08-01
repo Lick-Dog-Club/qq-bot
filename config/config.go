@@ -9,7 +9,6 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
-	"qq/util"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -185,18 +184,6 @@ func GPTOnlySearch() bool {
 	return c.Load().(KV)["only_search"] == "1"
 }
 
-func BinanceKey() string {
-	return c.Load().(KV)["binance_key"]
-}
-
-func BinanceSecret() string {
-	return c.Load().(KV)["binance_secret"]
-}
-
-func BinanceDiff() string {
-	return c.Load().(KV)["binance_diff"]
-}
-
 func TgPhone() string {
 	return c.Load().(KV)["tg_phone"]
 }
@@ -238,7 +225,6 @@ func Tasks() []Task {
 func SyncTasks(res []Task) {
 	marshal, _ := json.Marshal(&res)
 	Set(map[string]string{"tasks": string(marshal)})
-	return
 }
 
 func WebotUsers() map[string]struct{} {
@@ -332,42 +318,14 @@ func GoldCount() string {
 	return c.Load().(KV)["gold_count"]
 }
 
-func BgOneHandUSDT() float64 {
-	return util.ToFloat64(c.Load().(KV)["bg_one_hand"])
-}
-
 func GoldShowLabel() bool {
 	return c.Load().(KV)["gold_show_label"] == "1"
 }
 
-type BgBuy struct {
-	Coin       string
-	PriceBelow float64
-}
-
-func BgBuyCoin() []BgBuy {
-	s := c.Load().(KV)["bg_buy"]
-	split := strings.Split(s, ";")
-	buys := make([]BgBuy, 0, len(split))
-	for _, s2 := range split {
-		i := strings.Split(s2, ",")
-		if len(i) != 2 {
-			continue
-		}
-		buys = append(buys, BgBuy{
-			Coin:       i[0],
-			PriceBelow: util.ToFloat64(i[1]),
-		})
-	}
-	return buys
-}
-
 var kvHelp = map[string]string{
-	"bg_coin_watch": "XRP8USDT_SPBL,-15;BTCUSDT_SPBL,-0.01 # 监控币种价格变化率，支持百分比 ';' 分隔",
-	"bg_buy":        "XRP8USDT_SPBL,0.003; # 买入币种价格低于多少时买入, ';' 分隔",
-	"birthday":      "2021-01-01 # 生日格式",
-	"bark_token":    "xxa,aaa # bark 推送 token，',' 分隔",
-	"x_tokens":      "token,csrf; # x 认证令牌，';' 分隔",
+	"birthday":   "2021-01-01 # 生日格式",
+	"bark_token": "xxa,aaa # bark 推送 token，',' 分隔",
+	"x_tokens":   "token,csrf; # x 认证令牌，';' 分隔",
 }
 
 func GetHelp(key string) string {
@@ -375,8 +333,6 @@ func GetHelp(key string) string {
 }
 
 var mappingKV = KV{
-	"bg_one_hand": "",
-	"bg_buy":      "",
 	// onebound
 	"o_key":           "",
 	"cron_enabled":    "1",
@@ -390,7 +346,7 @@ var mappingKV = KV{
 	"bark_token":      "",
 	"taobao_bark_url": "",
 	"bili_cookie":     "",
-	"disabled_crons":  "",
+	"disabled_crons":  "maotai-reward,maotai",
 	"user_id":         "",
 	"run_webot":       "0",
 	// QQ 号码，"," 分隔，无法使用 config 设置
@@ -409,38 +365,23 @@ var mappingKV = KV{
 	"weather_key":          os.Getenv("WEATHER_KEY"),
 	"tian_api_key":         os.Getenv("TIAN_API_KEY"),
 	"http_proxy":           os.Getenv("HTTP_PROXY"),
-	"binance_key":          "",
 	"google_key":           "",
 	"google_cx":            "",
 	"only_search":          "",
 	"birthday":             "",
-	"ai_max_token":         "128000",
-	"binance_secret":       "",
-	"binance_diff":         "100",
 	"maotai":               "",
 	"tg_info":              "",
 	"tg_app_id":            "",
-	"bg_coin_watch":        "",
-	"bg_goal":              "",
 	"tg_app_hash":          "",
 	"tg_phone":             "",
 	"tg_code":              "",
-
-	"bg_money_diff":     "30",
-	"bg_api_key":        "",
-	"bg_passphrase":     "",
-	"bg_api_secret_key": "",
-	"gold_count":        "40",
-
-	"12306_JSESSIONID": "",
-
-	"disabled_cmds": "",
-
-	"x_tokens": "",
+	"gold_count":           "40",
+	"12306_JSESSIONID":     "",
+	"disabled_cmds":        "",
+	"x_tokens":             "",
 	// x 推文发送到哪个群里
 	"x_group_id": "",
 	"x_users":    "",
-
 	// 有道翻译
 	"yd_secret": "",
 	"yd_key":    "",
@@ -498,10 +439,6 @@ func T12306JSESSIONID() string {
 	return c.Load().(KV)["12306_JSESSIONID"]
 }
 
-func BgApiKey() string {
-	return c.Load().(KV)["bg_api_key"]
-}
-
 type WatchCoin struct {
 	Name string
 	// 价格变化率
@@ -509,65 +446,11 @@ type WatchCoin struct {
 	Price float64
 }
 
-func BgGoal() []WatchCoin {
-	s := c.Load().(KV)["bg_goal"]
-	split := strings.Split(s, ";")
-	watchCoins := make([]WatchCoin, 0, len(split))
-	for _, s2 := range split {
-		i := strings.Split(s2, ",")
-		if len(i) == 2 {
-			watchCoins = append(watchCoins, WatchCoin{
-				Name:  i[0],
-				Price: util.ToFloat64(i[1]),
-			})
-		}
-	}
-	return watchCoins
-}
-
 func YDKey() string {
 	return c.Load().(KV)["yd_key"]
 }
 func YDSecret() string {
 	return c.Load().(KV)["yd_secret"]
-}
-
-func BgCoinWatch() []WatchCoin {
-	s := c.Load().(KV)["bg_coin_watch"]
-	split := strings.Split(s, ";")
-	watchCoins := make([]WatchCoin, 0, len(split))
-	for _, s2 := range split {
-		i := strings.Split(s2, ",")
-		var rates []float64
-		for _, s3 := range i[1:] {
-			f := util.ToFloat64(s3)
-			if f > 1 || f < -1 {
-				f = f / 100
-			}
-			rates = append(rates, f)
-		}
-		watchCoins = append(watchCoins, WatchCoin{
-			Name: i[0],
-			Rate: rates,
-		})
-	}
-	return watchCoins
-}
-
-func BgMoneyDiff() string {
-	return c.Load().(KV)["bg_money_diff"]
-}
-
-func BgPassphrase() string {
-	return c.Load().(KV)["bg_passphrase"]
-}
-
-func BgApiSecretKey() string {
-	return c.Load().(KV)["bg_api_secret_key"]
-}
-
-func AIMaxToken() int64 {
-	return util.ToInt64(c.Load().(KV)["ai_max_token"])
 }
 
 type MTInfos map[string]MaoTaiInfo

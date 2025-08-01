@@ -292,7 +292,6 @@ type cmd struct {
 	sysCmd    bool
 	hidden    bool
 	group     string
-	disabled  bool
 	aiDefine  *AIFuncDef
 	hasAi     bool
 	adminRole bool

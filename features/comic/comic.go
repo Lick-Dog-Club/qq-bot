@@ -191,7 +191,10 @@ type imageByte struct {
 
 func (c *Comic) loadImages() [][]byte {
 	// 获取所有图片的路径
-	resp, _ := http.Get(c.LastUrl)
+	resp, err := http.Get(c.LastUrl)
+	if err != nil {
+		return nil
+	}
 	defer resp.Body.Close()
 	all, _ := io.ReadAll(resp.Body)
 	compile := regexp.MustCompile(`chapterImages = \[(.*?)];`)
@@ -209,19 +212,13 @@ func (c *Comic) loadImages() [][]byte {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			for {
-				select {
-				case s, ok := <-ch:
-					if !ok {
-						return
-					}
-					b := fetchImg(s.path)
-					if b != nil {
-						resultCh <- &imageByte{
-							index: s.index,
-							path:  s.path,
-							b:     b,
-						}
+			for s := range ch {
+				b := fetchImg(s.path)
+				if b != nil {
+					resultCh <- &imageByte{
+						index: s.index,
+						path:  s.path,
+						b:     b,
 					}
 				}
 			}

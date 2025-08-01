@@ -133,13 +133,9 @@ func (b *BotAuthDataProvider) PhoneNumber() (string, error) {
 	}
 	ticker := time.NewTicker(5 * time.Second)
 	defer ticker.Stop()
-LABEL:
-	for {
-		select {
-		case <-ticker.C:
-			if config.TgPhone() != "" {
-				break LABEL
-			}
+	for range ticker.C {
+		if config.TgPhone() != "" {
+			break
 		}
 	}
 
@@ -153,13 +149,9 @@ func (b *BotAuthDataProvider) Code() (string, error) {
 	}
 	ticker := time.NewTicker(5 * time.Second)
 	defer ticker.Stop()
-LABEL:
-	for {
-		select {
-		case <-ticker.C:
-			if config.TgCode() != "" {
-				break LABEL
-			}
+	for range ticker.C {
+		if config.TgCode() != "" {
+			break
 		}
 	}
 

@@ -492,7 +492,10 @@ func login(mobile string, code string) (uid int, token, cookie string) {
 	var body = fmt.Sprintf(`{"vCode": %s, "ydToken": "", "ydLogId": "", "mobile": "%s", "md5": "%s", "timestamp": "%d", "MT-APP-Version": "%s"}`, code, mobile, md5, currentTimestamp, version())
 	request, _ := http.NewRequest("POST", "https://app.moutai519.com.cn/xhr/front/user/register/login", strings.NewReader(body))
 	addHeaders(request)
-	do, _ := http.DefaultClient.Do(request)
+	do, err := http.DefaultClient.Do(request)
+	if err != nil {
+		return 0, "", ""
+	}
 	defer do.Body.Close()
 	var data loginResp
 	json.NewDecoder(do.Body).Decode(&data)
@@ -502,7 +505,10 @@ func login(mobile string, code string) (uid int, token, cookie string) {
 func getCode(mobile string) error {
 	currentTimestamp := time.Now().UnixMilli()
 	body := fmt.Sprintf(`{"mobile": "%s", "md5": "%s", "timestamp": "%d", "MT-APP-Version": "%s"}`, mobile, signature(map[string]string{"mobile": mobile}, currentTimestamp), currentTimestamp, version())
-	request, _ := http.NewRequest("POST", "https://app.moutai519.com.cn/xhr/front/user/register/vcode", strings.NewReader(body))
+	request, err := http.NewRequest("POST", "https://app.moutai519.com.cn/xhr/front/user/register/vcode", strings.NewReader(body))
+	if err != nil {
+		return err
+	}
 	addHeaders(request)
 	do, _ := http.DefaultClient.Do(request)
 	defer do.Body.Close()
@@ -567,7 +573,10 @@ func reservation(itemID int, shop shopInfo, sessionID, userID int, token string)
 	marshal, _ := json.Marshal(p)
 	p.ActParam = encrypt(marshal)
 	b, _ := json.Marshal(p)
-	request, _ := http.NewRequest("POST", "https://app.moutai519.com.cn/xhr/front/mall/reservation/add", bytes.NewReader(b))
+	request, err := http.NewRequest("POST", "https://app.moutai519.com.cn/xhr/front/mall/reservation/add", bytes.NewReader(b))
+	if err != nil {
+		return ""
+	}
 	addHeaders(request)
 	request.Header.Del("userId")
 	request.Header.Del("MT-Token")
@@ -592,11 +601,6 @@ func encrypt[T string | []byte](text T) string {
 	return base64.StdEncoding.EncodeToString(dst)
 }
 
-func decrypt[T string | []byte](text T) string {
-	dst, _ := openssl.AesCBCDecrypt([]byte(text), AES_KEY, AES_IV, openssl.PKCS7_PADDING)
-	return string(dst)
-}
-
 type resourceMap struct {
 	Data struct {
 		MtshopsPc struct {
@@ -608,7 +612,10 @@ type resourceMap struct {
 
 func getMap() AllShopMap {
 	var data resourceMap
-	resp, _ := http.Get("https://static.moutai519.com.cn/mt-backend/xhr/front/mall/resource/get")
+	resp, err := http.Get("https://static.moutai519.com.cn/mt-backend/xhr/front/mall/resource/get")
+	if err != nil {
+		return nil
+	}
 	defer resp.Body.Close()
 	json.NewDecoder(resp.Body).Decode(&data)
 	var shops AllShopMap

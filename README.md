@@ -30,6 +30,7 @@
 @bot	(x)gtop         	<+num: 数量> 前 {num} 便宜的店铺的金价
 @bot	(x)gx           	<+name: 模糊匹配店铺> 店铺金价
 @bot	(x)gxx          	<+name: 模糊搜索> 金价
+@bot	(x)ga           	店铺今天金价
 @bot	(x)glist        	金价店铺列表
 @bot	(x)gold         	金价
 @bot	(y)p            	<+n/r/rai> 返回 pixiv 热门图片
@@ -42,6 +43,7 @@
 @bot	(x)help         	帮助信息
 @bot	(y)bili-lottery 	<+bilibili-cookie> bilibili 抽奖, 自动转发up主的抽奖活动
 @bot	(x)ddys         	<+dy/dm>, 获取 ddys 网站的电影、动漫资讯, 默认 +dy
+@bot	(x)x            	<+user> <+maxLimit: 1> 获取用户最近推文
 @bot	(y)kfc          	KFC 骚话, 返回肯德基疯狂星期四文案
 @bot	(y)lpr          	获取当前贷款市场报价利率(lpr)数值
 @bot	(y)weather      	<+城市> 获取天气信息, 默认杭州

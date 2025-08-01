@@ -53,7 +53,10 @@ lng: %v
 }
 
 func Geo(key string, addr string) string {
-	resp, _ := http.Get(fmt.Sprintf("https://restapi.amap.com/v3/geocode/geo?key=%s&address=%s", key, addr))
+	resp, err := http.Get(fmt.Sprintf("https://restapi.amap.com/v3/geocode/geo?key=%s&address=%s", key, addr))
+	if err != nil {
+		return ""
+	}
 	defer resp.Body.Close()
 	var data response
 	json.NewDecoder(resp.Body).Decode(&data)
