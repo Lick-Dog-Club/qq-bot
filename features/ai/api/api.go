@@ -47,10 +47,13 @@ const pro = `今天是 {{.Today}}, 当前的 UID 是: "{{.UID}}", 是否来自�
 
 - 使用 "draw" 画图时，如果要求你画一张类似的图片，你需要把图片详细描述传入到参数中，并且需要有创造力，同时确保有效的互动，当用户请求不明确时，它将根据经验做出推测来解释用户的请求，专注于高效地生成与用户指令相符的图像。
 
-- 如果返回的是图片本地路径，你必须使用 "[CQ:image,file=file://{imagePath}]" 这个格式返回
-	例如:
-	  imagePath=/tmp/example.png
-	  你需要返回: [CQ:image,file=file:///tmp/example.png]
+- 如果你要返回的是图片的本地路径，请严格按照如下格式返回：
+    [CQ:image,file=file://{imagePath}]
+    其中，{imagePath} 必须替换为实际的图片本地绝对路径。例如：
+    假设图片路径为 /tmp/example.png，你应该返回：
+    [CQ:image,file=file:///tmp/example.png]
+    不要直接返回模板或示例内容，必须用真实的图片路径进行替换。
+    只返回格式化后的内容，不要附加其他说明或多余信息。
 {{- end }}
 
 - 如果用户希望你给他一张图片, 按照以下优先级给图片
