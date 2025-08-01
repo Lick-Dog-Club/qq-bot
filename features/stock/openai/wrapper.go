@@ -2,6 +2,7 @@ package openai
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"qq/features/stock/ai"
 
@@ -41,8 +42,19 @@ func (t *toolCallChatWrapper) StreamCompletion(ctx context.Context, tm *ai.Histo
 			})
 			for _, call := range toolCalls {
 				if t.send != nil {
+					pargs := call.Function.Arguments
+					var v map[string]any
+					if pargs != "" {
+						json.Unmarshal([]byte(pargs), &v)
+						delete(v, "UID")
+						delete(v, "FromGroup")
+						delete(v, "GroupID")
+						delete(v, "From")
+						indent, _ := json.Marshal(v)
+						pargs = string(indent)
+					}
 					t.send(fmt.Sprintf(`正在调用函数: %v
-参数为: %v`, call.Function.Name, call.Function.Arguments))
+参数为: %v`, call.Function.Name, pargs))
 				}
 				callResult, err := t.openaiClient.toolCall(call.Function.Name, call.Function.Arguments)
 				if err != nil {
