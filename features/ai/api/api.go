@@ -97,16 +97,16 @@ var (
 
 type userImp interface {
 	lastAskTime() time.Time
-	send(s, uid, gid string) string
+	send(s, uid, gid string, send func(msg string) string) string
 }
 
-func Request(uuid string, ask, from, uid, gid string) string {
+func Request(uuid string, ask, from, uid, gid string, send func(msg string) string) string {
 	user := manager.getByUser(uuid, from)
 	if user.lastAskTime().Add(10 * time.Minute).Before(time.Now()) {
 		manager.deleteUser(uuid)
 		user = manager.getByUser(uuid, from)
 	}
-	result := user.send(ask, uid, gid)
+	result := user.send(ask, uid, gid, send)
 	log.Printf("%s: %s\ngpt: %s\n", uuid, ask, result)
 	return result
 }
@@ -192,7 +192,7 @@ func buildSysPrompt(s SysPrompt) string {
 	return bf.String()
 }
 
-func (gpt *chatGPTClient) send(msg string, userid, gid string) string {
+func (gpt *chatGPTClient) send(msg string, userid, gid string, send func(msg string) string) string {
 	if gpt.status.IsAsking() {
 		return "正在回答上一个问题: " + gpt.status.Msg()
 	}
@@ -214,7 +214,7 @@ func (gpt *chatGPTClient) send(msg string, userid, gid string) string {
 		result, err = gpt.client().GetCompletion(gpt.history, openai.ChatCompletionMessage{
 			Role:    openai.ChatMessageRoleUser,
 			Content: msg,
-		})
+		}, send)
 		if err != nil {
 			fmt.Println(err)
 		}

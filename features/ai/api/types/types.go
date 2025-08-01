@@ -9,7 +9,7 @@ import (
 )
 
 type GptClientImpl interface {
-	GetCompletion(his *ai.History, current openai.ChatCompletionMessage) (string, error)
+	GetCompletion(his *ai.History, current openai.ChatCompletionMessage, send func(msg string) string) (string, error)
 	Platform() string
 }
 

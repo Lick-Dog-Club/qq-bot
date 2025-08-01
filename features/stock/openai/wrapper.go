@@ -2,6 +2,7 @@ package openai
 
 import (
 	"context"
+	"fmt"
 	"qq/features/stock/ai"
 
 	"github.com/sashabaranov/go-openai"
@@ -9,6 +10,7 @@ import (
 
 type toolCallChatWrapper struct {
 	openaiClient *openaiClient
+	send         func(msg string) string
 }
 
 func (t *toolCallChatWrapper) StreamCompletion(ctx context.Context, tm *ai.History) (<-chan ai.CompletionResponse, error) {
@@ -38,6 +40,10 @@ func (t *toolCallChatWrapper) StreamCompletion(ctx context.Context, tm *ai.Histo
 				ToolCalls: toolCalls,
 			})
 			for _, call := range toolCalls {
+				if t.send != nil {
+					t.send(fmt.Sprintf(`正在调用函数: %v
+参数为: %v`, call.Function.Name, call.Function.Arguments))
+				}
 				callResult, err := t.openaiClient.toolCall(call.Function.Name, call.Function.Arguments)
 				if err != nil {
 					resCh <- &ai.CompletionResponseImpl{Error: err}

@@ -116,7 +116,7 @@ func Analyze(content string) string {
 监管公告或新闻：没有重大负面新闻或公告影响股票基本面，短期内的价格下跌可能仅仅是市场情绪的反应。
 给出止盈止损的点位, 并且说出你分析的思路，并且做一个总结。
 `, time.Now().Format(time.DateTime)))
-	completion, _ := client.StreamCompletion(context.TODO(), h)
+	completion, _ := client.StreamCompletion(context.TODO(), h, nil)
 	str := ""
 	for resp := range completion {
 		if resp.IsEnd() {

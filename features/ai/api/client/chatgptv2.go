@@ -46,11 +46,11 @@ func (gpt *openaiClientV2) Platform() string {
 	return "chatgpt-v2"
 }
 
-func (gpt *openaiClientV2) GetCompletion(his *ai.History, current openai.ChatCompletionMessage) (string, error) {
+func (gpt *openaiClientV2) GetCompletion(his *ai.History, current openai.ChatCompletionMessage, send func(msg string) string) (string, error) {
 	timeout, cancelFunc := context.WithTimeout(context.TODO(), 120*time.Second)
 	defer cancelFunc()
 	his.Add(current)
-	completion, err := gpt.cli.StreamCompletion(timeout, his)
+	completion, err := gpt.cli.StreamCompletion(timeout, his, send)
 	if err != nil {
 		return err.Error(), nil
 	}

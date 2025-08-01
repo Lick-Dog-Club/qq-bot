@@ -26,7 +26,7 @@ var (
 
 type Chat interface {
 	Completion(ctx context.Context, messages []Message) (CompletionResponse, error)
-	StreamCompletion(ctx context.Context, messages *History) (<-chan CompletionResponse, error)
+	StreamCompletion(ctx context.Context, messages *History, send func(msg string) string) (<-chan CompletionResponse, error)
 	CreateImage(ctx context.Context, prompt string, quality string, size string) (res ImageResponse, err error)
 	CreateEmbeddings(context.Context, []string) (EmbeddingResponse, error)
 }
@@ -176,7 +176,7 @@ type CompletionResponseImpl struct {
 }
 
 func (s *CompletionResponseImpl) IsEnd() bool {
-	return errors.Is(io.EOF, s.Error) || s.Error != nil
+	return errors.Is(s.Error, io.EOF) || s.Error != nil
 }
 
 func (s *CompletionResponseImpl) GetError() error {
