@@ -8,8 +8,6 @@ require (
 	github.com/adshao/go-binance/v2 v2.4.2
 	github.com/antchfx/htmlquery v1.3.0
 	github.com/cenkalti/backoff/v4 v4.2.1
-	github.com/chromedp/cdproto v0.0.0-20240426225625-909263490071
-	github.com/chromedp/chromedp v0.9.5
 	github.com/duc-cnzj/when-rules v0.0.0-20230427085034-04cfb63088f8
 	github.com/eatmoreapple/openwechat v1.4.6
 	github.com/fogleman/gg v1.3.0
@@ -46,7 +44,6 @@ require (
 	github.com/ansel1/merry/v2 v2.1.1 // indirect
 	github.com/antchfx/xpath v1.2.3 // indirect
 	github.com/bitly/go-simplejson v0.5.0 // indirect
-	github.com/chromedp/sysutil v1.0.0 // indirect
 	github.com/cloudflare/circl v1.3.7 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dlclark/regexp2 v1.10.0 // indirect
@@ -57,9 +54,6 @@ require (
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/jsonreference v0.20.0 // indirect
 	github.com/go-openapi/swag v0.19.14 // indirect
-	github.com/gobwas/httphead v0.1.0 // indirect
-	github.com/gobwas/pool v0.2.1 // indirect
-	github.com/gobwas/ws v1.3.2 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
